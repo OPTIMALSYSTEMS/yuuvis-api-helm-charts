@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: viewer
+  name: viewer
+spec:
+  replicas: {{.Values.yuuvis.client.viewer.instances}}
+  selector:
+    matchLabels:
+      name: viewer
+  template:
+    metadata:
+      labels:
+        name: viewer
+    spec:
+      containers:
+      - image: {{.Values.yuuvis.client.viewer.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/health
+            port: 9000
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: /manage/health
+            port: 9000
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        name: viewer
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+      imagePullSecrets:
+      - name: clientsecret
+      restartPolicy: Always

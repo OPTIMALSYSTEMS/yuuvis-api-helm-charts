@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: repository
+    k8s-app: repository-gateway-metrics
+    yuuvis: "true"
+  name: repository
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.repository.port}}
+  selector:
+    name: repository
+  type: ClusterIP

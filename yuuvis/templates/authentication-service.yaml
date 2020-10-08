@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: authentication
+    k8s-app: authentication-gateway-metrics
+    yuuvis: "true"
+  name: authentication
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.authentication.port}}
+    {{- if .Values.yuuvis.services.authentication.nodeport.use }}
+    nodePort: {{.Values.yuuvis.services.authentication.nodeport.value }}
+    {{- end}}
+  selector:
+    name: authentication
+  {{- if .Values.yuuvis.services.authentication.nodeport.use }}
+  type: NodePort
+  {{- end}}

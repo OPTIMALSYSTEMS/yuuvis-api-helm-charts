@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-create-selfsigned-cert
+  labels:
+    app: keycloak-create-selfsigned-cert
+spec:
+  template:
+    spec:
+      containers:
+      - name: keycloak-create-selfsigned-cert
+        image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        args: ["/yuuvis/script/keycloakCreateSelfsignedCert.bash"]
+        volumeMounts:
+        - mountPath: /yuuvis/script/keycloakCreateSelfsignedCert.bash
+          name: createscript
+          subPath: keycloakCreateSelfsignedCert.bash
+      imagePullSecrets:
+      - name: {{.Values.elasticsearch.imagePullSecret}}
+      volumes:
+      - configMap:
+          name: keycloakcreateselfsignedcert
+        name: createscript
+      serviceAccount: create-selfsigned-cert
+      restartPolicy: OnFailure

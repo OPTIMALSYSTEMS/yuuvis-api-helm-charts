@@ -1,0 +1,16 @@
+apiVersion: v1
+data:
+  initgit.sh: "#!/bin/sh\n\ngit config --global user.email yuuvis-init@yuuvis.org\ngit
+    config --global user.name yuuvis-init\n\necho 'git clone'\n\t\nif git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}}
+    --branch {{.Values.yuuvis.git.branch}}; then\n\techo \"git branch {{.Values.yuuvis.git.branch}}
+    already exists\"\n\tcd {{.Values.yuuvis.git.name}}\n\tif [ -f application-docker.yml
+    ]; then\n      echo application-docker.yml exists \n\t  exit 0\n\tfi\nelse\n\tgit
+    clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}}\n\n\tcd
+    {{.Values.yuuvis.git.protocol}}\n\techo \"creating new {{.Values.yuuvis.git.branch}}\"\n\techo
+    'git checkout -b'\n    git checkout -b {{.Values.yuuvis.git.branch}}\nfi\n\ncp
+    /yuuvis/data/*.yml .\nmkdir system\ncd system\ncp /yuuvis/data/system/*.xml .\ncp
+    /yuuvis/data/system/*.json .\ncd ..\ngit add .\ngit commit -m \"init config\"\necho
+    'git push'\ngit push origin {{.Values.yuuvis.git.branch}}\n\nexit 0"
+kind: ConfigMap
+metadata:
+  name: initcommitconfigmap

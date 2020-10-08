@@ -1,0 +1,54 @@
+apiVersion: v1
+data:
+  application-dbs.yml: |
+    yuuvis.db.name: {{.Values.yuuvis.db.name}}
+    yuuvis.db.server: {{.Values.yuuvis.db.server}}
+    yuuvis.db.username: {{.Values.yuuvis.db.user}}
+    yuuvis.db.password: {{.Values.yuuvis.db.password}}
+
+    spring.datasource.url: jdbc:postgresql://${yuuvis.db.server}/${yuuvis.db.name}
+    spring.datasource.driver-class-name: org.postgresql.Driver
+    spring.datasource.username: ${yuuvis.db.username}
+    spring.datasource.password: ${yuuvis.db.password}
+  application-docker.yml: |
+    docker.enabled: true
+  application-kubernetes.yml: |
+    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
+  system-prod.yml: |
+    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.name!=null && (metadata.name matches 'index' || metadata.name matches 'rest-ws' || metadata.name matches 'search' || metadata.name matches 'registry' || metadata.name matches 'system)'
+  authentication-prod.yml: |
+{{ tpl .Values.yuuvis.authconfig . | indent 4 }}
+  application-es.yml: |
+    #configuration for elastic search
+    spring.data.elasticsearch.cluster-name: 'planet-express'
+    spring.data.elasticsearch.cluster-nodes: '{{.Values.yuuvis.elastic.url}}:9300'
+    spring.data.elasticsearch.repositories.enabled: true
+    spring.data.elasticsearch.cluster-nodes-rest: '{{.Values.yuuvis.elastic.url}}:9200'
+    elasticsearch.timeout: 60000
+    index.indexname: {{.Values.yuuvis.elastic.init.index.name}}
+    index.creation.settings.number_of_shards: {{.Values.yuuvis.elastic.init.index.number_of_shards}}
+    index.creation.settings.number_of_replicas: {{.Values.yuuvis.elastic.init.index.number_of_replicas}}
+  application-mq.yml: |
+    # amqp
+    amqp:
+      host: {{.Values.yuuvis.amqp.url}}
+      port: {{.Values.yuuvis.amqp.port}}
+      user: {{.Values.yuuvis.amqp.user}}
+      password: {{.Values.yuuvis.amqp.password}}
+  application-storage.yml: |
+{{ tpl .Values.yuuvis.storage . | indent 4 }}
+  application-redis.yml: |
+    spring.redis.port: {{.Values.yuuvis.redis.port}}
+    spring.redis.host: {{.Values.yuuvis.redis.host}}
+  registry-prod.yml: |
+    indexing.sync: true
+  application-lc.yml: |
+    textextraction.in-queue: lc.textextraction
+    textextraction.job-queue: lc.textextraction.job
+  application-oauth2.yml: |
+{{ tpl .Values.yuuvis.oauth2 . | indent 4 }}
+  application-metrics.yml: |
+    management.metrics.web.server.auto-time-requests: true
+kind: ConfigMap
+metadata:
+  name: profilesconfigmap

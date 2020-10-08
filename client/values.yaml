@@ -1,0 +1,57 @@
+imageCredentials:
+  clientsecret:
+    registry: docker.yuuvis.org
+    username: 
+    password: 
+
+yuuvis:
+  image:
+    imagePullPolicy: Always
+  configservice:
+    url: http://configservice/config
+  livenessProbe:
+    enable: false
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 10
+  readinessProbe:
+    enable: true
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 5
+  client:
+    apiweb:
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:2020-07-08
+      initContainerImage: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
+      profiles: prod,docker,kubernetes
+      instances: 1
+      java:
+        maxHeap: -Xmx128m
+    userservice:
+      dockerImage: docker.yuuvis.org/yuuvis/userservice:2020-07-08
+      initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      profiles: postgres,userservice
+      instances: 1
+      java:
+        maxHeap: -Xmx128m
+      database:
+        name: erebus
+        user: postgres
+        password: optimal
+        address: postgresql.infrastructure
+      userseriveyml: |
+        keycloak.server: http://keycloak-http.infrastructure/auth
+        keycloak.admin.username: keycloak
+        keycloak.admin.password: optimal
+    client:
+      dockerImage: docker.yuuvis.org/yuuvis/client:2020-07-08
+      instances: 1
+    custom:
+      dockerImage: docker.yuuvis.org/yuuvis/client:2020-07-08
+      instances: 1
+    viewer:
+      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2020-07-08
+      instances: 1
+        
+initContainer:
+  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

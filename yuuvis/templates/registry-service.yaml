@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: registry
+    k8s-app: registry-gateway-metrics
+    yuuvis: "true"
+  name: registry
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.registry.port}}
+  selector:
+    name: registry
+  type: ClusterIP

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: system
+    k8s-app: system-gateway-metrics
+    yuuvis: "true"
+  name: system
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.system.port}}
+  selector:
+    name: system
+  type: ClusterIP

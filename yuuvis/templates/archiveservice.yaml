@@ -1,0 +1,87 @@
+{{- if .Values.yuuvis.services.archive.deploy }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: archive
+  name: archive
+spec:
+  replicas: {{.Values.yuuvis.services.archive.instances}}
+  selector:
+    matchLabels:
+      name: archive
+  template:
+    metadata:
+      labels:
+        name: archive
+    spec:
+      initContainers:
+      - name: init-archive
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      containers:
+      - name: archive
+        image: "{{.Values.yuuvis.services.archive.dockerRegistry}}:{{ .Values.yuuvis.services.archive.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.livenessProbe.path }}
+            port: {{.Values.yuuvis.services.archive.port}}
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.readinessProbe.path }}
+            port: {{.Values.yuuvis.services.archive.port}}
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        resources:
+          requests:
+            memory: {{.Values.yuuvis.services.archive.requests.memory}}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.services.archive.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.services.archive.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          valueFrom:
+            configMapKeyRef:
+              name: yuuvis-common-env
+              key: CONFIGSERVICEURL
+        {{- if .Values.yuuvis.services.archive.volumeMounts }}
+        volumeMounts:
+{{ tpl .Values.yuuvis.services.archive.volumeMounts . | indent 8 }}
+        {{- end }}
+        ports:
+        - containerPort: {{.Values.yuuvis.services.archive.port}}
+      restartPolicy: Always
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: yuuvisorg
+{{- if .Values.yuuvis.services.archive.volumes }}
+      volumes:
+{{ tpl .Values.yuuvis.services.archive.volumes . | indent 6 }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+  name: {{.Values.yuuvis.services.archive.pvc.name}}
+spec:
+  accessModes:
+  - {{.Values.yuuvis.services.archive.pvc.accessmode}}
+  storageClassName: {{.Values.yuuvis.services.archive.pvc.storageclass}}
+  resources:
+    requests:
+      storage: {{.Values.yuuvis.services.archive.pvc.storage}}
+{{- end}}
+{{- end}}

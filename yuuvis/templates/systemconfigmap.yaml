@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  schema.xml: |
+{{ tpl .Values.yuuvis.systemschema . | indent 4 }}
+  systemHookConfiguration.json: |
+{{ tpl .Values.yuuvis.systemHookConfiguration . | indent 4 }}
+  serviceConfiguration.json: |
+{{ tpl .Values.yuuvis.serviceConfiguration . | indent 4 }}
+  roleset.xml: |
+{{ tpl .Values.yuuvis.systemroleset . | indent 4 }}
+kind: ConfigMap
+metadata:
+  name: systemconfigmap

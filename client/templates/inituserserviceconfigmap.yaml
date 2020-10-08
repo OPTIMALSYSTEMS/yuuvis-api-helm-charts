@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  init.bash: "#!/bin/bash\n\nuntil wget -q --spider http://configservice/manage/health;
+    do echo waiting for configservice; sleep 11; done;\necho 'test if config exists'\ngetuseryml=$(curl
+    -s -o /dev/null -w \"%{http_code}\" \"http://configservice/api/resources/application-userservice.yml\")\nif
+    [ \"$getuseryml\" = \"404\" ]\nthen\n        echo \"must create application-userservice.yml\"\n\t\tcurl -POST
+    -F \"resource=@/yuuvis/data/application-userservice.yml\" \"http://configservice/api/resources/application-userservice.yml\"\nelse\n
+    \       echo \"userservice yml already exists\"\nfi\n"
+kind: ConfigMap
+metadata:
+  name: inituserserviceconfigmap

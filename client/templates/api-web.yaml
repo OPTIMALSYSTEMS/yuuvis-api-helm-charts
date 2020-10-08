@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: api-web
+  name: api-web
+spec:
+  replicas: {{.Values.yuuvis.client.apiweb.instances }}
+  selector:
+    matchLabels:
+      name: api-web
+      yuuvislog: "true"
+  template:
+    metadata:
+      labels:
+        name: api-web
+        yuuvislog: "true"
+    spec:
+      initContainers:
+      - name: init-api-web
+        image: {{.Values.yuuvis.client.apiweb.initContainerImage}}
+        command: ['bash', '/yuuvis/script/init.bash']
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: clientresources
+        - mountPath: /yuuvis/script/init.bash
+          name: initscript
+          subPath: init.bash
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.client.apiweb.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.client.apiweb.profiles}}
+        image: {{.Values.yuuvis.client.apiweb.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 7550
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: /manage/health
+            port: 7550
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        name: api-web
+        ports:
+        - containerPort: 7550
+          protocol: TCP
+      imagePullSecrets:
+      - name: clientsecret
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          name: clientresources
+        name: clientresources
+      - configMap:
+          name: apiwebinit
+        name: initscript

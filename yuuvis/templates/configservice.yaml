@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: configservice
+    yuuvis: "true"
+  name: configservice
+spec:
+  replicas: {{.Values.yuuvis.services.config.instances}} 
+  selector:
+    matchLabels:
+      name: configservice
+  template:
+    metadata:
+      labels:
+        name: configservice
+    spec:
+      initContainers:
+      - name: init-config
+        image: alpine/git:latest
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '/yuuvis/script/initgit.sh']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: configyml
+        - mountPath: /yuuvis/data/system
+          name: systemconfig
+        - mountPath: /yuuvis/script/initgit.sh
+          name: initscript
+          subPath: initgit.sh
+      containers:
+      - name: configservice
+        image: "{{.Values.yuuvis.services.config.dockerRegistry}}:{{ .Values.yuuvis.services.config.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.livenessProbe.path}}
+            port: {{.Values.yuuvis.services.config.port}}
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.readinessProbe.path}}
+            port: {{.Values.yuuvis.services.config.port}}
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        resources:
+          requests:
+            memory: {{.Values.yuuvis.services.config.requests.memory}}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.services.config.java.maxHeap}}
+        - name: SERVER_PORT
+          value: "{{.Values.yuuvis.services.config.port}}"
+        - name: SPRING_CLOUD_CONFIG_LABEL
+          value: {{.Values.yuuvis.git.branch}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT-LABEL
+          value: {{.Values.yuuvis.git.branch}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
+          value: {{.Values.yuuvis.git.password}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+          value: {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.url}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME
+          value: {{.Values.yuuvis.git.user}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_PREFIX
+          value: /config/
+        ports:
+        - containerPort: {{.Values.yuuvis.services.config.port}}
+      restartPolicy: Always
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: yuuvisorg
+      volumes:
+      - configMap:
+          name: initcommitconfigmap
+        name: initscript
+      - configMap:
+          name: profilesconfigmap
+        name: configyml
+      - configMap:
+          name: systemconfigmap
+        name: systemconfig
+

@@ -1,0 +1,27 @@
+{{- if .Values.gogs.useCustomDeployment }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gogsrepo-init
+  labels:
+    app: gogsrepo
+spec:
+  template:
+    spec:
+      containers:
+      - name: gogsrepo-init
+        image: {{.Values.gogs.initcontainer.image}}
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '/yuuvis/script/gitInitRepo.sh']
+        volumeMounts:
+        - mountPath: /yuuvis/script/gitInitRepo.sh
+          name: initscript
+          subPath: gitInitRepo.sh
+      imagePullSecrets:
+      - name:  {{.Values.gogs.initcontainer.secret}}
+      volumes:
+      - configMap:
+          name: gitinitrepo
+        name: initscript
+      restartPolicy: OnFailure
+{{- end}}

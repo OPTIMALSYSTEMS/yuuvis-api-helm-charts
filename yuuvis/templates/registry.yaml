@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: registry
+  name: registry
+spec:
+  replicas: {{.Values.yuuvis.services.registry.instances}}
+  selector:
+    matchLabels:
+      name: registry
+  template:
+    metadata:
+      labels:
+        name: registry
+    spec:
+      initContainers:
+      - name: init-registry
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      containers:
+      - name: registry
+        image: "{{.Values.yuuvis.services.registry.dockerRegistry}}:{{ .Values.yuuvis.services.registry.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+# service may perform db updates, possible long duration
+# service uses liquibase, if killed during startup db lock possible never released
+#        livenessProbe:
+#          httpGet:
+#            path: /manage/info
+#            port: 7510
+#         initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+#         periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+#         timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.readinessProbe.path}}
+            port: {{.Values.yuuvis.services.registry.port}}
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        resources:
+          requests:
+            memory: {{.Values.yuuvis.services.registry.requests.memory}}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.services.registry.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.services.registry.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          valueFrom:
+            configMapKeyRef:
+              name: yuuvis-common-env
+              key: CONFIGSERVICEURL
+        ports:
+        - containerPort: {{.Values.yuuvis.services.registry.port}}
+      restartPolicy: Always
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: yuuvisorg

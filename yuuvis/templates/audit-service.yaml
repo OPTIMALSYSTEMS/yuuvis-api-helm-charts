@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    k8s-app: audit-gateway-metrics
+    name: audit
+    yuuvis: "true"
+  name: audit
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.audit.port}}
+  selector:
+    name: audit
+  type: ClusterIP

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: search
+    k8s-app: search-gateway-metrics
+    yuuvis: "true"
+  name: search
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.search.port}}
+  selector:
+    name: search
+  type: ClusterIP

@@ -1,0 +1,611 @@
+imageCredentials:
+  yuuvisorg:
+    registry: docker.yuuvis.org
+    username:
+    password:
+
+yuuvis:
+  keycloak:
+    # !!! Change before running
+    # this variable must contain the "public" ip of keycloak
+    # this ip will be sent to the user from the authentication service
+    ip: 192.168.99.100
+  git:
+    protocol: http
+    url: gogs.infrastructure/yuuvis/yuuvis-config.git
+    name: yuuvis-config
+    user: yuuvis
+    password: optimal
+    branch: master
+  amqp:
+    user: rodger
+    password: optimal
+    url: rabbitmq.infrastructure
+    port: 5672
+  db:
+    name: yuuvis
+    server: postgresql.infrastructure:5432
+    user: yuuvis
+    password: optimal
+  elastic:
+    url: elasticsearch.infrastructure
+    init:
+      index:
+        name: yuuvis
+        number_of_shards: 3
+        number_of_replicas: 1
+  redis:
+    host: redis-master.infrastructure
+    port: 6379
+  authconfig: |
+    routing.defaultEntryPoint: '/client/index.html'
+    management.security.enabled: true
+    endpoints:
+      enabled: false
+      health:
+        enabled: true
+      info:
+        enabled: true
+    routing.endpoints:
+      - 'rest-ws'
+      - 'authentication'
+      - 'yuuvis'
+      - 'api'
+      - 'search'
+      - 'client'
+      - 'api-web'
+      - 'viewer'
+      - 'custom'
+    authorization.accesses:
+    ### Manage-Endpunkte
+      - endpoints: /manage/**
+        expose: true
+      - endpoints: /*/manage/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+    ### API-Endpunkte
+      - endpoints: /api/system/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+      - endpoints: /api/admin/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN')
+      - endpoints: /api/dms/objects
+        method: POST
+        access: hasAuthority('YUUVIS_CREATE_OBJECT')
+      - endpoints: /api/dms/**
+    ### Endpunkte für Swagger-Webclient des API-Gateways
+      - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
+      - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
+      - endpoints: /api/api/system/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+      - endpoints: /api/api/admin/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN')
+      - endpoints: /api/api/dms/**
+    ### Webclient
+      - endpoints: /rest-ws/**,/search/**,/viewer/**
+      - endpoints: /client/**
+        expose: true
+      - endpoints: /custom/**
+        expose: true
+    ### api-web
+      - endpoints: /api-web/swagger-ui.html/**,/api-web/**/springfox-swagger-ui/**,/api-web/**/swagger-resources/**,/api-web/**/v2/api-docs/**
+      - endpoints: /api-web/resources/**
+      - endpoints: /api-web/user/**
+      - endpoints: /api-web/search/**
+      - endpoints: /api-web/dms/**
+      - endpoints: /api-web/system/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+      - endpoints: /api-web/admin/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN')
+  storage: |
+    storage:
+      repositories:
+        s3:
+          profiles: ['s3profile1']
+          default: true
+        netapp:
+          profiles: ['netapplike']
+          url:  http://archive/api/profiles/{profile}/dms/objects
+          useDiscovery: true
+      profiles:
+        s3:
+          s3profile1:
+            access-key: 'MGMWCOYTDUSLNCFE'
+            secret-key: '2707764007156720'
+            url: 'http://minio.infrastructure:9000'
+            bucket: 'dmscloudrepodocker'
+        netapp:
+          netapplike:
+            # use mountpoint of the persistent volume claim that provides the netapp storage
+            # must be the same in the deployment of the archive app
+            volume: '/var/lib/netapp/data'
+            defaultRetentionInDays: 10
+  oauth2: |
+    # Konfiguration für den yuuvis authentication service
+    keycloak.host: {{.Values.yuuvis.keycloak.ip}}:30111
+    authentication.filter: oauth2
+    authentication.provider: oauth2
+    authentication.exposed.endpoints: ''
+    authentication.oauth2.tenants:
+    - name: yuuvistest
+      clientId: yuuvis-authentication-service
+      clientSecret: dbdf4856-3c86-4e5f-aca7-96f3d93d35b4
+      userAuthorizationUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/auth
+      accessTokenUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/token
+      userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
+      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout?redirect_uri=${redir}
+      userNameExtractionPattern: $.sub
+    - name: testyuuvis
+      clientId: yuuvis-authentication-service
+      clientSecret: 61048b73-8cd7-4682-b78c-786c5dc8a2a1
+      userAuthorizationUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/auth
+      accessTokenUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/token
+      userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
+      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout?redirect_uri=${redir}
+      userNameExtractionPattern: $.sub 
+
+    # Konfiguration für den yuuvis organization service
+    keycloak.server: https://keycloak-https.infrastructure/auth
+    keycloak.admin.username: keycloak
+    keycloak.admin.password: optimal
+  systemschema: |
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
+    <version>1</version>
+    <lastModificationDate>2019-10-02T14:43:36.735Z</lastModificationDate>
+    <systemVersion>ec-01</systemVersion>
+    <propertyStringDefinition>
+        <id>email:from</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail sender</description>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>email:to</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail recipients</description>
+        <propertyType>string</propertyType>
+        <cardinality>multi</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>email:cc</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail cc</description>
+        <propertyType>string</propertyType>
+        <cardinality>multi</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>email:bcc</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail bcc</description>
+        <propertyType>string</propertyType>
+        <cardinality>multi</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>email:subject</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail subject</description>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyIntegerDefinition>
+        <id>email:attachmentcount</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail attachment count</description>
+        <propertyType>integer</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+        <defaultValue>0</defaultValue>
+    </propertyIntegerDefinition>
+    <propertyStringDefinition>
+        <id>email:attachmentnames</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail attachment names</description>
+        <propertyType>string</propertyType>
+        <cardinality>multi</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyTableDefinition>
+        <id>email:meta</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>Additional data</description>
+        <propertyType>table</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+        <propertyStringDefinition>
+            <id>email:key</id>
+            <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+            <description>Key of this additional data entry.</description>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>email:value</id>
+            <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+            <description>Value of this additional data entry.</description>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+    </propertyTableDefinition>
+    <propertyStringDefinition>
+        <id>email:messageid</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail message id</description>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyDateTimeDefinition>
+        <id>email:received</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail received</description>
+        <propertyType>datetime</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyDateTimeDefinition>
+    <propertyStringDefinition>
+        <id>email:mode</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail storing mode</description>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>email:exchangeid</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the e-mail exchange id</description>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>email:maildigest</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>system-wide field for the calculated e-mail digest</description>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyDateTimeDefinition>
+        <id>date</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:dokument</localNamespace>
+        <description>the date of the document???</description>
+        <propertyType>datetime</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyDateTimeDefinition>
+    <propertyStringDefinition>
+        <id>ID</id>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <propertyStringDefinition>
+        <id>Name</id>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+    </propertyStringDefinition>
+    <typeDocumentDefinition>
+        <id>email:email</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
+        <description>...</description>
+        <baseId>system:document</baseId>
+        <propertyReference>email:from</propertyReference>
+        <propertyReference>email:to</propertyReference>
+        <propertyReference>email:cc</propertyReference>
+        <propertyReference>email:bcc</propertyReference>
+        <propertyReference>email:subject</propertyReference>
+        <propertyReference>email:attachmentcount</propertyReference>
+        <propertyReference>email:attachmentnames</propertyReference>
+        <propertyReference>email:meta</propertyReference>
+        <propertyReference>email:messageid</propertyReference>
+        <propertyReference>email:received</propertyReference>
+        <propertyReference>email:mode</propertyReference>
+        <propertyReference>email:exchangeid</propertyReference>
+        <propertyReference>email:maildigest</propertyReference>
+        <contentStreamAllowed>required</contentStreamAllowed>
+       <secondaryObjectTypeId>system:rmDestructionRetention</secondaryObjectTypeId>
+    </typeDocumentDefinition>
+    <typeDocumentDefinition>
+        <id>document</id>
+        <localNamespace>urn:optimal-systems.de:dmscloud:document</localNamespace>
+        <description>...</description>
+        <baseId>system:document</baseId>
+        <propertyReference>Name</propertyReference>
+        <propertyReference>date</propertyReference>
+        <contentStreamAllowed>allowed</contentStreamAllowed>
+       <secondaryObjectTypeId>system:rmDestructionRetention</secondaryObjectTypeId>
+    </typeDocumentDefinition>
+    </schema>
+  systemroleset: |
+    <?xml version="1.0" encoding="utf-8"?>
+        <roleSet xmlns="http://optimal-systems.org/ns/dmscloud/roleset/">
+          <role>
+            <name>YUUVIS_DEFAULT</name>
+            <permission>
+              <action>read</action>
+              <action>write</action>
+              <action>delete</action>
+            </permission>
+          </role>
+          <role>
+            <name>YUUVIS_TENANT_ADMIN</name>
+            <permission>
+              <action>read</action>
+              <action>write</action>
+              <action>delete</action>
+            </permission>
+          </role>
+          <role>
+            <name>YUUVIS_SYSTEM_INTEGRATOR</name>
+            <permission>
+              <action>read</action>
+              <action>write</action>
+              <action>delete</action>
+            </permission>
+          </role>
+        </roleSet>      
+  systemHookConfiguration: |
+    {"systemhooks" :
+      {"amqp" : [
+        {"enable" : true,
+         "predicate" : "spel:(contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null && contentStreams[0]['range'].length() > 0) ? true : false",
+         "type" : "object.insert.document",
+         "url" : "{{.Values.yuuvis.amqp.url}}:{{.Values.yuuvis.amqp.port}}",
+         "user" : "{{.Values.yuuvis.amqp.user}}",
+         "password" : "{{.Values.yuuvis.amqp.password}}",
+         "queue" : "lc.textextraction",
+         "bulkSize" : 1
+        }
+      ],
+       "webhooks": [
+         {
+           "enable": true,
+           "predicate": "spel:true",
+           "type": "user.info",
+           "url": "http://organization/api/userinfo/${tenant}/${userId}"
+         }
+       ]
+     }
+    }
+  serviceConfiguration: |
+    {"services": {
+       "contentanalyzer": {
+         "analyze": [				
+          {
+            "predicate": "spel:(properties != null && properties['Name'] != null && properties['Name']['value'] == 'disable') ? true : false",
+            "mimetype": true,
+            "content": false
+          },				
+          {
+            "predicate": "spel:(contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null && contentStreams[0]['range'].length() > 0) ? true : false",
+            "mimetype": false,
+            "content": false
+          }
+          ]
+        }
+      }
+    }
+
+  image:
+    imagePullPolicy: IfNotPresent
+  livenessProbe:
+    enable: false
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 10
+    path: /manage/info
+  readinessProbe:
+    enable: true
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 5
+    path: /manage/health
+  # create services with type nodport for authentication, admin
+  labels:
+    app: yuuvis
+  services:
+    api:
+      dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
+      tag: 2020-07-08
+      profiles: prod,redis,docker,kubernetes,metrics
+      instances: 1
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      port: 7450
+      requests:
+        memory: "128Mi"
+    admin:
+      dockerRegistry: docker.yuuvis.org/yuuvis/admin
+      tag: 2020-07-08
+      profiles: prod,docker,kubernetes
+      instances: 1
+      port: 7273
+      nodePort: 30273
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    audit:
+      dockerRegistry: docker.yuuvis.org/yuuvis/audit
+      tag: 2020-07-08
+      profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
+      instances: 1
+      port: 7251
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    authentication:
+      nodeport:
+        use: true
+        value: 30080
+      dockerRegistry: docker.yuuvis.org/yuuvis/authentication
+      tag: 2020-07-08
+      profiles: prod,oauth2,docker,kubernetes,metrics
+      instances: 1
+      port: 8080
+      requests:
+        memory: "128Mi"
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      volumes: |
+        - name: keycloak-tls-selfsigned
+          secret:
+            defaultMode: 420
+            secretName: keycloak-selfsigned-cert-secret
+      volumeMounts: |
+        - mountPath: /etc/yuuvis/certs
+          name: keycloak-tls-selfsigned
+    config:
+      dockerRegistry: docker.yuuvis.org/yuuvis/config
+      tag: 2020-07-08
+      instances: 1
+      port: 7282
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    contentanalyzer:
+      dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
+      tag: 2020-07-08
+      profiles: prod,docker,kubernetes,metrics
+      instances: 2
+      port: 7430
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    index:
+      dockerRegistry: docker.yuuvis.org/yuuvis/index
+      profiles: prod,es,dms,dmscloud,docker,kubernetes,redis,metrics
+      tag: 2020-07-08
+      instances: 1
+      port: 7291
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    organization:
+      dockerRegistry: docker.yuuvis.org/yuuvis/organization
+      tag: 2020-07-08
+      profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
+      instances: 1
+      port: 7440
+      requests:
+        memory: "128Mi"
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      volumes: |
+        - name: keycloak-tls-selfsigned
+          secret:
+            defaultMode: 420
+            secretName: keycloak-selfsigned-cert-secret
+      volumeMounts: |
+        - mountPath: /etc/yuuvis/certs
+          name: keycloak-tls-selfsigned
+    registry:
+      dockerRegistry: docker.yuuvis.org/yuuvis/registry
+      tag: 2020-07-08
+      profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
+      instances: 1
+      port: 7510
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    repository:
+      dockerRegistry: docker.yuuvis.org/yuuvis/repository
+      tag: 2020-07-08
+      profiles: prod,storage,docker,kubernetes,redis,metrics
+      instances: 1
+      port: 7500
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    search:
+      dockerRegistry: docker.yuuvis.org/yuuvis/search
+      tag: 2020-07-08
+      profiles: prod,es,dms,dmscloud,docker,kubernetes,metrics
+      instances: 1
+      port: 7221
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    system:
+      dockerRegistry: docker.yuuvis.org/yuuvis/system
+      profiles: prod,docker,redis,kubernetes,metrics
+      tag: 2020-07-08
+      instances: 1
+      port: 7400
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+    archive:
+      deploy: false
+      dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice
+      tag: 2020-07-08
+      profiles: prod,docker,storage
+      instances: 1
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+      # if testMode: true a pvc will be created and mounted to the archiveservice container
+      testMode: true
+      storageClassName: standard
+      storage: 500Mi
+      port: 7530
+      volumes: |
+        - name: archiveservice-netapp
+          persistentVolumeClaim:
+            claimName: archiveservice-netapp
+      volumeMounts: |
+        - mountPath: /var/lib/netapp/data
+          name: archiveservice-netapp
+      pvc:
+        name: archiveservice-netapp
+        storageclass: standard
+        storage: 500Mi
+        accessmode: ReadWriteMany
+    controller:
+      dockerRegistry: docker.yuuvis.org/yuuvis/controller
+      tag: 2020-07-08
+      profiles: prod,docker,es,oauth2,lc,mq,kubernetes
+      instances: 1
+      port: 7332
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+      volumes: |
+        - name: keycloak-tls-selfsigned
+          secret:
+            defaultMode: 420
+            secretName: keycloak-selfsigned-cert-secret
+      volumeMounts: |
+        - name: keycloak-tls-selfsigned
+          mountPath: "/etc/yuuvis/certs"
+    textextractor:
+      dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
+      tag: 2020-07-08
+      profiles: prod,docker,es,lc,mq,kubernetes
+      instances: 1
+      port: 7420
+      java:
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
+initContainer:
+  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

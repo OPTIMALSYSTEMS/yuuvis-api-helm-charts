@@ -1,0 +1,25 @@
+*/charts/
+*requirements.lock
+
+# Folder config file
+Desktop.ini
+
+# IntelliJ
+*.idea/
+[Tt]arget/*
+*.iml
+*/target/*
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+#Spring
+**/resources/application-*
+!**/resources/application-eml.yml
+logs/
+modules/blue-system/.settings/org.eclipse.jdt.apt.core.prefs
+modules/blue-system/.settings/
+.project
+.settings/
+*.classpath
+*.factorypath

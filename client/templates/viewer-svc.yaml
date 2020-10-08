@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: yuuvis
+    yuuvis: "true"
+    name: viewer
+  name: viewer
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    name: viewer
+  type: ClusterIP

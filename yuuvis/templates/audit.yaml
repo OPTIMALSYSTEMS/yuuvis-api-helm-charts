@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: audit
+  name: audit
+spec:
+  replicas: {{.Values.yuuvis.services.audit.instances}}
+  selector:
+    matchLabels:
+      name: audit
+  template:
+    metadata:
+      labels:
+        name: audit
+    spec:
+      initContainers:
+      - name: init-audit
+        image: busybox
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        imagePullPolicy: IfNotPresent
+      containers:
+      - name: audit
+        image: "{{.Values.yuuvis.services.audit.dockerRegistry}}:{{ .Values.yuuvis.services.audit.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+# service may perform db updates, possible long duration
+# service uses liquibase, if killed during startup db lock possible never released
+#        livenessProbe:
+#          httpGet:
+#            path: /manage/info
+#            port: 7251
+#         initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+#         periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+#         timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.readinessProbe.path }}
+            port: {{.Values.yuuvis.services.audit.port}}
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        resources:
+          requests:
+            memory: {{.Values.yuuvis.services.audit.requests.memory}}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.services.audit.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.services.audit.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          valueFrom:
+            configMapKeyRef:
+              name: yuuvis-common-env
+              key: CONFIGSERVICEURL
+        ports:
+        - containerPort: {{.Values.yuuvis.services.audit.port}}
+      restartPolicy: Always
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: yuuvisorg

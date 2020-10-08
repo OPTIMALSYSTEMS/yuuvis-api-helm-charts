@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: userservice
+  name: userservice
+spec:
+  replicas: {{.Values.yuuvis.client.userservice.instances}}
+  selector:
+    matchLabels:
+      name: userservice
+  template:
+    metadata:
+      labels:
+        name: userservice
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.client.userservice.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.client.userservice.profiles}}
+        - name: db.user
+          value: {{.Values.yuuvis.client.userservice.database.user}}
+        - name: db.pwd
+          value: {{.Values.yuuvis.client.userservice.database.password}}
+        - name: db.host
+          value: {{.Values.yuuvis.client.userservice.database.address}}
+        - name: db.port
+          value: "5432"
+        - name: db.name
+          value: {{.Values.yuuvis.client.userservice.database.name}}
+        image: {{.Values.yuuvis.client.userservice.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: userservice
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      imagePullSecrets:
+      - name: clientsecret
+      initContainers:
+      - args:
+        - psql -h {{.Values.yuuvis.client.userservice.database.address}} -p 5432 -U $PGUSER -c "CREATE DATABASE
+          ${PGDBNAME};"; psql -h {{.Values.yuuvis.client.userservice.database.address}} -p 5432 -U $PGUSER -c "GRANT ALL PRIVILEGES ON DATABASE ${PGDBNAME} TO ${PGUSER};";until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;
+        command:
+        - /bin/sh
+        - -c
+        env:
+        - name: PGUSER
+          value: {{.Values.yuuvis.client.userservice.database.user}}
+        - name: PGPASSWORD
+          value: {{.Values.yuuvis.client.userservice.database.password}}
+        - name: PGDBNAME
+          value: {{.Values.yuuvis.client.userservice.database.name}}
+        image: {{.Values.yuuvis.client.userservice.initContainerImage}}
+        imagePullPolicy: Always
+        name: init-database
+      - name: init-config
+        image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
+        imagePullPolicy: IfNotPresent
+        command: ['bash', '/yuuvis/script/init.bash']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: configyml
+        - mountPath: /yuuvis/script/init.bash
+          name: initscript
+          subPath: init.bash
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          name: inituserserviceconfigmap
+        name: initscript
+      - configMap:
+          name: userserviceconfigconfigmap
+        name: configyml

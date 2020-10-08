@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+  keycloakCreateSelfsignedCert.bash: |-
+    echo "keytool -genkey"
+    keytool -genkey -alias keycloak-https.{{.Release.Namespace}} -keyalg RSA -keystore keycloak.jks -validity 36500 -storepass optimal1! -dname "CN=keycloak-https.{{.Release.Namespace}}, OU=yuuvis, O=yuuvis, L=Berlin, ST=Berlin, C=de" -keypass optimal1!
+
+    echo "keytool convert pkcs"
+    keytool -importkeystore -srckeystore keycloak.jks -destkeystore keycloak.p12 -deststoretype PKCS12 -storepass "optimal1!" -srcstorepass "optimal1!" 
+
+    echo "openssl extract key crt"
+    openssl pkcs12 -in keycloak.p12 -nokeys -out keycloak.crt -password pass:optimal1!
+    openssl pkcs12 -in keycloak.p12 -nocerts -nodes -out keycloak.key -password pass:optimal1!
+
+    echo "k8s create keycloak-selfsigned-tls-secret"
+    kubectl create secret tls keycloak-selfsigned-tls-secret --key keycloak.key --cert keycloak.crt
+    echo "k8s create namespace {{.Values.yuuvis.namespaces.yuuvis}}"
+    kubectl create namespace {{.Values.yuuvis.namespaces.yuuvis}}
+    echo "k8s create keycloak-selfsigned-cert-secret in namespace {{.Values.yuuvis.namespaces.yuuvis}}"
+    kubectl create secret generic keycloak-selfsigned-cert-secret --from-file keycloak.crt -n {{.Values.yuuvis.namespaces.yuuvis}}
+kind: ConfigMap
+metadata:
+  name: keycloakcreateselfsignedcert

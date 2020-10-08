@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: custom
+  name: custom
+spec:
+  replicas: {{.Values.yuuvis.client.custom.instances}}
+  selector:
+    matchLabels:
+      name: custom
+  template:
+    metadata:
+      labels:
+        name: custom
+    spec:
+      containers:
+      - image: {{.Values.yuuvis.client.custom.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: custom
+        ports:
+        - containerPort: 80
+          protocol: TCP
+      imagePullSecrets:
+      - name: clientsecret
+      restartPolicy: Always
