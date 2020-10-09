@@ -48,23 +48,9 @@ helm install client ./client --namespace yuuvis
 
 ```shell
  helm uninstall infrastructure  --namespace infrastructure
- helm uninstall prometheus-operator  --namespace infrastructure
- kubectl delete servicemonitor --all -n infrastructure
- kubectl delete prometheusrule --all -n infrastructure
  helm uninstall yuuvis  --namespace yuuvis
  helm uninstall client  --namespace yuuvis
 ```
-
-```shell
-kubectl delete statefulset elasticsearch -n infrastructure
-kubectl delete statefulset rabbitmq -n infrastructure
-kubectl delete jobs keycloakaddrole-yuuvis  -n infrastructure
-kubectl delete jobs keycloak-create-selfsigned-cert -n infrastructure
-kubectl delete job gogsrepo-init -n infrastructure
-kubectl delete pvc gogs -n infrastructure
-kubectl delete pv name(replace with pv from gogs --check value with kubectl get pv -n infrastructure) -n infrastructure
-```
-While deleting persistence volume and persistence claim from gogs, please delete pod, than they will be unbind.
 
 ## upgrade
 
@@ -77,7 +63,6 @@ helm upgrade yuuvis ./yuuvis --namespace yuuvis
 ```
 Check version of deployed helm chart
 ```shell
-helm list -n infrastructure 
 helm list -n yuuvis 
 ```
 
