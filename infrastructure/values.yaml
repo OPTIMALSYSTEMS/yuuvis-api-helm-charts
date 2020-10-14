@@ -41,6 +41,7 @@ postgresql:
   fullnameOverride: postgresql
   postgresqlPassword: optimal
   persistence:
+    storageClass: standard
     size: 100Mi
   resources:
     requests:
