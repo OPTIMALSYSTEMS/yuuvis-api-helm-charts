@@ -1,8 +1,8 @@
 imageCredentials:
   dockeryuuvisorg:
     registry: docker.yuuvis.org
-    username: 
-    password: 
+    username: PLACEUSERNAMEHERE
+    password: PLACEPASSWORDHERE 
 
 yuuvis:
   # !!! Change before running
@@ -26,7 +26,7 @@ elasticsearch:
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 100Mi
-  storageClassName: standard
+  storageClassName: default
   javaOpts: -Xms1024m -Xmx1024m
   replicas: 1
   port: 9300
@@ -41,7 +41,7 @@ postgresql:
   fullnameOverride: postgresql
   postgresqlPassword: optimal
   persistence:
-    storageClass: standard
+    storageClass: default
     size: 100Mi
   resources:
     requests:
@@ -52,7 +52,15 @@ postgresql:
   readinessProbe:
     enabled: false
   initdbScriptsConfigMap: postgresql-initdb
-  postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB"}
+  postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB", "effective_cache_size": "384MB"}
+  initdb:
+    database1: yuuvis
+    user1: yuuvis
+    password1: optimal
+    database2: keycloak
+    user2: keycloak
+    password2: optimal
+
 
 rabbitmq:
   fullnameOverride: rabbitmq
@@ -66,35 +74,36 @@ rabbitmq:
       amqp1_0.default_user = rodger
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: default
     size: 100Mi
-
+git:
+  protocol: http
+  reponame: yuuvis-config
+  username: yuuvis
+  password: optimal
 gogs:
   useCustomDeployment: true
   image: gogs/gogs:0.11.86
   imagePullPolicy: IfNotPresent
-  initcontainer: 
+  initcontainer:
     image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
     secret: dockeryuuvisorg
   persistence:
     size: 500Mi
-    storageClass: standard
-    
+    storageClass: default
+  username: yuuvis
+  password: optimal
+  port: 80
+  targetPort: 3000
+  containerPort: 3000
 minio:
   fullnameOverride: minio
-  accessKey: "MGMWCOYTDUSLNCFE"
-  secretKey: "2707764007156720"
+  accessKey: "PLACE_STORAGE_CREDENTIALS_ACCOUNT_HERE"
+  secretKey: "PLACE_STORAGE_CREDENTIALS_SECRET_HERE"
   persistence:
-    storageClass: standard
+    storageClass: default
     size: 10Gi
   resources: {}
-  # for gateway usage with azure blob storage set access  key and secret key to your
-  # storage account credentials, activate azure gateway mode and disable persistence
-  # persistence:
-  #   enabled: false
-  # azuregateway:
-  #   enabled: true
-  #   replicas: 1  
   
 keycloak:
   fullnameOverride: keycloak
@@ -151,5 +160,5 @@ redis:
       initialDelaySeconds: 600
     persistence:
       enabled: false
-      storageClass: standard
+      storageClass: default
       size: 50Mi

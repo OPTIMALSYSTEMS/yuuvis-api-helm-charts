@@ -42,7 +42,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /manage/info
-            port: 7550
+            port: {{.Values.yuuvis.client.apiweb.port}}
           initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
@@ -51,14 +51,14 @@ spec:
         readinessProbe:
           httpGet:
             path: /manage/health
-            port: 7550
+            port: {{.Values.yuuvis.client.apiweb.port}}
           initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
         {{- end}}
         name: api-web
         ports:
-        - containerPort: 7550
+        - containerPort: {{.Values.yuuvis.client.apiweb.containerPort}}
           protocol: TCP
       imagePullSecrets:
       - name: clientsecret

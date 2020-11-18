@@ -9,9 +9,9 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 80
+    port: {{.Values.yuuvis.client.custom.port}}
     protocol: TCP
-    targetPort: 80
+    targetPort: {{.Values.yuuvis.client.custom.targetPort}}
   selector:
     name: custom
   type: ClusterIP

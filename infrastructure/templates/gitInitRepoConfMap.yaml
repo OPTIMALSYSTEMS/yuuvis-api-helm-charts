@@ -2,11 +2,11 @@ apiVersion: v1
 data:
   gitInitRepo.sh: "until $(curl --output /dev/null --silent --head --fail http://gogs);
     do\n    echo waiting for gogs \n    sleep 11;\ndone\nsleep 42\necho create
-    user\ncurl -d \"user_name=yuuvis&email=yuuvis%40yuuvis.org&password=optimal&retype=optimal\"
+    user\ncurl -d \"user_name={{.Values.git.username}}&email=yuuvis%40yuuvis.org&password={{.Values.git.password}}&retype={{.Values.git.password}}\"
     -c cookies.txt http://gogs/user/sign_up\necho login git\nCSRF=$(cat ./cookies.txt
-    | grep _csrf | cut -f 7)\n\ncurl -d \"_csrf=$CSRF&user_name=yuuvis&password=optimal\"
+    | grep _csrf | cut -f 7)\n\ncurl -d \"_csrf=$CSRF&user_name={{.Values.git.username}}&password={{.Values.git.password}}\"
     -c cookies2.txt -L http://gogs/user/login\n\necho create git repository\nCSRF2=$(cat
-    ./cookies2.txt | grep _csrf | cut -f 7)\n\ncurl -d \"_csrf=$CSRF2&user_id=1&repo_name=yuuvis-config&private=on&description=&gitignores=&license=&readme=Default&auto_init=on\"
+    ./cookies2.txt | grep _csrf | cut -f 7)\n\ncurl -d \"_csrf=$CSRF2&user_id=1&repo_name={{.Values.git.reponame}}&private=on&description=&gitignores=&license=&readme=Default&auto_init=on\"
     -b cookies2.txt -L http://gogs/repo/create\n"
 kind: ConfigMap
 metadata:

@@ -22,7 +22,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /manage/health
-            port: 9000
+            port: {{.Values.yuuvis.client.viewer.port}}
           initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
@@ -31,14 +31,14 @@ spec:
         readinessProbe:
           httpGet:
             path: /manage/health
-            port: 9000
+            port: {{.Values.yuuvis.client.viewer.port}}
           initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
         {{- end}}
         name: viewer
         ports:
-        - containerPort: 9000
+        - containerPort: {{.Values.yuuvis.client.viewer.containerPort}}
           protocol: TCP
       imagePullSecrets:
       - name: clientsecret

@@ -20,7 +20,7 @@ spec:
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: custom
         ports:
-        - containerPort: 80
+        - containerPort: {{.Values.yuuvis.client.custom.containerPort}}
           protocol: TCP
       imagePullSecrets:
       - name: clientsecret

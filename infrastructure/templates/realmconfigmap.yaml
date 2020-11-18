@@ -90,7 +90,7 @@ data:
                 "lastName": "Root",
                 "credentials" : [
                     { "type" : "password",
-                      "value" : "optimal" }
+                      "value" : {{.Values.keycloak.keycloak.password | quote }} }
                 ],
                 "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN", "YUUVIS_CREATE_OBJECT", "YUUVIS_MANAGE_SETTINGS" ],
                 "clientRoles": {
@@ -1418,7 +1418,7 @@ data:
                 "lastName": "Root",
                 "credentials" : [
                     { "type" : "password",
-                      "value" : "optimal" }
+                      "value" : {{.Values.keycloak.keycloak.password | quote }} }
                 ],
                 "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN", "YUUVIS_CREATE_OBJECT", "YUUVIS_MANAGE_SETTINGS" ],
                 "clientRoles": {

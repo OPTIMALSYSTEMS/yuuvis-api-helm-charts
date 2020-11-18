@@ -2,7 +2,7 @@ apiVersion: v1
 data:
   keycloakAddRoleToClient.bash: |-
     KEYCLOAK_USER=keycloak
-    KEYCLOAK_PASSWORD=optimal
+    KEYCLOAK_PASSWORD={{.Values.keycloak.keycloak.password }}
     REALM=yuuvistest
     REALM_2=testyuuvis
     CLIENT_NAME=yuuvis-authentication-service

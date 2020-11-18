@@ -1,8 +1,8 @@
 imageCredentials:
   clientsecret:
     registry: docker.yuuvis.org
-    username: 
-    password: 
+    username: PLACEUSERNAMEHERE
+    password: PLACEPASSWORDHERE 
 
 yuuvis:
   image:
@@ -24,6 +24,10 @@ yuuvis:
       dockerImage: docker.yuuvis.org/yuuvis/api-web:2020-07-08
       initContainerImage: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
       profiles: prod,docker,kubernetes
+      containerPort: 7550
+      port: 7550
+      targetPort: 7550
+      port80: 80
       instances: 1
       java:
         maxHeap: -Xmx128m
@@ -31,6 +35,9 @@ yuuvis:
       dockerImage: docker.yuuvis.org/yuuvis/userservice:2020-07-08
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,userservice
+      containerPort: 8080
+      port: 80
+      targetPort: 8080
       instances: 1
       java:
         maxHeap: -Xmx128m
@@ -46,12 +53,22 @@ yuuvis:
     client:
       dockerImage: docker.yuuvis.org/yuuvis/client:2020-07-08
       instances: 1
+      containerPort: 80
+      port: 80
+      targetPort: 80
     custom:
       dockerImage: docker.yuuvis.org/yuuvis/client:2020-07-08
       instances: 1
+      containerPort: 80
+      port: 80
+      targetPort: 80
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2020-07-08
       instances: 1
+      port: 9000
+      targetPort: 9000
+      containerPort: 9000
+      port80: 80
         
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

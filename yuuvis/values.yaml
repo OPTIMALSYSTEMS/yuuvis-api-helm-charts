@@ -1,8 +1,8 @@
 imageCredentials:
   yuuvisorg:
     registry: docker.yuuvis.org
-    username:
-    password:
+    username: PLACEUSERNAMEHERE
+    password: PLACEPASSWORDHERE 
 
 yuuvis:
   keycloak:
@@ -131,7 +131,7 @@ yuuvis:
       userAuthorizationUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/auth
       accessTokenUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/token
       userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout?redirect_uri=${redir}
+      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout?redirect_uri=
       userNameExtractionPattern: $.sub
     - name: testyuuvis
       clientId: yuuvis-authentication-service
@@ -139,7 +139,7 @@ yuuvis:
       userAuthorizationUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/auth
       accessTokenUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/token
       userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout?redirect_uri=${redir}
+      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout?redirect_uri=
       userNameExtractionPattern: $.sub 
 
     # Konfiguration für den yuuvis organization service
@@ -371,7 +371,7 @@ yuuvis:
            "enable": true,
            "predicate": "spel:true",
            "type": "user.info",
-           "url": "http://organization/api/userinfo/${tenant}/${userId}"
+           "url": "http://organization/api/userinfo//"
          }
        ]
      }
@@ -564,7 +564,7 @@ yuuvis:
         memory: "128Mi"
       # if testMode: true a pvc will be created and mounted to the archiveservice container
       testMode: true
-      storageClassName: standard
+      storageClassName: default
       storage: 500Mi
       port: 7530
       volumes: |
@@ -576,7 +576,7 @@ yuuvis:
           name: archiveservice-netapp
       pvc:
         name: archiveservice-netapp
-        storageclass: standard
+        storageclass: default
         storage: 500Mi
         accessmode: ReadWriteMany
     controller:

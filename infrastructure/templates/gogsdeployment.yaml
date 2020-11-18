@@ -24,7 +24,7 @@ spec:
         imagePullPolicy: {{.Values.gogs.imagePullPolicy}}
         name: gogs
         ports:
-        - containerPort: 3000
+        - containerPort: {{.Values.gogs.containerPort}}
         volumeMounts:
         - mountPath: /data
           name: data
@@ -46,8 +46,8 @@ metadata:
 spec:
   ports:
   - name: gogs-http
-    port: 80
-    targetPort: 3000
+    port: {{.Values.gogs.port}}
+    targetPort: {{.Values.gogs.targetPort}}
   selector:
     app: gogs
   type: ClusterIP
@@ -76,7 +76,7 @@ data:
     = false\nDISABLE_REGISTRATION = false\nREQUIRE_SIGNIN_VIEW = false\nENABLE_NOTIFY_MAIL
     = false\nENABLE_REVERSE_PROXY_AUTHENTICATION = false\nENABLE_REVERSE_PROXY_AUTO_REGISTRATION
     = false\n\n[database]\nDB_TYPE = \"sqlite3\"\nHOST = \"127.0.0.1\"\nNAME
-    = \"gogs\"\nUSER = \"gogs\"\nPASSWD = \"optimal\"\n\n[security]\nINSTALL_LOCK
+    = \"gogs\"\nUSER = \"{{.Values.gogs.username}}\"\nPASSWD = \"{{.Values.gogs.password}}\"\n\n[security]\nINSTALL_LOCK
     = true\nSECRET_KEY = \"b3B0aW1hbA==\"\n\n[ui]\nEXPLORE_PAGING_NUM = 20\nISSUE_PAGING_NUM
     = 10\nFEED_MAX_COMMIT_NUM = 5\n\n[cache]\nADAPTER = memory\nINTERVAL = 60\nHOST
     = \n\n[webhook]\nQUEUE_LENGTH = 1000\nDELIVER_TIMEOUT = 5\nSKIP_TLS_VERIFY = true\nPAGING_NUM
