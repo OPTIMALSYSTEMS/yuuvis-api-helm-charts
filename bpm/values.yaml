@@ -1,0 +1,41 @@
+yuuvis:
+  image:
+    imagePullPolicy: Always
+    imagePullSecret: yuuvisorg
+  configservice:
+    url: http://configservice/config
+  git:
+    protocol: http
+    url: gogs.infrastructure/yuuvis/yuuvis-config.git
+    name: yuuvis-config
+    user: yuuvis
+    password: changeme
+    branch: master
+  livenessProbe:
+    enable: false
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 10
+  readinessProbe:
+    enable: true
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 5
+  bpm:
+    engine:
+      dockerImage: docker.yuuvis.org/yuuvis/bpm-engine:0.0.3
+      initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      profiles: postgres,swagger
+      instances: 1
+      java:
+        maxHeap: -Xmx128m
+      database:
+        name: themis
+        user: postgres
+        port: "5432"
+        password: changeme
+        address: postgresql.infrastructure
+        createdb: true
+        
+initContainer:
+  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

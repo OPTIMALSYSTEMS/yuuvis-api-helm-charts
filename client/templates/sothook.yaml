@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: sothook
+  name: sothook
+spec:
+  replicas: 1
+  selector:
+     matchLabels:
+      name: sothook
+  template:
+    metadata:
+      labels:
+        app: yuuvis
+        name: sothook
+    spec:
+      initContainers:
+      - name: init-sothook
+        image: busybox
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        imagePullPolicy: IfNotPresent
+      containers:
+      - name: sothook
+        image: {{.Values.yuuvis.client.sothook.dockerImage}}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.client.sothook.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.client.sothook.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 10779
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: /manage/health
+            port: 10779
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        ports:
+        - containerPort: 10779
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: clientsecret

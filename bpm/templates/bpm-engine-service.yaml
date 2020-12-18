@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: bpm-engine
+  name: bpm-engine
+spec:
+  replicas: {{.Values.yuuvis.bpm.engine.instances}}
+  selector:
+    matchLabels:
+      name: bpm-engine
+  template:
+    metadata:
+      labels:
+        name: bpm-engine
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.bpm.engine.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.bpm.engine.profiles}}
+        - name: db.user
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: bpm-dbsecret
+        - name: db.pwd
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-dbsecret
+        - name: db.host
+          value: {{.Values.yuuvis.bpm.engine.database.address}}
+        - name: db.port
+          value: {{.Values.yuuvis.bpm.engine.database.port | quote }}
+        - name: db.name
+          value: {{.Values.yuuvis.bpm.engine.database.name}}
+        image: {{.Values.yuuvis.bpm.engine.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: bpm
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      {{- if .Values.yuuvis.bpm.engine.database.createdb }}
+      - args:
+        - psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p 5432 -U $PGUSER -c "CREATE DATABASE
+          ${PGDBNAME};"; psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p 5432 -U $PGUSER -c "GRANT ALL PRIVILEGES ON DATABASE ${PGDBNAME} TO ${PGUSER};";until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;
+        command:
+        - /bin/sh
+        - -c
+        env:
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: bpm-dbsecret
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-dbsecret
+        - name: PGDBNAME
+          value: {{.Values.yuuvis.bpm.engine.database.name}}
+        image: {{.Values.yuuvis.bpm.engine.initContainerImage}}
+        imagePullPolicy: Always
+        name: init-database
+      {{- end}}

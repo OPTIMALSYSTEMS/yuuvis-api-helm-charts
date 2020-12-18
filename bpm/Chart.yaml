@@ -1,0 +1,9 @@
+apiVersion: v1
+appVersion: "1.0"
+description: yuuvis bpm components
+name: yuuvis-bpm
+version: 0.1.0
+keywords:
+- yuuvis
+- bpm
+home: https://yuuvis.com/scalable-content-services
