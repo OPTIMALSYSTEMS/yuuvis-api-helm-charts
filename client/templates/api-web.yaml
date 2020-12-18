@@ -18,16 +18,10 @@ spec:
         yuuvislog: "true"
     spec:
       initContainers:
-      - name: init-api-web
-        image: {{.Values.yuuvis.client.apiweb.initContainerImage}}
-        command: ['bash', '/yuuvis/script/init.bash']
+      - name: init-sothook
+        image: busybox
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
-        volumeMounts:
-        - mountPath: /yuuvis/data
-          name: clientresources
-        - mountPath: /yuuvis/script/init.bash
-          name: initscript
-          subPath: init.bash
       containers:
       - env:
         - name: JAVA_OPTS
@@ -42,7 +36,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /manage/info
-            port: {{.Values.yuuvis.client.apiweb.port}}
+            port: 7550
           initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
@@ -51,22 +45,15 @@ spec:
         readinessProbe:
           httpGet:
             path: /manage/health
-            port: {{.Values.yuuvis.client.apiweb.port}}
+            port: 7550
           initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
         {{- end}}
         name: api-web
         ports:
-        - containerPort: {{.Values.yuuvis.client.apiweb.containerPort}}
+        - containerPort: 7550
           protocol: TCP
       imagePullSecrets:
       - name: clientsecret
       restartPolicy: Always
-      volumes:
-      - configMap:
-          name: clientresources
-        name: clientresources
-      - configMap:
-          name: apiwebinit
-        name: initscript

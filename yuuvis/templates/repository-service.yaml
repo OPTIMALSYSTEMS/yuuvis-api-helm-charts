@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: repository
-    k8s-app: repository-gateway-metrics
     yuuvis: "true"
   name: repository
 spec:

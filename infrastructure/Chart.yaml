@@ -5,4 +5,4 @@ description: umbrella chart with examples for infrastructure components of an yu
              this chart is for demo use only 
              do not use this chart for production
 name: infrastructure
-version: 0.7.0
+version: 0.8.0

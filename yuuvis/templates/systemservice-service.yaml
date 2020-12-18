@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: system
-    k8s-app: system-gateway-metrics
     yuuvis: "true"
   name: system
 spec:

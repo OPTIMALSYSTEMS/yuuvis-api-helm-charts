@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: index
-    k8s-app: index-gateway-metrics
     yuuvis: "true"
   name: index
 spec:

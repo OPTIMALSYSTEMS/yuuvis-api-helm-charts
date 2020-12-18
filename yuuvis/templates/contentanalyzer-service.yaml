@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: contentanalyzer
-    k8s-app: contentanalyzer-gateway-metrics
     yuuvis: "true"
   name: contentanalyzer
 spec:

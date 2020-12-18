@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: authentication
-    k8s-app: authentication-gateway-metrics
     yuuvis: "true"
   name: authentication
 spec:

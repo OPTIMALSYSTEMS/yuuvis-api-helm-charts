@@ -28,22 +28,6 @@ data:
             "containerId": "yuuvistest"
           },
           {
-            "id": "f41d5a41-6272-41f9-ac56-52aa17a81703",
-            "name": "YUUVIS_CREATE_OBJECT",
-            "description": "user can create new instances of arbitrary object types",
-            "composite": false,
-            "clientRole": false,
-            "containerId": "yuuvistest"
-          },
-          {
-            "id": "9727ad02-fc86-4e03-8e30-5813e3c1f0ec",
-            "name": "YUUVIS_MANAGE_SETTINGS",
-            "description": "user can read and write client settings",
-            "composite": false,
-            "clientRole": false,
-            "containerId": "yuuvistest"
-          },
-          {
             "id": "319e5fe4-dacb-4e5d-aeaa-87b83682b32e",
             "name": "YUUVIS_TENANT_ADMIN",
             "description": "admin for own tenant in yuuvis",
@@ -82,20 +66,43 @@ data:
       ],
       "users" : [
             {
-                "username" : "root",
+                "username" : "{{.Values.yuuvis.keycloak.realm.yuuvistest.user.name}}",
                 "id" : "d90b12d5-1288-4a73-92fc-d9b6872df812",
                 "enabled": true,
                 "email" : "testroot@yuuvis",
-                "firstName": "Test",
-                "lastName": "Root",
+                "firstName": "First",
+                "lastName": "User",
                 "credentials" : [
                     { "type" : "password",
-                      "value" : {{.Values.keycloak.keycloak.password | quote }} }
+                      "value" : "{{.Values.yuuvis.keycloak.realm.yuuvistest.user.password}}" }
                 ],
-                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN", "YUUVIS_CREATE_OBJECT", "YUUVIS_MANAGE_SETTINGS" ],
+                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN" ],
                 "clientRoles": {
                     "account": ["view-profile", "manage-account"]
                 }
+            },
+            {
+              "id": "12bb2f29-8672-4279-b1d6-e0efed8019b8",
+              "username": "service-account-yuuvis-authentication-service",
+              "enabled": true,
+              "totp": false,
+              "emailVerified": false,
+              "serviceAccountClientId": "yuuvis-authentication-service",
+              "disableableCredentialTypes": [],
+              "requiredActions": [],
+              "realmRoles": [
+                "offline_access",
+                "uma_authorization",
+                "YUUVIS_DEFAULT"
+              ],
+              "clientRoles": {
+                "account": [
+                  "view-profile",
+                  "manage-account"
+                ]
+              },
+              "notBefore": 0,
+              "groups": []
             }
       ],
       "scopeMappings": [],
@@ -1356,22 +1363,6 @@ data:
             "containerId": "yuuvistest"
           },
           {
-            "id": "8777651b-0adf-4896-a04d-a55277a8769a",
-            "name": "YUUVIS_CREATE_OBJECT",
-            "description": "user can create new instances of arbitrary object types",
-            "composite": false,
-            "clientRole": false,
-            "containerId": "yuuvistest"
-          },
-          {
-            "id": "0c765039-9548-489f-b530-089e069dc437",
-            "name": "YUUVIS_MANAGE_SETTINGS",
-            "description": "user can read and write client settings",
-            "composite": false,
-            "clientRole": false,
-            "containerId": "yuuvistest"
-          },
-          {
             "id": "49012d51-7254-4309-b8e4-ba9592814c4c",
             "name": "YUUVIS_TENANT_ADMIN",
             "description": "admin for own tenant in yuuvis",
@@ -1410,7 +1401,7 @@ data:
       ],
       "users" : [
             {
-                "username" : "root",
+                "username" : "{{.Values.yuuvis.keycloak.realm.testyuuvis.user.name}}",
                 "id" : "85b6c5ef-7e87-4e71-bbba-4148a042c7c4",
                 "enabled": true,
                 "email" : "testroot@yuuvis",
@@ -1418,12 +1409,35 @@ data:
                 "lastName": "Root",
                 "credentials" : [
                     { "type" : "password",
-                      "value" : {{.Values.keycloak.keycloak.password | quote }} }
+                      "value" : "{{.Values.yuuvis.keycloak.realm.testyuuvis.user.password}}" }
                 ],
-                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN", "YUUVIS_CREATE_OBJECT", "YUUVIS_MANAGE_SETTINGS" ],
+                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN" ],
                 "clientRoles": {
                     "account": ["view-profile", "manage-account"]
                 }
+            },
+            {
+              "id": "b65c1a15-c7e4-4507-910b-10cd063f3aa4",
+              "username": "service-account-yuuvis-authentication-service",
+              "enabled": true,
+              "totp": false,
+              "emailVerified": false,
+              "serviceAccountClientId": "yuuvis-authentication-service",
+              "disableableCredentialTypes": [],
+              "requiredActions": [],
+              "realmRoles": [
+                "offline_access",
+                "uma_authorization",
+                "YUUVIS_DEFAULT"
+              ],
+              "clientRoles": {
+                "account": [
+                  "view-profile",
+                  "manage-account"
+                ]
+              },
+              "notBefore": 0,
+              "groups": []
             }
       ],
       "scopeMappings": [],

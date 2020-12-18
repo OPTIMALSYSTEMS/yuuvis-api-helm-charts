@@ -8,8 +8,8 @@ spec:
   ports:
   - name: https
     port: 443
-    targetPort: {{.Values.keycloak.targetPort}}
-    nodePort: {{.Values.keycloak.nodePort}}
+    targetPort: 8443
+    nodePort: {{.Values.yuuvis.keycloak.nodePort}}
   selector:
     app.kubernetes.io/instance: {{.Release.Namespace}}
     app.kubernetes.io/name: keycloak

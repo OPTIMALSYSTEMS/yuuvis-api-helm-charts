@@ -3,7 +3,6 @@ kind: Service
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
-    k8s-app: api-gateway-metrics
     name: api
     yuuvis: "true"
   name: api
@@ -12,6 +11,11 @@ spec:
   - name: "http"
     port: 80
     targetPort: {{.Values.yuuvis.services.api.port}}
+    {{- if .Values.yuuvis.services.api.nodeport.use }}
+    nodePort: {{.Values.yuuvis.services.api.nodeport.value }}
+    {{- end}}
   selector:
     name: api
-  type: ClusterIP
+  {{- if .Values.yuuvis.services.api.nodeport.use }}
+  type: NodePort
+  {{- end}}

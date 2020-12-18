@@ -1,8 +1,8 @@
 imageCredentials:
   dockeryuuvisorg:
     registry: docker.yuuvis.org
-    username: PLACEUSERNAMEHERE
-    password: PLACEPASSWORDHERE 
+    username:
+    password:
 
 yuuvis:
   # !!! Change before running
@@ -20,13 +20,32 @@ yuuvis:
     port: 30080
   labels:
     app: yuuvis
+  db:
+    user: yuuvis
+    password: changeme
+  keycloak:
+    user: keycloak
+    password: changeme
+    db:
+      user: keycloak
+      password: changeme
+    nodePort: 30111
+    realm:
+      yuuvistest:
+        user:
+          name: root
+          password: changeme
+      testyuuvis:
+        user:
+          name: root
+          password: changeme
     
 elasticsearch:
   image: docker.yuuvis.org/yuuvis/elasticsearch:2019-11-28
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
-  storage: 100Mi
-  storageClassName: default
+  storage: 5Gi
+  storageClassName: standard
   javaOpts: -Xms1024m -Xmx1024m
   replicas: 1
   port: 9300
@@ -38,11 +57,12 @@ elasticsearch:
   initial_master_nodes: elasticsearch-0
 
 postgresql:
+  enabled: true
   fullnameOverride: postgresql
-  postgresqlPassword: optimal
+  postgresqlPassword: changeme
   persistence:
-    storageClass: default
-    size: 100Mi
+    storageClass: standard
+    size: 500Mi
   resources:
     requests:
       memory: 128Mi
@@ -52,102 +72,115 @@ postgresql:
   readinessProbe:
     enabled: false
   initdbScriptsConfigMap: postgresql-initdb
-  postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB", "effective_cache_size": "384MB"}
-  initdb:
-    database1: yuuvis
-    user1: yuuvis
-    password1: optimal
-    database2: keycloak
-    user2: keycloak
-    password2: optimal
+  postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB"}
 
 
 rabbitmq:
+  enabled: true
   fullnameOverride: rabbitmq
-  rabbitmq:
+  auth:
     username: rodger
-    password: optimal
-    extraPlugins: "rabbitmq_auth_backend_ldap rabbitmq_amqp1_0 rabbitmq_prometheus"
-    extraConfiguration: |-
-      #disk_free_limit.absolute = 50MB
-      #management.load_definitions = /app/load_definition.json
-      amqp1_0.default_user = rodger
+    password: changeme
+  extraPlugins: "rabbitmq_auth_backend_ldap rabbitmq_amqp1_0 rabbitmq_prometheus"
+  extraConfiguration: |-
+    #default_vhost = {{ .Release.Namespace }}-vhost
+    #disk_free_limit.absolute = 50MB
+    #load_definitions = /app/load_definition.json
+    amqp1_0.default_user = rodger
   persistence:
     enabled: true
-    storageClass: default
+    storageClass: standard
     size: 100Mi
-git:
-  protocol: http
-  reponame: yuuvis-config
-  username: yuuvis
-  password: optimal
+
 gogs:
   useCustomDeployment: true
-  image: gogs/gogs:0.11.86
+  image: gogs/gogs:0.11.91
   imagePullPolicy: IfNotPresent
   initcontainer:
     image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
     secret: dockeryuuvisorg
   persistence:
-    size: 500Mi
-    storageClass: default
-  username: yuuvis
-  password: optimal
-  port: 80
-  targetPort: 3000
-  containerPort: 3000
+    size: 100Mi
+    storageClass: standard
+  git:
+    user: yuuvis
+    password: changeme
+    
 minio:
+  enabled: true
   fullnameOverride: minio
-  accessKey: "PLACE_STORAGE_CREDENTIALS_ACCOUNT_HERE"
-  secretKey: "PLACE_STORAGE_CREDENTIALS_SECRET_HERE"
+  accessKey: "MGMWCOYTDUSLNCFE"
+  secretKey: "changeme"
   persistence:
-    storageClass: default
+    storageClass: standard
     size: 10Gi
   resources: {}
-  
-keycloak:
-  fullnameOverride: keycloak
-  targetPort: 8443
-  nodePort: 30111
-  keycloak:
-    image:
-      tag: 7.0.0
-    livenessProbe: |
-      httpGet:
-        path: {{ if ne .Values.keycloak.basepath "" }}/{{ .Values.keycloak.basepath }}{{ end }}/
-        port: http
-      initialDelaySeconds: 600
-      timeoutSeconds: 5
-    username: keycloak
-    password: "optimal"
-    persistence:
-      dbVendor: postgres
-      dbName: keycloak
-      dbHost: "postgresql"
-      dbPort: 5432
-      dbUser: keycloak
-      dbPassword: "optimal"
-    extraArgs: "-Dkeycloak.import=/realm/yuuvistest.json,/realm/testyuuvis.json"
-    extraVolumes: |
-      - name: realm-config
-        configMap:
-          name: realmconfigmap
-      - name: keycloak-tls-localhost
-        secret:
-          defaultMode: 420
-          secretName: keycloak-selfsigned-tls-secret
-    extraVolumeMounts: | 
-      - name: realm-config
-        mountPath: "/realm/"
-        readOnly: true
-      - name: keycloak-tls-localhost
-        mountPath: "/etc/x509/https/"
-    extraEnv: |
-      - name: PROXY_ADDRESS_FORWARDING
-        value: "true"
-      - name: POSTGRES_PORT
-        value: "5432"
+  # for gateway usage with azure blob storage set access  key and secret key to your
+  # storage account credentials, activate azure gateway mode and disable persistence
+  # persistence:
+  #   enabled: false
+  # azuregateway:
+  #   enabled: true
+  #   replicas: 1 
 
+keycloak:
+  enabled: true
+  fullnameOverride: "keycloak"
+  livenessProbe: |
+    httpGet:
+      path: /auth/
+      port: http
+    initialDelaySeconds: 600
+    timeoutSeconds: 5
+  postgresql:
+    enabled: false
+  extraEnv: |
+    - name: KEYCLOAK_USER_FILE
+      value: /secrets/keycloak/user
+    - name: KEYCLOAK_PASSWORD_FILE
+      value: /secrets/keycloak/password
+    - name: PROXY_ADDRESS_FORWARDING
+      value: "true"
+    - name: DB_VENDOR
+      value: postgres
+    - name: DB_ADDR
+      value: postgresql
+    - name: DB_PORT
+      value: "5432"
+    - name: DB_DATABASE
+      value: keycloak
+    - name: DB_USER_FILE
+      value: /secrets/db-creds/user
+    - name: DB_PASSWORD_FILE
+      value: /secrets/db-creds/password
+    - name: KEYCLOAK_IMPORT
+      value: "/realm/yuuvistest.json,/realm/testyuuvis.json -Dkeycloak.profile.feature.upload_scripts=enabled"
+  extraVolumes: |
+    - name: realm-config
+      configMap:
+        name: realmconfigmap
+    - name: keycloak-tls-localhost
+      secret:
+        defaultMode: 420
+        secretName: keycloak-selfsigned-tls-secret
+    - name: db-creds
+      secret:
+        secretName: keycloakdb
+    - name: kc-creds
+      secret:
+        secretName: keycloakuser
+  extraVolumeMounts: |
+    - name: realm-config
+      mountPath: "/realm/"
+      readOnly: true
+    - name: keycloak-tls-localhost
+      mountPath: "/etc/x509/https/"
+    - name: db-creds
+      mountPath: /secrets/db-creds
+      readOnly: true
+    - name: kc-creds
+      mountPath: /secrets/keycloak
+      readOnly: true
 
 redis:
   fullnameOverride: redis
@@ -160,5 +193,5 @@ redis:
       initialDelaySeconds: 600
     persistence:
       enabled: false
-      storageClass: default
+      storageClass: standard
       size: 50Mi

@@ -64,11 +64,17 @@ spec:
         - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT-LABEL
           value: {{.Values.yuuvis.git.branch}}
         - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
-          value: {{.Values.yuuvis.git.password}}
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: gitsecret
         - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
           value: {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.url}}
         - name: SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME
-          value: {{.Values.yuuvis.git.user}}
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: gitsecret
         - name: SPRING_CLOUD_CONFIG_SERVER_PREFIX
           value: /config/
         ports:

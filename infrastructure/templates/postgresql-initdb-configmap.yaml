@@ -4,9 +4,9 @@ metadata:
   name: postgresql-initdb
 data:
   create_enaio_dbs.sql: |
-    CREATE DATABASE {{.Values.postgresql.initdb.database1}};
-    CREATE USER {{.Values.postgresql.initdb.user1}} WITH ENCRYPTED PASSWORD {{.Values.postgresql.initdb.password1 | squote}};
-    GRANT ALL PRIVILEGES ON DATABASE {{.Values.postgresql.initdb.database1}} TO {{.Values.postgresql.initdb.user1}};
-    CREATE DATABASE {{.Values.postgresql.initdb.database2}};
-    CREATE USER {{.Values.postgresql.initdb.user2}} WITH ENCRYPTED PASSWORD {{.Values.postgresql.initdb.password2 | squote}};
-    GRANT ALL PRIVILEGES ON DATABASE {{.Values.postgresql.initdb.database2}} TO {{.Values.postgresql.initdb.user2}};
+    CREATE DATABASE yuuvis;
+    CREATE USER {{.Values.yuuvis.db.user}} WITH ENCRYPTED PASSWORD '{{.Values.yuuvis.db.password}}';
+    GRANT ALL PRIVILEGES ON DATABASE yuuvis TO {{.Values.yuuvis.db.user}};
+    CREATE DATABASE keycloak;
+    CREATE USER {{.Values.yuuvis.keycloak.db.user}} WITH ENCRYPTED PASSWORD '{{.Values.yuuvis.keycloak.db.password}}';
+    GRANT ALL PRIVILEGES ON DATABASE keycloak TO {{.Values.yuuvis.keycloak.db.user}};

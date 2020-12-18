@@ -1,14 +1,26 @@
 imageCredentials:
   clientsecret:
     registry: docker.yuuvis.org
-    username: PLACEUSERNAMEHERE
-    password: PLACEPASSWORDHERE 
+    username:
+    password:
 
 yuuvis:
   image:
     imagePullPolicy: Always
   configservice:
     url: http://configservice/config
+  git:
+    protocol: http
+    url: gogs.infrastructure/yuuvis/yuuvis-config.git
+    name: yuuvis-config
+    user: yuuvis
+    password: changeme
+    branch: master
+  amqp:
+    user: rodger
+    password: changeme
+    url: rabbitmq.infrastructure
+    port: 5672
   livenessProbe:
     enable: false
     initialDelaySeconds: 300
@@ -21,8 +33,8 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:2020-07-08
-      initContainerImage: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.5.3
+      initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       containerPort: 7550
       port: 7550
@@ -32,7 +44,7 @@ yuuvis:
       java:
         maxHeap: -Xmx128m
     userservice:
-      dockerImage: docker.yuuvis.org/yuuvis/userservice:2020-07-08
+      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.1.1
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,userservice
       containerPort: 8080
@@ -44,31 +56,233 @@ yuuvis:
       database:
         name: erebus
         user: postgres
-        password: optimal
+        port: "5432"
+        password: changeme
         address: postgresql.infrastructure
+        createdb: true
       userseriveyml: |
         keycloak.server: http://keycloak-http.infrastructure/auth
         keycloak.admin.username: keycloak
-        keycloak.admin.password: optimal
+        keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2020-07-08
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.9
       instances: 1
       containerPort: 80
       port: 80
       targetPort: 80
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2020-07-08
-      instances: 1
-      containerPort: 80
-      port: 80
-      targetPort: 80
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.9
+      instances: 0
     viewer:
-      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2020-07-08
+      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.1.3
       instances: 1
-      port: 9000
-      targetPort: 9000
-      containerPort: 9000
-      port80: 80
+    architect:
+      dockerImage: docker.yuuvis.org/yuuvis/architect:1.0.3
+      instances: 1
+    sothook:
+      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:1.0.0
+      instances: 1
+      profiles: prod,cloud,kubernetes
+      java:
+        maxHeap: -Xmx128m
         
 initContainer:
-  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"
+
+configfiles:
+  appclientschema: |
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
+      <propertyStringDefinition>
+        <id>clienttitle</id>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>true</required>
+        <maxLength>200</maxLength>
+      </propertyStringDefinition>
+      <propertyStringDefinition>
+        <id>clientdescription</id>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>true</required>
+        <maxLength>200</maxLength>
+      </propertyStringDefinition>
+      <typeDocumentDefinition>
+        <id>minidoc</id>
+        <baseId>system:document</baseId>
+        <contentStreamAllowed>allowed</contentStreamAllowed>
+        <secondaryObjectTypeId>appClientsystem:leadingType</secondaryObjectTypeId>
+        <secondaryObjectTypeId>appClient:clientdefaults</secondaryObjectTypeId>
+      </typeDocumentDefinition>
+      <typeSecondaryDefinition>
+        <id>clientdefaults</id>
+        <description>contains title and description fields mainly for mixed resultlist and object header</description>
+        <baseId>system:secondary</baseId>
+        <propertyReference>clienttitle</propertyReference>
+        <propertyReference>clientdescription</propertyReference>
+        <classification>appClient:required</classification>
+      </typeSecondaryDefinition>
+    </schema>
+  systemHookConfiguration: |
+    {"systemhooks" :
+      {"amqp" : [
+        {"enable" : true,
+         "predicate" : "spel:(contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null && contentStreams[0]['range'].length() > 0) ? true : false",
+         "type" : "object.insert.document",
+         "url" : "{{.Values.yuuvis.amqp.url}}:{{.Values.yuuvis.amqp.port}}",
+         "user" : "{{.Values.yuuvis.amqp.user}}",
+         "password" : "{{.Values.yuuvis.amqp.password}}",
+         "queue" : "lc.textextraction",
+         "bulkSize" : 1
+        }
+      ],
+       "webhooks": [
+         {
+           "enable": true,
+           "predicate": "spel:true",
+           "type": "user.info",
+           "url": "http://organization/api/userinfo/${tenant}/${userId}"
+         },
+         {
+           "enable": true,
+           "predicate": "spel:(options==null || options['currentVersion']==null)",
+           "type": "dms.request.import.storage.before",
+           "url": "http://sothook/api/dms/request/import",
+           "useDiscovery": true
+         },
+         {
+           "enable": true,
+           "predicate": "spel:options!=null && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
+           "type": "dms.request.update.metadata",
+           "url": "http://sothook/api/dms/request/update/metadata",
+           "useDiscovery": true
+         }
+       ]
+     }
+    }
+  appclientsystemschema: |
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
+      <propertyStringDefinition>
+        <id>leadingTypeId</id>
+        <propertyType>string</propertyType>
+        <cardinality>single</cardinality>
+        <required>false</required>
+      </propertyStringDefinition>
+      <typeSecondaryDefinition>
+        <id>leadingType</id>
+        <description>contains the field that supports a better use of FSOTs</description>
+        <baseId>system:secondary</baseId>
+        <propertyReference>leadingTypeId</propertyReference>
+      </typeSecondaryDefinition>
+    </schema>
+  i18nde: |
+    {
+      "system:folder_label": "Alle Ordner",
+      "system:folder_description": "01 Übergreifend",
+      "system:document_label": "Alle Dokumente",
+      "system:document_description": "01 Übergreifend",
+      "system:secondary_label": "Alle sekundären Dokumente",
+      "system:secondary_description": "01 Übergreifend",
+      "system:baseTypeId_label": "Basistyp",
+      "system:objectTypeId_label": "Typ",
+      "system:secondaryObjectTypeIds_label": "Characteristika",
+      "system:parentObjectTypeId_label": "Ordnertyp",
+      "system:objectId_label": "Objekt-ID",
+      "system:parentId_label": "Ordner-ID",
+      "system:createdBy_label": "Ersteller",
+      "system:creationDate_label": "Erstellt am",
+      "system:lastModifiedBy_label": "Bearbeiter",
+      "system:lastModificationDate_label": "Bearbeitet am",
+      "system:versionNumber_label": "Version",
+      "system:acl_label": "Zugriffsliste",
+      "system:tenant_label": "Mandant",
+      "system:traceId_label": "Trace-ID",
+      "system:tags_label": "Tags",
+      "system:contentStreamLength_label": "Dateigröße",
+      "system:contentStreamMimeType_label": "Dateityp",
+      "system:contentStreamFileName_label": "Dateiname",
+      "system:contentStreamId_label": "Dateistrom-ID",
+      "system:contentStreamRange_label": "Dateistrombereich",
+      "system:contentStreamRepositoryId_label": "Dateistrom-Repository",
+      "system:digest_label": "Digest",
+      "system:archivePath_label": "Archivpfad",
+      "system:rmExpirationDate_label": "Aufbewahrungsdatum",
+      "system:rmStartOfRetention_label": "Aufbewahrungsstart",
+      "system:rmDestructionDate_label": "Aussonderungsdatum",
+      "system:rmDestructionRetention_label": "Aufbewahrung",
+      "system:parentVersionNumber_label": "Ordner-Version",
+      "follow-up_label": "Wiedervorlage",
+      "expiryDateTime_label": "Wiedervorlagedatum",
+      "businessKey_label": "Objekt",
+      "whatAbout_label": "Betreff",
+      "startTime_label": "Startzeitpunkt",
+      "task_label": "Erinnerung Wiedervorlage",
+      "type_label": "Type",
+      "undefined_label": "",
+      "document_label": "Dokument",
+      "document_description": "01 Übergreifend",
+      "appClient_label": "Client-Standards",
+      "appClient:minidoc_label": "Kleinstes Dokument",
+      "appClient:minidoc_description": "01 Übergreifend",
+      "appClient:clientdefaults_label": "Objektkopf",
+      "appClient:clienttitle_label": "Titel",
+      "appClient:clientdescription_label": "Beschreibung",
+      "appClientsystem:leadingType_label": "Typ",
+      "appClientsystem:leadingTypeId_label": "Typ"
+    }
+  i18nen: |
+    {
+     "system:folder_label": "All folders",
+     "system:folder_description": "01 Across all",
+     "system:document_label": "All documents",
+     "system:document_description": "01 Across all",
+     "system:secondary_label": "All secondary documents",
+     "system:secondary_description": "01 Across all",
+     "system:baseTypeId_label": "Basistype ID",
+     "system:objectTypeId_label": "Object-type ID",
+     "system:secondaryObjectTypeIds_label": "Characteristics",
+     "system:parentObjectTypeId_label": "Folder type",
+     "system:objectId_label": "Object ID",
+     "system:parentId_label": "Folder ID",
+     "system:createdBy_label": "Creator",
+     "system:creationDate_label": "Created on",
+     "system:lastModifiedBy_label": "Editor",
+     "system:lastModificationDate_label": "Edited on",
+     "system:versionNumber_label": "Version",
+     "system:acl_label": "Access list",
+     "system:tenant_label": "Tenant",
+     "system:traceId_label": "Trace ID",
+     "system:tags_label": "Tags",
+     "system:contentStreamLength_label": "File size",
+     "system:contentStreamMimeType_label": "File type",
+     "system:contentStreamFileName_label": "File name",
+     "system:contentStreamId_label": "Content ID",
+     "system:contentStreamRange_label": "Content range",
+     "system:contentStreamRepositoryId_label": "Content stream repository",
+     "system:digest_label": "Digest",
+     "system:archivePath_label": "Archive path",
+     "system:rmExpirationDate_label": "Retention date",
+     "system:rmStartOfRetention_label": "Retention start",
+     "system:rmDestructionDate_label": "Destruction date",
+     "system:rmDestructionRetention_label": "Retention",
+     "system:parentVersionNumber_label": "Folder version",
+     "follow-up_label": "Follow-up",
+     "expiryDateTime_label": "Follup-up date",
+     "businessKey_label": "Object",
+     "whatAbout_label": "Subject",
+     "startTime_label": "Start time",
+     "task_label": "Follow-up reminder",
+     "type_label": "Type",
+     "undefined_label": "",
+     "document_label": "Document",
+     "document_description": "01 Across all",
+     "appClient_label": "Client standards",
+     "appClient:minidoc_label": "Smallest document",
+     "appClient:minidoc_description": "01 Across all",
+     "appClient:clientdefaults_label": "Object header",
+     "appClient:clienttitle_label": "Title",
+     "appClient:clientdescription_label": "Description",
+     "appClientsystem:leadingType_label": "Type",
+     "appClientsystem:leadingTypeId_label": "Type"
+    }

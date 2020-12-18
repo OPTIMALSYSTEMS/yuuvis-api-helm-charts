@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: registry
-    k8s-app: registry-gateway-metrics
     yuuvis: "true"
   name: registry
 spec:
