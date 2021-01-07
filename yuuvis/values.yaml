@@ -425,7 +425,7 @@ yuuvis:
     app: yuuvis
   services:
     api:
-      dockerRegistry: docke.yuuvis.org/yuuvis/api-gateway
+      dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
       tag: 4.5.9
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
