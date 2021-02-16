@@ -39,7 +39,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 ```shell
 cd infrastructure
 helm dep up
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo add stable https://charts.helm.sh/stable
 cd ..
 ```
 
