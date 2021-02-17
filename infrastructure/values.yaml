@@ -41,7 +41,7 @@ yuuvis:
           password: changeme
     
 elasticsearch:
-  image: docker.yuuvis.org/yuuvis/elasticsearch:2019-11-28
+  image: docker.yuuvis.org/yuuvis/elasticsearch:2021-02-09
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 5Gi
@@ -90,7 +90,7 @@ rabbitmq:
   persistence:
     enabled: true
     storageClass: standard
-    size: 100Mi
+    size: 1Gi
 
 gogs:
   useCustomDeployment: true

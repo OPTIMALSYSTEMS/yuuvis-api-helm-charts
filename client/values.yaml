@@ -33,7 +33,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.5.3
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.5.4
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       containerPort: 7550
@@ -65,13 +65,13 @@ yuuvis:
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.9
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.10
       instances: 1
       containerPort: 80
       port: 80
       targetPort: 80
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.9
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.10
       instances: 0
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.1.3
