@@ -16,8 +16,7 @@ data:
     merge_i18n_en.json apps/api-web/text/i18n_en.json\n  fi\n\tjq -s '.[0] * .[1]'
     system/systemHookConfiguration.json /yuuvis/data/systemHookConfiguration.json
     > merge_hook.json\n\trm system/systemHookConfiguration.json\n\tmv merge_hook.json
-    system/systemHookConfiguration.json\n\tgit add .\n\tgit commit -m \"init api-web
-    config\"\n\techo 'git push'\n    git push origin {{.Values.yuuvis.git.branch}}\n
+    system/systemHookConfiguration.json\n\tgit add .\n\tgit commit -m 'init api-web config'\n\techo 'git push'\n    git push origin {{.Values.yuuvis.git.branch}}\n
        exit 0 \n  fi\nfi  \necho 'git and/or git branch not found'\nexit 1"
 kind: ConfigMap
 metadata:

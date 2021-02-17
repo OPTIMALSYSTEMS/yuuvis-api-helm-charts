@@ -42,6 +42,14 @@ data:
             "composite": false,
             "clientRole": false,
             "containerId": "yuuvistest"
+          },
+          {
+            "id": "31fa63f8-6540-4045-ac0e-42e337be9326",
+            "name": "YUUVIS_CREATE_OBJECT",
+            "description": "user can create objects",
+            "composite": false,
+            "clientRole": false,
+            "containerId": "yuuvistest"
           }
         ],
         "client": {
@@ -76,7 +84,9 @@ data:
                     { "type" : "password",
                       "value" : "{{.Values.yuuvis.keycloak.realm.yuuvistest.user.password}}" }
                 ],
-                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN" ],
+                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR",
+                "YUUVIS_CREATE_OBJECT",
+                "YUUVIS_TENANT_ADMIN" ],
                 "clientRoles": {
                     "account": ["view-profile", "manage-account"]
                 }
@@ -1377,6 +1387,14 @@ data:
             "composite": false,
             "clientRole": false,
             "containerId": "yuuvistest"
+          },
+          {
+            "id": "c91bb170-39c2-4615-8f9a-f63149258793",
+            "name": "YUUVIS_CREATE_OBJECT",
+            "description": "user can create objects",
+            "composite": false,
+            "clientRole": false,
+            "containerId": "yuuvistest"
           }
         ],
         "client": {
@@ -1411,7 +1429,9 @@ data:
                     { "type" : "password",
                       "value" : "{{.Values.yuuvis.keycloak.realm.testyuuvis.user.password}}" }
                 ],
-                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR", "YUUVIS_TENANT_ADMIN" ],
+                "realmRoles": [ "YUUVIS_DEFAULT", "YUUVIS_SYSTEM_INTEGRATOR",
+                "YUUVIS_CREATE_OBJECT",
+                "YUUVIS_TENANT_ADMIN" ],
                 "clientRoles": {
                     "account": ["view-profile", "manage-account"]
                 }
