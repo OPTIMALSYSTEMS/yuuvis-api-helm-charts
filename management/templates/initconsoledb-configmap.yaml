@@ -1,4 +1,4 @@
-{{- if .Values.yuuvis.bpm.engine.database.createdb }}
+{{- if .Values.yuuvis.management.console.api.config.db.createdb }}
 apiVersion: v1
 data:
   initdb.sh: |-
