@@ -1,0 +1,25 @@
+yuuvis:
+  image:
+    imagePullPolicy: Always
+    imagePullSecret: yuuvisorg
+  configservice:
+    url: http://configservice/config
+  livenessProbe:
+    enable: false
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 10
+  readinessProbe:
+    enable: true
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 5
+  renditionservice:
+    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.0.0
+    profiles: prod
+    instances: 1
+    java:
+      maxHeap: -Xmx128m
+        
+initContainer:
+  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

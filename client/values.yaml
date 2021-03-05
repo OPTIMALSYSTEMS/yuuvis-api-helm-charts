@@ -1,12 +1,7 @@
-imageCredentials:
-  clientsecret:
-    registry: docker.yuuvis.org
-    username:
-    password:
-
 yuuvis:
   image:
     imagePullPolicy: Always
+    imagePullSecret: yuuvisorg
   configservice:
     url: http://configservice/config
   git:
@@ -33,7 +28,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.5.4
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.6.0
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       containerPort: 7550
@@ -44,7 +39,7 @@ yuuvis:
       java:
         maxHeap: -Xmx128m
     userservice:
-      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.1.1
+      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.1.2
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,userservice
       containerPort: 8080
@@ -55,29 +50,40 @@ yuuvis:
         maxHeap: -Xmx128m
       database:
         name: erebus
-        user: postgres
-        port: "5432"
+        user: erebus
         password: changeme
+        port: "5432"
         address: postgresql.infrastructure
         createdb: true
+        # for postgres systems the database an optional init job can be used to create 
+        # the database
+        # if createdb is 'true' 
+        # the following user is used to test if the database and user exists
+        # and if they dont exit, to create the database, the user and
+        # grand the user privileges for the database
+        # the privilege user must have the rights to create databases, users
+        # and grand privileges to users
+        privilege:
+          user: postgres
+          password: changeme
       userseriveyml: |
         keycloak.server: http://keycloak-http.infrastructure/auth
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.10
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.3.0
       instances: 1
       containerPort: 80
       port: 80
       targetPort: 80
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:1.2.10
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.3.0
       instances: 0
     viewer:
-      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.1.3
+      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.2.0
       instances: 1
     architect:
-      dockerImage: docker.yuuvis.org/yuuvis/architect:1.0.3
+      dockerImage: docker.yuuvis.org/yuuvis/architect:1.1.0
       instances: 1
     sothook:
       dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:1.0.0

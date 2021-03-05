@@ -4,13 +4,6 @@ yuuvis:
     imagePullSecret: yuuvisorg
   configservice:
     url: http://configservice/config
-  git:
-    protocol: http
-    url: gogs.infrastructure/yuuvis/yuuvis-config.git
-    name: yuuvis-config
-    user: yuuvis
-    password: changeme
-    branch: master
   livenessProbe:
     enable: false
     initialDelaySeconds: 300
@@ -23,19 +16,31 @@ yuuvis:
     timeoutSeconds: 5
   bpm:
     engine:
-      dockerImage: docker.yuuvis.org/yuuvis/bpm-engine:0.0.3
+      dockerImage: docker.yuuvis.org/yuuvis/bpm-engine:0.0.4
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,swagger
       instances: 1
       java:
         maxHeap: -Xmx128m
       database:
+        # user and password used by the bpm service to access the desired database
         name: themis
-        user: postgres
-        port: "5432"
+        user: bpmusr
         password: changeme
+        port: "5432"
         address: postgresql.infrastructure
         createdb: true
+        # for postgres systems the database an optional init job can be used to create 
+        # the database
+        # if createdb is 'true' 
+        # the following user is used to test if the database and user exists
+        # and if they dont exit, to create the database, the user and
+        # grand the user privileges for the database
+        # the privilege user must have the rights to create databases, users
+        # and grand privileges to users
+        privilege:
+          user: postgres
+          password: changeme
         
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

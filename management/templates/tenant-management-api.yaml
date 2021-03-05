@@ -1,42 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
   labels:
-    app: yuuvis
-    name: sothook
-  name: sothook
+    app: {{.Values.yuuvis.labels.app}}
+    name: tenant-management
+  name: tenant-management
 spec:
-  replicas: 1
+  replicas: {{.Values.yuuvis.apitm.instances}}
   selector:
-     matchLabels:
-      name: sothook
+    matchLabels:
+      name: tenant-management
   template:
     metadata:
       labels:
-        app: yuuvis
-        name: sothook
+        name: tenant-management
     spec:
       initContainers:
-      - name: init-sothook
+      - name: init-api-tm
         image: busybox
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
       containers:
-      - name: sothook
-        image: {{.Values.yuuvis.client.sothook.dockerImage}}
-        env:
+      - env:
         - name: JAVA_OPTS
-          value: {{.Values.yuuvis.client.sothook.java.maxHeap}}
-        - name: SPRING_PROFILES_ACTIVE
-          value: {{.Values.yuuvis.client.sothook.profiles}}
+          value: {{.Values.yuuvis.apitm.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
-        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.apitm.profiles}}
+        - name: CLIENT_ROOTURL
+          value: {{.Values.yuuvis.apitm.client.rooturl}}
+        image: "{{.Values.yuuvis.apitm.dockerImage }}"
+        imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
           httpGet:
-            path: /manage/info
-            port: 10779
+            path: {{.Values.yuuvis.livenessProbe.path }}
+            port: 7560
           initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
@@ -44,14 +45,15 @@ spec:
         {{- if .Values.yuuvis.readinessProbe.enable }}
         readinessProbe:
           httpGet:
-            path: /manage/health
-            port: 10779
+            path: {{.Values.yuuvis.readinessProbe.path }}
+            port: 7560
           initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
         {{- end}}
+        name: tenant-management
         ports:
-        - containerPort: 10779
-      restartPolicy: Always
+        - containerPort: 7560
+          protocol: TCP
       imagePullSecrets:
-      - name: {{.Values.yuuvis.image.imagePullSecret }}
+      - name: {{.Values.yuuvis.image.imagePullSecret}}

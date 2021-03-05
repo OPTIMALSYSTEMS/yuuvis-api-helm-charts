@@ -30,7 +30,7 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.client.apiweb.profiles}}
-        image: {{.Values.yuuvis.client.apiweb.dockerImage}}
+        image: {{.Values.yuuvis.client.apiweb.dockerImage }}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -55,5 +55,5 @@ spec:
         - containerPort: 7550
           protocol: TCP
       imagePullSecrets:
-      - name: clientsecret
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always

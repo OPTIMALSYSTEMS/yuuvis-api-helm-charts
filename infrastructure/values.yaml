@@ -126,6 +126,8 @@ minio:
 keycloak:
   enabled: true
   fullnameOverride: "keycloak"
+  image.repository: docker.yuuvis.org/yuuvis/keycloak
+  image.tag: 11.0.2-stable1
   livenessProbe: |
     httpGet:
       path: /auth/

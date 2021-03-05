@@ -23,5 +23,5 @@ spec:
         - containerPort: 80
           protocol: TCP
       imagePullSecrets:
-      - name: clientsecret
+      - name: {{.Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always

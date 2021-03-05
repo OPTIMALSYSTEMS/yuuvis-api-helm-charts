@@ -61,9 +61,11 @@ yuuvis:
       - 'search'
       - 'client'
       - 'api-web'
+      - 'tenant-management'
       - 'viewer'
       - 'architect'
       - 'custom'
+      - 'userservice'
 
     authorization.accesses:
     ### Manage-Endpunkte
@@ -90,8 +92,8 @@ yuuvis:
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/api/dms/**
     ### Webclient
-      - endpoints: /search/**,/viewer/**
-      - endpoints: /client/**,/architect/**
+      - endpoints: /search/**,/viewer/**,/architect/**
+      - endpoints: /client/**
         expose: true
       - endpoints: /custom/**
         expose: true
@@ -106,6 +108,14 @@ yuuvis:
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
       - endpoints: /api-web/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
+    ### tenant-management
+      - endpoints: /tenant-management/swagger-ui.html/**,/tenant-management/**/springfox-swagger-ui/**,/tenant-management/**/swagger-resources/**,/tenant-management/**/v2/api-docs/**
+      - endpoints: /tenant-management/api/system/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+      - endpoints: /tenant-management/api/admin/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN')
+    ### userservice
+      - endpoints: /userservice/**
   storage: |
     storage:
       repositories:
@@ -160,181 +170,32 @@ yuuvis:
   systemschema: |
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
-    <version>1</version>
-    <lastModificationDate>2019-10-02T14:43:36.735Z</lastModificationDate>
-    <systemVersion>ec-01</systemVersion>
-    <propertyStringDefinition>
-        <id>email:from</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail sender</description>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
-        <id>email:to</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail recipients</description>
-        <propertyType>string</propertyType>
-        <cardinality>multi</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
-        <id>email:cc</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail cc</description>
-        <propertyType>string</propertyType>
-        <cardinality>multi</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
-        <id>email:bcc</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail bcc</description>
-        <propertyType>string</propertyType>
-        <cardinality>multi</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
-        <id>email:subject</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail subject</description>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyIntegerDefinition>
-        <id>email:attachmentcount</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail attachment count</description>
-        <propertyType>integer</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-        <defaultValue>0</defaultValue>
-    </propertyIntegerDefinition>
-    <propertyStringDefinition>
-        <id>email:attachmentnames</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail attachment names</description>
-        <propertyType>string</propertyType>
-        <cardinality>multi</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyTableDefinition>
-        <id>email:meta</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>Additional data</description>
-        <propertyType>table</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-        <propertyStringDefinition>
-            <id>email:key</id>
-            <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-            <description>Key of this additional data entry.</description>
-            <propertyType>string</propertyType>
-            <cardinality>single</cardinality>
-            <required>false</required>
-        </propertyStringDefinition>
-        <propertyStringDefinition>
-            <id>email:value</id>
-            <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-            <description>Value of this additional data entry.</description>
-            <propertyType>string</propertyType>
-            <cardinality>single</cardinality>
-            <required>false</required>
-        </propertyStringDefinition>
-    </propertyTableDefinition>
-    <propertyStringDefinition>
-        <id>email:messageid</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail message id</description>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyDateTimeDefinition>
-        <id>email:received</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail received</description>
-        <propertyType>datetime</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyDateTimeDefinition>
-    <propertyStringDefinition>
-        <id>email:mode</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail storing mode</description>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
-        <id>email:exchangeid</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the e-mail exchange id</description>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
-        <id>email:maildigest</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>system-wide field for the calculated e-mail digest</description>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyDateTimeDefinition>
+      <version>1</version>
+      <lastModificationDate>2017-11-13T06:02:42.56</lastModificationDate>
+      <propertyDateTimeDefinition>
         <id>date</id>
         <localNamespace>urn:optimal-systems.de:dmscloud:dokument</localNamespace>
         <description>the date of the document???</description>
         <propertyType>datetime</propertyType>
         <cardinality>single</cardinality>
         <required>false</required>
-    </propertyDateTimeDefinition>
-    <propertyStringDefinition>
-        <id>ID</id>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-    </propertyStringDefinition>
-    <propertyStringDefinition>
+      </propertyDateTimeDefinition>
+      <propertyStringDefinition>
         <id>Name</id>
         <propertyType>string</propertyType>
         <cardinality>single</cardinality>
         <required>false</required>
-    </propertyStringDefinition>
-    <typeDocumentDefinition>
-        <id>email:email</id>
-        <localNamespace>urn:optimal-systems.de:dmscloud:email</localNamespace>
-        <description>...</description>
-        <baseId>system:document</baseId>
-        <propertyReference>email:from</propertyReference>
-        <propertyReference>email:to</propertyReference>
-        <propertyReference>email:cc</propertyReference>
-        <propertyReference>email:bcc</propertyReference>
-        <propertyReference>email:subject</propertyReference>
-        <propertyReference>email:attachmentcount</propertyReference>
-        <propertyReference>email:attachmentnames</propertyReference>
-        <propertyReference>email:meta</propertyReference>
-        <propertyReference>email:messageid</propertyReference>
-        <propertyReference>email:received</propertyReference>
-        <propertyReference>email:mode</propertyReference>
-        <propertyReference>email:exchangeid</propertyReference>
-        <propertyReference>email:maildigest</propertyReference>
-        <contentStreamAllowed>required</contentStreamAllowed>
-       <secondaryObjectTypeId>system:rmDestructionRetention</secondaryObjectTypeId>
-    </typeDocumentDefinition>
-    <typeDocumentDefinition>
+      </propertyStringDefinition>
+      <typeDocumentDefinition>
         <id>document</id>
         <localNamespace>urn:optimal-systems.de:dmscloud:document</localNamespace>
         <description>...</description>
         <baseId>system:document</baseId>
         <propertyReference>Name</propertyReference>
         <propertyReference>date</propertyReference>
-        <contentStreamAllowed>allowed</contentStreamAllowed>
-       <secondaryObjectTypeId>system:rmDestructionRetention</secondaryObjectTypeId>
-    </typeDocumentDefinition>
+        <contentStreamAllowed>required</contentStreamAllowed>
+        <secondaryObjectTypeId>system:rmDestructionRetention</secondaryObjectTypeId>
+      </typeDocumentDefinition>
     </schema>
   systemroleset: |
     <?xml version="1.0" encoding="utf-8"?>
@@ -387,6 +248,9 @@ yuuvis:
        ]
      }
     }
+  systemProd: |
+    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
+    schema.changed.observers: /rest-ws/refreshschema?global=%s, /sothook/schema/refresh?global=%s, /primarysothook/schema/refresh?global=%s
   serviceConfiguration: |
     {"services": {
        "contentanalyzer": {
@@ -426,7 +290,7 @@ yuuvis:
   services:
     api:
       dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
@@ -439,7 +303,7 @@ yuuvis:
         memory: "128Mi"
     admin:
       dockerRegistry: docker.yuuvis.org/yuuvis/admin
-      tag: 5.7.0.0
+      tag: 5.7.1.0
       profiles: prod,docker,kubernetes
       instances: 1
       port: 7273
@@ -450,7 +314,7 @@ yuuvis:
         memory: "128Mi"
     audit:
       dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
       instances: 1
       port: 7251
@@ -463,7 +327,7 @@ yuuvis:
         use: true
         value: 30080
       dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -481,7 +345,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 5.7.0.0
+      tag: 5.7.1.0
       instances: 1
       port: 7282
       java:
@@ -490,7 +354,7 @@ yuuvis:
         memory: "128Mi"
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -501,7 +365,7 @@ yuuvis:
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,dms,dmscloud,docker,kubernetes,redis,metrics
-      tag: 4.5.11
+      tag: 4.6.0
       instances: 1
       port: 7291
       java:
@@ -510,7 +374,7 @@ yuuvis:
         memory: "128Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -528,7 +392,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     registry:
       dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -538,7 +402,7 @@ yuuvis:
         memory: "128Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -548,7 +412,7 @@ yuuvis:
         memory: "128Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.5.11
+      tag: 4.6.0
       profiles: prod,es,dms,dmscloud,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -559,7 +423,7 @@ yuuvis:
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.5.11
+      tag: 4.6.0
       instances: 1
       port: 7400
       java:
@@ -595,7 +459,7 @@ yuuvis:
         accessmode: ReadWriteMany
     controller:
       dockerRegistry: docker.yuuvis.org/yuuvis/controller
-      tag: 4.5.0
+      tag: 4.6.0
       profiles: prod,docker,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -613,7 +477,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     textextractor:
       dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
-      tag: 4.5.0
+      tag: 4.6.0
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420

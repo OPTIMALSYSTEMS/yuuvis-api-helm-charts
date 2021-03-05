@@ -1,6 +1,6 @@
 # License
 
-Copyright 2020 OPTIMAL SYSTEMS GmbH
+Copyright 2021 OPTIMAL SYSTEMS GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -84,6 +84,12 @@ helm install yuuvis ./yuuvis --namespace yuuvis
 
 wait till all pods are ready 
 
+* Edit the docker registry credentials.
+
+
+### Install the yuuvis bpm Helm chart
+
+install bpm services with:
 ```shell
 kubectl get po -n yuuvis
 ```
@@ -129,6 +135,14 @@ install bpm services with:
 ```shell
 kubectl get po -n yuuvis
 helm install bpm ./bpm --namespace yuuvis
+```
+
+### Install the yuuvis rendition Helm chart
+
+install rendition services with:
+```shell
+kubectl get po -n yuuvis
+helm install rendition ./rendition --namespace yuuvis
 ```
 
 ## Version upgrades

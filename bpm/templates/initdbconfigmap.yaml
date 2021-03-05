@@ -1,0 +1,28 @@
+{{- if .Values.yuuvis.bpm.engine.database.createdb }}
+apiVersion: v1
+data:
+  initdb.sh: |-
+    if [ "$( psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -tAc "SELECT 1 FROM pg_database WHERE datname='${DBNAME}';" )" = '1' ]
+    then
+        echo "Database already exists"
+    else
+        psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -c "CREATE DATABASE ${DBNAME};";
+    fi
+    if [ "$( psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -tAc "SELECT 1 FROM pg_roles WHERE rolname='${DBUSER}'" )" = '1' ]
+    then
+        echo "user already exists"
+    else
+        psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -c "CREATE USER ${DBUSER} WITH ENCRYPTED PASSWORD '${DBPWD}';";
+    fi
+    if ! [ "$( psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -d $DBNAME -tAc "SELECT DISTINCT 1 from pg_catalog.pg_tables where schemaname = 'public' and tableowner='${DBUSER}';" )" = '1' ]
+    then
+      echo "db tables were created by different user, change owner"
+      psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -c "ALTER DATABASE ${DBNAME} OWNER TO ${DBUSER};";
+      for table in `psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -d $DBNAME -tAc "SELECT tablename from pg_tables where schemaname = 'public';"` ; do  psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -d $DBNAME -tAc "ALTER table \"$table\" owner to ${DBUSER}"; done
+    fi
+    psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p {{.Values.yuuvis.bpm.engine.database.port}} -U $PGUSER -c "GRANT ALL PRIVILEGES ON DATABASE ${DBNAME} TO ${DBUSER};";
+    until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;
+kind: ConfigMap
+metadata:
+  name: initbpmdbconfigmap
+{{- end}}

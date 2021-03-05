@@ -46,31 +46,42 @@ spec:
         - containerPort: 8080
           protocol: TCP
       imagePullSecrets:
-      - name: clientsecret
+      - name: {{.Values.yuuvis.image.imagePullSecret }}
       initContainers:
       {{- if .Values.yuuvis.client.userservice.database.createdb }}
-      - args:
-        - psql -h {{.Values.yuuvis.client.userservice.database.address}} -p 5432 -U $PGUSER -c "CREATE DATABASE
-          ${PGDBNAME};"; psql -h {{.Values.yuuvis.client.userservice.database.address}} -p 5432 -U $PGUSER -c "GRANT ALL PRIVILEGES ON DATABASE ${PGDBNAME} TO ${PGUSER};";until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;
-        command:
-        - /bin/sh
-        - -c
+      - command:
+        - sh
+        - /yuuvis/script/initdb.sh
         env:
         - name: PGUSER
           valueFrom:
             secretKeyRef:
               key: user
-              name: userservice-dbsecret
+              name: init-userservice-dbsecret
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
               key: password
+              name: init-userservice-dbsecret
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
               name: userservice-dbsecret
-        - name: PGDBNAME
+        - name: DBPWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: userservice-dbsecret
+        - name: DBNAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
         image: {{.Values.yuuvis.client.userservice.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
+        volumeMounts:
+        - mountPath: /yuuvis/script/initdb.sh
+          name: initdbscript
+          subPath: initdb.sh
       {{- end}}
       - name: init-config
         image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
@@ -90,3 +101,8 @@ spec:
       - configMap:
           name: userserviceconfigconfigmap
         name: configyml
+      {{- if .Values.yuuvis.client.userservice.database.createdb }}
+      - configMap:
+          name: inituserservicedbconfigmap
+        name: initdbscript
+      {{- end}}

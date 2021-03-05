@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    yuuvis: "true"
+    name: tenant-management
+  name: tenant-management
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 7560
+  selector:
+    name: tenant-management
+  type: ClusterIP

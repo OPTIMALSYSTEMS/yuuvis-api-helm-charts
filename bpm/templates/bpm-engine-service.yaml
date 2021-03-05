@@ -49,26 +49,41 @@ spec:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
       initContainers:
       {{- if .Values.yuuvis.bpm.engine.database.createdb }}
-      - args:
-        - psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p 5432 -U $PGUSER -c "CREATE DATABASE
-          ${PGDBNAME};"; psql -h {{.Values.yuuvis.bpm.engine.database.address}} -p 5432 -U $PGUSER -c "GRANT ALL PRIVILEGES ON DATABASE ${PGDBNAME} TO ${PGUSER};";until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;
-        command:
-        - /bin/sh
-        - -c
+      - command:
+        - sh
+        - /yuuvis/script/initdb.sh
         env:
         - name: PGUSER
           valueFrom:
             secretKeyRef:
               key: user
-              name: bpm-dbsecret
+              name: initbpm-dbsecret
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
               key: password
+              name: initbpm-dbsecret
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
               name: bpm-dbsecret
-        - name: PGDBNAME
+        - name: DBPWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-dbsecret
+        - name: DBNAME
           value: {{.Values.yuuvis.bpm.engine.database.name}}
         image: {{.Values.yuuvis.bpm.engine.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
+        volumeMounts:
+        - mountPath: /yuuvis/script/initdb.sh
+          name: initscript
+          subPath: initdb.sh
+      volumes:
+      - configMap:
+          name: initbpmdbconfigmap
+        name: initscript
       {{- end}}

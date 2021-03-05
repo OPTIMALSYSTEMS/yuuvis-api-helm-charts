@@ -15,7 +15,7 @@ data:
   application-kubernetes.yml: |
     spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
   system-prod.yml: |
-    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.name!=null && (metadata.name matches 'index' || metadata.name matches 'rest-ws' || metadata.name matches 'search' || metadata.name matches 'registry' || metadata.name matches 'system)'
+{{ tpl .Values.yuuvis.systemProd . | indent 4 }}
   authentication-prod.yml: |
 {{ tpl .Values.yuuvis.authconfig . | indent 4 }}
   application-es.yml: |

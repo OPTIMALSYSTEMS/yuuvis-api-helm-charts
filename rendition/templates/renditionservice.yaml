@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: rendition
+  name: rendition
+spec:
+  replicas: {{.Values.yuuvis.renditionservice.instances}}
+  selector:
+    matchLabels:
+      name: rendition
+  template:
+    metadata:
+      labels:
+        name: rendition
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.renditionservice.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.renditionservice.profiles}}
+        image: {{.Values.yuuvis.renditionservice.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: rendition
+        ports:
+        - containerPort: 7341
+          protocol: TCP
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      - name: init-rendition
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
