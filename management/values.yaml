@@ -31,56 +31,7 @@ yuuvis:
     java:
       maxHeap: -Xmx128m
     client:
-      rooturl: https://kolibri.enaioci.net
-  management:
-    console:
-      client:
-        instances: 1
-        dockerImage: docker.yuuvis.org/yuuvis/management-console-client:1.1.0
-      api:
-        dockerImage: docker.yuuvis.org/yuuvis/management-console:1.1.0
-        instances: 1
-        config:
-          host: changeme
-          keycloak: hchangeme
-          realm: changeme
-          client: changeme
-          clientsecret: changeme
-          apiHost: changeme
-          clientHost: changeme
-          jwt:
-            token:
-              access: changeme
-              refresh: changeme
-          db:
-            host: postgres.infrastructure
-            port: "5432"
-            name: consoledb
-            user: changeme
-            password: changeme
-            createdb: true
-            # for postgres systems the database an optional init job can be used to create 
-            # the database
-            # if createdb is 'true' 
-            # the following user is used to test if the database and user exists
-            # and if they dont exit, to create the database, the user and
-            # grand the user privileges for the database
-            # the privilege user must have the rights to create databases, users
-            # and grand privileges to users
-            privilege:
-              user: postgres
-              password: changeme
-          smtp:
-            host: changeme
-            port: "25"
-            from: changeme
-          ip:
-            keycloak:
-              realm: changeme
-              host: changeme
-              client:
-                id: changeme
-                secret: changeme
+      rooturl: https://changeme
      
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"
