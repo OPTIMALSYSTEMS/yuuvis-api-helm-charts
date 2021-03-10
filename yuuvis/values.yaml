@@ -68,13 +68,13 @@ yuuvis:
       - 'userservice'
 
     authorization.accesses:
-    ### Manage-Endpunkte
+    ### manage-endpoints
       - endpoints: /manage/info,/manage/health
         expose: true
       - endpoints: /manage/refresh
       - endpoints: /*/manage/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
-    ### API-Endpunkte
+    ### API-endpoints
       - endpoints: /api/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
       - endpoints: /api/admin/**
@@ -83,7 +83,7 @@ yuuvis:
         method: POST
         access: hasAuthority('YUUVIS_CREATE_OBJECT')
       - endpoints: /api/dms/**
-    ### Endpunkte für Swagger-Webclient des API-Gateways
+    ### endpoints for api swagger
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
       - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
       - endpoints: /api/api/system/**
@@ -140,7 +140,7 @@ yuuvis:
             volume: '/var/lib/netapp/data'
             defaultRetentionInDays: 10
   oauth2: |
-    # Konfiguration für den yuuvis authentication service
+    # configuration for the yuuvis authentication service
     keycloak.host: {{.Values.yuuvis.keycloak.ip}}:30111
     authentication.filter: oauth2
     authentication.provider: oauth2
@@ -163,7 +163,7 @@ yuuvis:
       endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout?redirect_uri=${redir}
       userNameExtractionPattern: $.sub 
 
-    # Konfiguration für den yuuvis organization service
+    # configuration for the yuuvis organization service
     keycloak.server: https://keycloak-https.infrastructure/auth
     keycloak.admin.username: keycloak
     keycloak.admin.password: changeme
