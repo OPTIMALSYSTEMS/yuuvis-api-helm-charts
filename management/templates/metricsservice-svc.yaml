@@ -4,6 +4,7 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: metricsservice
+    yuuvis: "true"
   name: metricsservice
 spec:
   ports:
