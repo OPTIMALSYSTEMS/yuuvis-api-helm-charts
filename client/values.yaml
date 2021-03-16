@@ -71,19 +71,19 @@ yuuvis:
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:1.3.0
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.4.0-rc1
       instances: 1
       containerPort: 80
       port: 80
       targetPort: 80
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:1.3.0
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.4.0-rc1
       instances: 0
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.2.0
       instances: 1
     architect:
-      dockerImage: docker.yuuvis.org/yuuvis/architect:1.1.0
+      dockerImage: docker.yuuvis.org/yuuvis/architect:1.2.0-rc1
       instances: 1
     sothook:
       dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:1.0.0
