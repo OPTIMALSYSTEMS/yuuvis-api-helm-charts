@@ -25,7 +25,7 @@ yuuvis:
     java:
       maxHeap: -Xmx128m
   apitm:
-    dockerImage: docker.yuuvis.org/yuuvis/tenant-management:1.4.0-rc1
+    dockerImage: docker.yuuvis.org/yuuvis/tenant-mangement: 1.4.0-rc2
     profiles: prod,docker,kubernetes,oauth2
     instances: 1
     java:
