@@ -9,7 +9,7 @@ yuuvis:
     # !!! Change before running
     # this variable must contain the "public" ip of keycloak
     # this ip will be sent to the user from the authentication service
-    ip: 192.168.99.100
+    address: 192.168.99.100:30111
   git:
     protocol: http
     url: gogs.infrastructure/yuuvis/yuuvis-config.git
@@ -141,7 +141,7 @@ yuuvis:
             defaultRetentionInDays: 10
   oauth2: |
     # configuration for the yuuvis authentication service
-    keycloak.host: {{.Values.yuuvis.keycloak.ip}}:30111
+    keycloak.host: {{.Values.yuuvis.keycloak.address}}
     authentication.filter: oauth2
     authentication.provider: oauth2
     authentication.exposed.endpoints: ''
@@ -364,7 +364,7 @@ yuuvis:
         memory: "256Mi"
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
-      profiles: prod,es,dms,dmscloud,docker,kubernetes,redis,metrics
+      profiles: prod,es,docker,kubernetes,redis,metrics
       tag: 4.6.0
       instances: 1
       port: 7291
@@ -413,7 +413,7 @@ yuuvis:
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
       tag: 4.6.0
-      profiles: prod,es,dms,dmscloud,docker,kubernetes,metrics
+      profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
       java:
