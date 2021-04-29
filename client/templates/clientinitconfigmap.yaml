@@ -40,18 +40,30 @@ data:
         jq -s '.[0] * .[1]' system/systemHookConfiguration.json /yuuvis/data/systemHookConfiguration.json > merge_hook.json
         rm system/systemHookConfiguration.json
         mv merge_hook.json system/systemHookConfiguration.json
-
+        
         git add .
         git commit -m 'init api-web config'
 
         echo 'git pull'
         git pull -s recursive -X ours
+
         echo 'git push'    
-        git push origin {{.Values.yuuvis.git.branch}}
-        exit 0 
-    fi 
-    echo 'git and/or git branch not found'
-    exit 1
+        if git push origin {{.Values.yuuvis.git.branch}}
+        then
+            echo 'push sucessful'
+            mkdir -p /health/clientinit/
+            touch /health/clientinit/ready
+            sleep 50
+            rm -rf /health/clientinit 
+            echo 'ready'
+        else
+            echo 'push unsucessful'
+            exit 1
+        fi
+    else
+        echo 'git and/or git branch not found'
+        exit 1 
+    fi
 kind: ConfigMap
 metadata:
   name: clientinit

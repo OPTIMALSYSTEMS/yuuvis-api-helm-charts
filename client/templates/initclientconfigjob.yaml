@@ -5,6 +5,7 @@ metadata:
   labels:
     app: client
 spec:
+  backoffLimit: 3
   template:
     spec:
       containers:
@@ -12,6 +13,14 @@ spec:
         image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
         imagePullPolicy: IfNotPresent
         command: ['bash', '/yuuvis/script/init.bash']
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /health/clientinit/ready
+          periodSeconds: 10
+          initialDelaySeconds: 5
+          failureThreshold: 20
         volumeMounts:
         - mountPath: /yuuvis/data
           name: clientresources

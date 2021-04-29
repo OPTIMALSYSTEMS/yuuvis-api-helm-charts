@@ -66,7 +66,7 @@ yuuvis:
         privilege:
           user: postgres
           password: changeme
-      userseriveyml: |
+      userserviceyml: |
         keycloak.server: http://keycloak-http.infrastructure/auth
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme

@@ -13,8 +13,10 @@ data:
 
     echo "k8s create keycloak-selfsigned-tls-secret"
     kubectl create secret tls keycloak-selfsigned-tls-secret --key keycloak.key --cert keycloak.crt
+
     echo "k8s create namespace {{.Values.yuuvis.namespaces.yuuvis}}"
     kubectl create namespace {{.Values.yuuvis.namespaces.yuuvis}}
+    
     echo "k8s create keycloak-selfsigned-cert-secret in namespace {{.Values.yuuvis.namespaces.yuuvis}}"
     kubectl create secret generic keycloak-selfsigned-cert-secret --from-file keycloak.crt -n {{.Values.yuuvis.namespaces.yuuvis}}
 kind: ConfigMap
