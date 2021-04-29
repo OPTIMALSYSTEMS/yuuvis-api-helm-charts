@@ -28,7 +28,7 @@ spec:
           name: initscript
           subPath: clientgitinit.bash
       imagePullSecrets:
-      - name:  clientsecret
+      - name:  {{.Values.yuuvis.image.imagePullSecret }}
       volumes:
       - configMap:
           name: clientresources
