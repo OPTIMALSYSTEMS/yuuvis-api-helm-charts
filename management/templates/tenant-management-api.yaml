@@ -55,5 +55,13 @@ spec:
         ports:
         - containerPort: 7560
           protocol: TCP
+        {{- if .Values.yuuvis.apitm.volumeMounts }}
+        volumeMounts:
+{{ tpl .Values.yuuvis.apitm.volumeMounts . | indent 8 }}
+        {{- end }}
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
+      {{- if .Values.yuuvis.apitm.volumes }}
+      volumes:
+{{ tpl .Values.yuuvis.apitm.volumes . | indent 6 }}
+      {{- end}}

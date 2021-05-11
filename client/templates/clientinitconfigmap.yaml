@@ -51,11 +51,6 @@ data:
         if git push origin {{.Values.yuuvis.git.branch}}
         then
             echo 'push sucessful'
-            mkdir -p /health/clientinit/
-            touch /health/clientinit/ready
-            sleep 50
-            rm -rf /health/clientinit 
-            echo 'ready'
         else
             echo 'push unsucessful'
             exit 1

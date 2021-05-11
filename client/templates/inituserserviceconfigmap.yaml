@@ -13,9 +13,15 @@ data:
     if [ $getuseryml = 404 ]
     then
       echo 'must create application-userservice.yml'
-      curl -POST -F "resource=@/yuuvis/data/application-userservice.yml" http://configservice/api/resources/application-userservice.yml
+      postyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/application-userservice.yml" http://configservice/api/resources/application-userservice.yml)
+      
+      if [ $getuseryml != 200 ]
+      then
+        echo 'post userservice yml failed'
+        exit 1
       else
         echo 'userservice yml already exists'
+      fi
     fi
 kind: ConfigMap
 metadata:

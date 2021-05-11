@@ -1,0 +1,79 @@
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: false
+    general: true
+    k8s: true
+    kubeApiserver: false
+    kubeApiserverError: false
+    kubePrometheusNodeAlerting: true
+    kubePrometheusNodeRecording: true
+    kubernetesAbsent: true
+    kubernetesApps: true
+    kubernetesResources: false
+    kubernetesStorage: false
+    kubernetesSystem: false
+    kubeScheduler: false
+    network: true
+    node: true
+    prometheus: true
+    prometheusOperator: true
+    time: true
+
+prometheus:
+  service:
+    type: NodePort
+    nodePort: 30090
+
+alertmanager:
+  service:
+    nodePort: 30903
+    type: NodePort
+
+ruleSelector:
+    matchLabels:
+      role: alert-rules
+      release: prometheus-operator
+      prometheus: prometheus-operator-prometheus
+
+grafana:
+  adminPassword: changeme
+  service:
+    type: NodePort
+    nodePort: 30555
+  sidecar:
+    dashboards:
+      enabled: true
+
+prometheusOperator:
+  service:
+    type: NodePort
+    nodePort: 30180
+
+monitor:
+  release: prometheus-operator
+  prometheus: prometheus-operator-prometheus
+  namespace:
+    infrastructure: infrastructure
+    yuuvis: yuuvis
+
+postgresql:
+  postgresqlServer: postgresql
+  postgresqlUser: postgres
+  postgresqlPassword: changeme
+
+# Disable Etcd metrics
+kubeEtcd:
+  enabled: true
+
+# Disable Controller metrics
+kubeControllerManager:
+  enabled: true
+
+# Disable Scheduler metrics
+kubeScheduler:
+  enabled: true
+  
+# msteams webhook value replace
+connectors: https://optimalsystemsgmbh.webhook.office.com/webhookb2/8ca7a7f9-c871-49d6-bc4e-b4fec75750a7@b82e583b-cea8-4382-a3a4-2905826174c5/IncomingWebhook/2af71ccf3d44426780e8cdeb4a15693b/e63251c4-a235-447c-9ece-7397c7574529
