@@ -70,6 +70,28 @@ gogsrepo-init                     1/1           83s        8m4s
 keycloak-create-selfsigned-cert   1/1           8m4s       8m4s
 ```
 
+#### Installing Monitoring services
+
+Installing Prometheus Operator
+
+```shell
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+
+helm install prometheus-operator prometheus-community/kube-prometheus-stack --namespace infrastructure --values ./monitoring/values.yaml
+```
+
+Installing the monitoring chart
+```shell
+helm install monitoring ./monitoring --namespace infrastructure
+```
+
 #### Edit the yuuvis values.yaml
 
 * Edit the docker registry credentials.
@@ -84,12 +106,6 @@ helm install yuuvis ./yuuvis --namespace yuuvis
 
 wait till all pods are ready 
 
-* Edit the docker registry credentials.
-
-
-### Install the yuuvis bpm Helm chart
-
-install bpm services with:
 ```shell
 kubectl get po -n yuuvis
 ```
@@ -145,6 +161,15 @@ kubectl get po -n yuuvis
 helm install rendition ./rendition --namespace yuuvis
 ```
 
+#### Using Grafana 
+* Make Grafana pod accessible
+
+```shell
+kubectl port-forward prometheus-operator-grafana-xxxxx 3000 -n infrastructure
+```
+
+* Dashboards need to be exported via share -> export -> export for sharing externally
+
 ## Version upgrades
 
 The upgrade of the infrastructure chart is not supported at the moment.
@@ -173,9 +198,22 @@ helm list -n yuuvis
 
 ```shell
  helm uninstall infrastructure  --namespace infrastructure
+ helm uninstall prometheus-operator --namespace infrastructure
+ helm uninstall monitoring  --namespace infrastructure
  helm uninstall yuuvis  --namespace yuuvis
  helm uninstall client  --namespace yuuvis
  helm uninstall bpm  --namespace yuuvis
+```
+
+```shell
+kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
+kubectl delete crd alertmanagers.monitoring.coreos.com
+kubectl delete crd podmonitors.monitoring.coreos.com
+kubectl delete crd probes.monitoring.coreos.com
+kubectl delete crd prometheuses.monitoring.coreos.com
+kubectl delete crd prometheusrules.monitoring.coreos.com
+kubectl delete crd servicemonitors.monitoring.coreos.com
+kubectl delete crd thanosrulers.monitoring.coreos.com
 ```
 
 ```shell
