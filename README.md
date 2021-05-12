@@ -73,8 +73,7 @@ keycloak-create-selfsigned-cert   1/1           8m4s       8m4s
 #### Installing Monitoring services
 
 Installing Prometheus Operator
-
-```shell
+```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
 kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
@@ -84,7 +83,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/re
 kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
 kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
 
-helm install prometheus-operator prometheus-community/kube-prometheus-stack --namespace infrastructure --values ./monitoring/values.yaml
+helm install prometheus-operator prometheus-community/prometheus-operator  --namespace infrastructure --values ./monitoring/values.yaml --set prometheusOperator.createCustomResource=false
 ```
 
 Installing the monitoring chart

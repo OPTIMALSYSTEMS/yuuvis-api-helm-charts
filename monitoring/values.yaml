@@ -25,17 +25,16 @@ prometheus:
   service:
     type: NodePort
     nodePort: 30090
+  prometheusSpec:
+    ruleSelector:
+        matchLabels:
+          role: alert-rules
+          app: prometheus-operator-prometheus
 
 alertmanager:
   service:
     nodePort: 30903
     type: NodePort
-
-ruleSelector:
-    matchLabels:
-      role: alert-rules
-      release: prometheus-operator
-      prometheus: prometheus-operator-prometheus
 
 grafana:
   adminPassword: changeme
@@ -52,8 +51,6 @@ prometheusOperator:
     nodePort: 30180
 
 monitor:
-  release: prometheus-operator
-  prometheus: prometheus-operator-prometheus
   namespace:
     infrastructure: infrastructure
     yuuvis: yuuvis
