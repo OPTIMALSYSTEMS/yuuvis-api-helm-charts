@@ -79,7 +79,7 @@ yuuvis:
       dockerImage: docker.yuuvis.org/yuuvis/architect:1.1.0
       instances: 1
     sothook:
-      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.7.0-RC01
+      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:1.0.0
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
@@ -144,27 +144,13 @@ configfiles:
          },
          {
            "enable": true,
-           "predicate": "spel:T(java.util.List).of(100,101).contains(options['action'])",
-           "type": "dms.request.objects.upsert.storage-before",
-           "url": "http://sothook/api/dms/request/import",
-           "useDiscovery": true
-         },
-         {
-           "enable": true,
-           "predicate": "spel:T(java.util.List).of(300,301,110,210,310).contains(options['action']) && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
-           "type": "dms.request.objects.upsert.storage-before",
-           "url": "http://sothook/api/dms/request/update/metadata",
-           "useDiscovery": true
-         },
-         {
-           "enable": false,
            "predicate": "spel:(options==null || options['currentVersion']==null)",
            "type": "dms.request.import.storage.before",
            "url": "http://sothook/api/dms/request/import",
            "useDiscovery": true
          },
          {
-           "enable": false,
+           "enable": true,
            "predicate": "spel:options!=null && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
            "type": "dms.request.update.metadata",
            "url": "http://sothook/api/dms/request/update/metadata",
