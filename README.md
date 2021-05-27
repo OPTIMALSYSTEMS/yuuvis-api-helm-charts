@@ -73,6 +73,7 @@ keycloak-create-selfsigned-cert   1/1           8m4s       8m4s
 #### Installing Monitoring services
 
 Installing Prometheus Operator
+
 ```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
@@ -193,6 +194,12 @@ Check version of upgraded helm chart
 helm list -n yuuvis 
 ```
 
+The configuration files will not be changed during an upgrade.  
+Please follow the instructions provied at:
+
+* [breaking changes](https://help.optimal-systems.com/yuuvis_develop/display/YMY/Breaking+Changes)
+* [update instructions 2021 summer version](https://help.optimal-systems.com/yuuvis_develop/display/YMY/Update+Instructions+2021+Summer)
+
 ## Uninstall
 
 ```shell
@@ -224,4 +231,5 @@ kubectl delete job gogsrepo-init -n infrastructure
 kubectl delete pvc gogs -n infrastructure
 kubectl delete pv name(replace with pv from gogs --check value with kubectl get pv -n infrastructure) -n infrastructure
 ```
-While deleting persistence volume and persistence claim from gogs, please delete pod, than they will be unbind.
+
+Before deleting the persistent volumes and persistent volume claims, please delete corresponding pods.

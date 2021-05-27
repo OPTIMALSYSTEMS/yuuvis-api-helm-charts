@@ -25,13 +25,24 @@ yuuvis:
     java:
       maxHeap: -Xmx128m
   apitm:
-    dockerImage: docker.yuuvis.org/yuuvis/api-tm:1.3.2
+    dockerImage: docker.yuuvis.org/yuuvis/tenant-management:1.4.0
     profiles: prod,docker,kubernetes,oauth2
     instances: 1
     java:
       maxHeap: -Xmx128m
     client:
       rooturl: https://changeme
+    # if e.g. the keycloak has been deployed with a self signed cert 
+    # the certs mounted at /etc/yuuvis/certs will be added to the used java truststore 
+    # at the start of the container
+    volumes: |
+      - name: keycloak-tls-selfsigned
+        secret:
+          defaultMode: 420
+          secretName: keycloak-selfsigned-cert-secret
+    volumeMounts: |
+      - mountPath: /etc/yuuvis/certs
+        name: keycloak-tls-selfsigned
      
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

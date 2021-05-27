@@ -1,8 +1,8 @@
 apiVersion: v1
-appVersion: "2020 winter"
+appVersion: "2021 summer"
 description: yuuvis management components
 name: yuuvis-management
-version: 0.1.0
+version: 0.2.0
 keywords:
 - yuuvis
 - management
