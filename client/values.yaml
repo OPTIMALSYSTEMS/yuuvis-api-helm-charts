@@ -28,14 +28,14 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.7.0
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.6.0
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       instances: 1
       java:
         maxHeap: -Xmx128m
     userservice:
-      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.2.0
+      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.1.2
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,userservice
       instances: 1
@@ -64,19 +64,22 @@ yuuvis:
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.0.0
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.3.0
       instances: 1
+      containerPort: 80
+      port: 80
+      targetPort: 80
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.0.0
+      dockerImage: docker.yuuvis.org/yuuvis/client:1.3.0
       instances: 0
     viewer:
-      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.3.0
+      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:1.2.0
       instances: 1
     architect:
-      dockerImage: docker.yuuvis.org/yuuvis/architect:1.2.0
+      dockerImage: docker.yuuvis.org/yuuvis/architect:1.1.0
       instances: 1
     sothook:
-      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.7.0
+      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:1.0.0
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
@@ -141,27 +144,13 @@ configfiles:
          },
          {
            "enable": true,
-           "predicate": "spel:T(java.util.List).of(100,101).contains(options['action'])",
-           "type": "dms.request.objects.upsert.storage-before",
-           "url": "http://sothook/api/dms/request/import",
-           "useDiscovery": true
-         },
-         {
-           "enable": true,
-           "predicate": "spel:T(java.util.List).of(300,301,110,210,310).contains(options['action']) && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
-           "type": "dms.request.objects.upsert.storage-before",
-           "url": "http://sothook/api/dms/request/update/metadata",
-           "useDiscovery": true
-         },
-         {
-           "enable": false,
            "predicate": "spel:(options==null || options['currentVersion']==null)",
            "type": "dms.request.import.storage.before",
            "url": "http://sothook/api/dms/request/import",
            "useDiscovery": true
          },
          {
-           "enable": false,
+           "enable": true,
            "predicate": "spel:options!=null && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
            "type": "dms.request.update.metadata",
            "url": "http://sothook/api/dms/request/update/metadata",

@@ -99,10 +99,14 @@ yuuvis:
         expose: true
     ### api-web
       - endpoints: /api-web/swagger-ui.html/**,/api-web/**/springfox-swagger-ui/**,/api-web/**/swagger-resources/**,/api-web/**/v2/api-docs/**
-      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**
-      - endpoints: /api-web/api/system/**
+      - endpoints: /api-web/resources/**
+      - endpoints: /api-web/user/**
+      - endpoints: /api-web/search/**
+      - endpoints: /api-web/dms/**
+      - endpoints: /api-web/bpm/**
+      - endpoints: /api-web/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
-      - endpoints: /api-web/api/admin/**
+      - endpoints: /api-web/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
     ### tenant-management
       - endpoints: /tenant-management/swagger-ui.html/**,/tenant-management/**/springfox-swagger-ui/**,/tenant-management/**/swagger-resources/**,/tenant-management/**/v2/api-docs/**
@@ -286,7 +290,7 @@ yuuvis:
   services:
     api:
       dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
@@ -299,7 +303,7 @@ yuuvis:
         memory: "128Mi"
     admin:
       dockerRegistry: docker.yuuvis.org/yuuvis/admin
-      tag: 5.7.2.0
+      tag: 5.7.1.0
       profiles: prod,docker,kubernetes
       instances: 1
       port: 7273
@@ -310,7 +314,7 @@ yuuvis:
         memory: "128Mi"
     audit:
       dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
       instances: 1
       port: 7251
@@ -323,7 +327,7 @@ yuuvis:
         use: true
         value: 30080
       dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -341,7 +345,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 5.7.2.0
+      tag: 5.7.1.0
       instances: 1
       port: 7282
       java:
@@ -350,7 +354,7 @@ yuuvis:
         memory: "128Mi"
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -361,7 +365,7 @@ yuuvis:
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.7.0
+      tag: 4.6.1
       instances: 1
       port: 7291
       java:
@@ -370,7 +374,7 @@ yuuvis:
         memory: "128Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -388,7 +392,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     registry:
       dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -398,7 +402,7 @@ yuuvis:
         memory: "128Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -408,7 +412,7 @@ yuuvis:
         memory: "128Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.7.0
+      tag: 4.6.1
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -419,7 +423,7 @@ yuuvis:
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.7.0
+      tag: 4.6.1
       instances: 1
       port: 7400
       java:
@@ -455,7 +459,7 @@ yuuvis:
         accessmode: ReadWriteMany
     controller:
       dockerRegistry: docker.yuuvis.org/yuuvis/controller
-      tag: 4.7.0
+      tag: 4.6.0
       profiles: prod,docker,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -473,7 +477,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     textextractor:
       dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
-      tag: 4.7.0
+      tag: 4.6.0
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420

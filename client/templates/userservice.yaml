@@ -23,21 +23,21 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.client.userservice.profiles}}
-        - name: DB_USER
+        - name: db.user
           valueFrom:
             secretKeyRef:
               key: user
               name: userservice-dbsecret
-        - name: DB_PWD
+        - name: db.pwd
           valueFrom:
             secretKeyRef:
               key: password
               name: userservice-dbsecret
-        - name: DB_HOST
+        - name: db.host
           value: {{.Values.yuuvis.client.userservice.database.address}}
-        - name: DB_PORT
+        - name: db.port
           value: {{.Values.yuuvis.client.userservice.database.port | quote }}
-        - name: DB_NAME
+        - name: db.name
           value: {{.Values.yuuvis.client.userservice.database.name}}
         image: {{.Values.yuuvis.client.userservice.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}

@@ -33,15 +33,10 @@ data:
 
     git add .
     git commit -m "init config"
-    
-    echo 'git push'    
-    if git push origin {{.Values.yuuvis.git.branch}}
-    then
-        echo 'push sucessful'
-    else
-        echo 'push unsucessful'
-        exit 1
-    fi
+
+    echo git push
+    git push origin {{.Values.yuuvis.git.branch}}
+    exit 0
 kind: ConfigMap
 metadata:
   name: initcommitconfigmap
