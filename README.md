@@ -194,11 +194,19 @@ Check version of upgraded helm chart
 helm list -n yuuvis 
 ```
 
+### 2021 summer
+
 The configuration files will not be changed during an upgrade.  
 Please follow the instructions provied at:
 
 * [breaking changes](https://help.optimal-systems.com/yuuvis_develop/display/YMY/Breaking+Changes)
 * [update instructions 2021 summer version](https://help.optimal-systems.com/yuuvis_develop/display/YMY/Update+Instructions+2021+Summer)
+
+With the 2021 summer version the webhook type *dms.request.update.metadata* is deprecated.  
+The type is still functional in this version, but will be removed in later versions.  
+Please migrate your config to use the new webhook type *dms.request.objects.upsert.storage-before*.  
+
+[deprecated webhook](https://help.optimal-systems.com/yuuvis_develop/pages/viewpage.action?pageId=40144034)
 
 ## Uninstall
 
