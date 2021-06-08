@@ -33,7 +33,7 @@ yuuvis:
       profiles: prod,docker,kubernetes
       instances: 1
       java:
-        maxHeap: -Xmx128m
+        maxHeap: -Xmx512m
     userservice:
       dockerImage: docker.yuuvis.org/yuuvis/userservice:1.2.0
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
@@ -80,7 +80,7 @@ yuuvis:
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
-        maxHeap: -Xmx128m
+        maxHeap: -Xmx512m
         
 initContainer:
   command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"
