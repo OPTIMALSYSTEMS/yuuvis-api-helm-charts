@@ -417,9 +417,9 @@ yuuvis:
       instances: 1
       port: 7221
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "1024Mi"
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
