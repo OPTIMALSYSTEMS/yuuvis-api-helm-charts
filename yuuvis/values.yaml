@@ -294,13 +294,13 @@ yuuvis:
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       port: 7450
       nodeport:
         use: false
         value: 30033
       requests:
-        memory: "128Mi"
+        memory: "512Mi"
     admin:
       dockerRegistry: docker.yuuvis.org/yuuvis/admin
       tag: 5.7.1.0
@@ -319,9 +319,9 @@ yuuvis:
       instances: 1
       port: 7251
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "512Mi"
     authentication:
       nodeport:
         use: true
@@ -332,9 +332,9 @@ yuuvis:
       instances: 1
       port: 8080
       requests:
-        memory: "128Mi"
+        memory: "512Mi"
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       volumes: |
         - name: keycloak-tls-selfsigned
           secret:
@@ -349,9 +349,9 @@ yuuvis:
       instances: 1
       port: 7282
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "256Mi"
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
       tag: 4.6.1
@@ -359,9 +359,9 @@ yuuvis:
       instances: 2
       port: 7430
       java:
-        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "256Mi"
+        memory: "1024Mi"
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,docker,kubernetes,redis,metrics
@@ -369,9 +369,9 @@ yuuvis:
       instances: 1
       port: 7291
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "1024Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
       tag: 4.6.1
@@ -379,9 +379,9 @@ yuuvis:
       instances: 1
       port: 7440
       requests:
-        memory: "128Mi"
+        memory: "256Mi"
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
       volumes: |
         - name: keycloak-tls-selfsigned
           secret:
@@ -397,9 +397,9 @@ yuuvis:
       instances: 1
       port: 7510
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "1024Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
       tag: 4.6.1
@@ -407,9 +407,9 @@ yuuvis:
       instances: 1
       port: 7500
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "1024Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
       tag: 4.6.1
@@ -427,9 +427,9 @@ yuuvis:
       instances: 1
       port: 7400
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "512Mi"
     archive:
       deploy: false
       dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice
@@ -437,9 +437,9 @@ yuuvis:
       profiles: prod,docker,storage
       instances: 1
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "512Mi"
       # if testMode: true a pvc will be created and mounted to the archiveservice container
       testMode: true
       storageClassName: standard
@@ -464,9 +464,9 @@ yuuvis:
       instances: 1
       port: 7332
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "512Mi"
       volumes: |
         - name: keycloak-tls-selfsigned
           secret:
@@ -482,8 +482,8 @@ yuuvis:
       instances: 1
       port: 7420
       java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
-        memory: "128Mi"
+        memory: "1024Mi"
 initContainer:
   command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"
