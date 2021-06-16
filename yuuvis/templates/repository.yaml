@@ -24,6 +24,7 @@ spec:
       - name: repository
         image: "{{.Values.yuuvis.services.repository.dockerRegistry}}:{{ .Values.yuuvis.services.repository.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        command: ["java", "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=/dumps/oom.bin", "-jar", "app.jar"]
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
           httpGet:
@@ -46,6 +47,8 @@ spec:
           requests:
             memory: {{.Values.yuuvis.services.repository.requests.memory}}
         env:
+        - name: REQUESTS_MAXPARALLEL
+          value: {{quote .Values.yuuvis.services.repository.maxRequests}}
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.repository.java.maxHeap}}
         - name: SPRING_PROFILES_ACTIVE
@@ -57,7 +60,14 @@ spec:
               key: CONFIGSERVICEURL
         ports:
         - containerPort: {{.Values.yuuvis.services.repository.port}}
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
+      volumes:
+      - name: heap-dumps
+        emptyDir: {}
       restartPolicy: Always
       automountServiceAccountToken: false
       imagePullSecrets:
       - name: yuuvisorg
+      

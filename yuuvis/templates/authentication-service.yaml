@@ -4,7 +4,6 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: authentication
-    yuuvis: "true"
   name: authentication
 spec:
   ports:
@@ -19,3 +18,19 @@ spec:
   {{- if .Values.yuuvis.services.authentication.nodeport.use }}
   type: NodePort
   {{- end}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: authentication-manage
+  name: authentication-manage
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.authentication.managePort}}
+  selector:
+    name: authentication
+  type: ClusterIP

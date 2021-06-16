@@ -28,7 +28,7 @@ spec:
         livenessProbe:
           httpGet:
             path: {{.Values.yuuvis.livenessProbe.path }}
-            port: {{.Values.yuuvis.services.authentication.port}}
+            port: {{.Values.yuuvis.services.authentication.managePort}}
           initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
@@ -37,7 +37,7 @@ spec:
         readinessProbe:
           httpGet:
             path: {{.Values.yuuvis.readinessProbe.path }}
-            port: {{.Values.yuuvis.services.authentication.port}}
+            port: {{.Values.yuuvis.services.authentication.managePort}}
           initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
           timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
