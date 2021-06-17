@@ -39,10 +39,7 @@ yuuvis:
     port: 6379
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
-
-    management.server.port: {{.Values.yuuvis.services.authentication.managePort}}
-    management.server.servlet.context-path: /
-
+    
     management:
       endpoints:
         web:
@@ -73,8 +70,9 @@ yuuvis:
 
     authorization.accesses:
     ### manage-endpoints
-      - endpoints: /manage/**
+      - endpoints: /manage/info,/manage/health
         expose: true
+      - endpoints: /manage/refresh
       - endpoints: /*/manage/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
     ### API-endpoints
@@ -406,7 +404,6 @@ yuuvis:
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
-      maxRequests: 1000
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
