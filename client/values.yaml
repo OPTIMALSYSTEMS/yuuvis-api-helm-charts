@@ -177,7 +177,7 @@ configfiles:
         <id>leadingTypeId</id>
         <propertyType>string</propertyType>
         <cardinality>single</cardinality>
-        <required>false</required>
+        <required>true</required>
       </propertyStringDefinition>
       <typeSecondaryDefinition>
         <id>leadingType</id>
