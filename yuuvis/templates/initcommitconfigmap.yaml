@@ -10,7 +10,7 @@ data:
     then
         echo git branch {{.Values.yuuvis.git.branch}} already exists
         cd {{.Values.yuuvis.git.name}}
-        if [ -f application-docker.yml]; 
+        if [ -f application-docker.yml ]; 
         then 
             echo application-docker.yml exists 
             exit 0
