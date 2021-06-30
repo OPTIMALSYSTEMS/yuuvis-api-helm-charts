@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: config-git-init-commit
+spec:
+  template:
+    spec:
+      containers:
+      - name: config-git-init-commit
+        image: alpine/git:latest
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '/yuuvis/script/initgit.sh']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: configyml
+        - mountPath: /yuuvis/data/system
+          name: systemconfig
+        - mountPath: /yuuvis/script/initgit.sh
+          name: initscript
+          subPath: initgit.sh
+      volumes:
+      - configMap:
+          name: initcommitconfigmap
+        name: initscript
+      - configMap:
+          name: profilesconfigmap
+        name: configyml
+      - configMap:
+          name: systemconfigmap
+        name: systemconfig
+      restartPolicy: OnFailure

@@ -1,0 +1,23 @@
+apiVersion: v1
+data:
+  checkgit.sh: |
+    git config --global user.email yuuvis-init@yuuvis.org
+    git config --global user.name yuuvis-init
+
+    echo git clone
+    if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} \
+        --branch {{.Values.yuuvis.git.branch}}; 
+    then
+        echo git branch {{.Values.yuuvis.git.branch}} exists
+        cd {{.Values.yuuvis.git.name}}
+        if [ -f application-docker.yml ]; 
+        then 
+            echo application-docker.yml exists 
+            exit 0
+        fi
+    fi
+    echo 'unexpected git state'
+    exit 1  
+kind: ConfigMap
+metadata:
+  name: initconfigserviceconfigmap
