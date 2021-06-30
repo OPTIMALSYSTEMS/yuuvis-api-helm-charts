@@ -20,15 +20,11 @@ spec:
       - name: init-config
         image: alpine/git:latest
         imagePullPolicy: IfNotPresent
-        command: ['sh', '/yuuvis/script/initgit.sh']
+        command: ['sh', '/yuuvis/script/checkgit.sh']
         volumeMounts:
-        - mountPath: /yuuvis/data
-          name: configyml
-        - mountPath: /yuuvis/data/system
-          name: systemconfig
-        - mountPath: /yuuvis/script/initgit.sh
+        - mountPath: /yuuvis/script/checkgit.sh
           name: initscript
-          subPath: initgit.sh
+          subPath: checkgit.sh
       containers:
       - name: configservice
         image: "{{.Values.yuuvis.services.config.dockerRegistry}}:{{ .Values.yuuvis.services.config.tag }}"
@@ -85,12 +81,6 @@ spec:
       - name: yuuvisorg
       volumes:
       - configMap:
-          name: initcommitconfigmap
+          name: initconfigserviceconfigmap
         name: initscript
-      - configMap:
-          name: profilesconfigmap
-        name: configyml
-      - configMap:
-          name: systemconfigmap
-        name: systemconfig
 

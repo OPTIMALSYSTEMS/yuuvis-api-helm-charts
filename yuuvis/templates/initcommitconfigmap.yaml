@@ -41,7 +41,7 @@ data:
     else
         echo 'push unsucessful'
         exit 1
-    fi
+    fi    
 kind: ConfigMap
 metadata:
   name: initcommitconfigmap
