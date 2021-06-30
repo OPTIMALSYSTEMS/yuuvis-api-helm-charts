@@ -41,6 +41,18 @@ yuuvis:
         privilege:
           user: postgres
           password: changeme
-        
+    admin:
+      dockerImage: docker.yuuvis.org/yuuvis/bpm-admin:0.0.4
+      profiles: 
+      instances: 1
+      java:
+        maxHeap: -Xmx128m
+      serverConfigProcessServerAddress: http://bpm-engine
+      serverConfigCmmnServerAddress: http://bpm-engine
+      serverConfigDmnServerAddress: http://bpm-engine
+      serverConfigFormServerAddress: http://bpm-engine
+      serverConfigContentServerAddress: http://bpm-engine
+      serverConfigAppServerAddress: http://bpm-engine  
+       
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

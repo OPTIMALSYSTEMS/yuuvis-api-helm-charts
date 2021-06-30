@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: bpm-admin
+  name: bpm-admin
+spec:
+  replicas: {{.Values.yuuvis.bpm.admin.instances}}
+  selector:
+    matchLabels:
+      name: bpm-admin
+  template:
+    metadata:
+      labels:
+        name: bpm-admin
+    spec:
+      containers:
+      - name: bpm-admin
+        image: {{.Values.yuuvis.bpm.admin.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.bpm.admin.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: BPM_ADMIN_APP_SERVER-CONFIG_PROCESS_SERVER-ADDRESS
+          value: {{ .Values.yuuvis.bpm.admin.serverConfigProcessServerAddress}}
+        - name: BPM_ADMIN_APP_SERVER-CONFIG_CMMN_SERVER-ADDRESS
+          value: {{ .Values.yuuvis.bpm.admin.serverConfigCmmnServerAddress}}
+        - name: BPM_ADMIN_APP_SERVER-CONFIG_DMN_SERVER-ADDRESS
+          value: {{ .Values.yuuvis.bpm.admin.serverConfigDmnServerAddress}}
+        - name: BPM_ADMIN_APP_SERVER-CONFIG_FORM_SERVER-ADDRESS
+          value: {{ .Values.yuuvis.bpm.admin.serverConfigFormServerAddress}}
+        - name: BPM_ADMIN_APP_SERVER-CONFIG_CONTENT_SERVER-ADDRESS
+          value: {{ .Values.yuuvis.bpm.admin.serverConfigContentServerAddress}}
+        - name: BPM_ADMIN_APP_SERVER-CONFIG_APP_SERVER-ADDRESS
+          value: {{ .Values.yuuvis.bpm.admin.serverConfigAppServerAddress}}
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
