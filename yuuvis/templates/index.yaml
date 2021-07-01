@@ -16,6 +16,13 @@ spec:
         name: index
     spec:
       initContainers:
+      - name: dependency-check
+        image: radial/busyboxplus:curl
+        imagePullPolicy: IfNotPresent
+        command: 
+          - "sh" 
+          - "-c" 
+          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.index.dependency}} != "200" ]]; do sleep 11; done'
       - name: init-index
         image: busybox
         imagePullPolicy: IfNotPresent

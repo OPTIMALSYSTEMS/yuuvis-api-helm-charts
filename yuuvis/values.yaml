@@ -366,6 +366,7 @@ yuuvis:
       tag: 4.7.3
       instances: 1
       port: 7291
+      dependency: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
@@ -404,6 +405,7 @@ yuuvis:
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
+      dependency: http://minio.infrastructure.svc.cluster.local:9000
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
@@ -414,6 +416,7 @@ yuuvis:
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
+      dependency: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
