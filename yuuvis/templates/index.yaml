@@ -22,7 +22,7 @@ spec:
         command: 
           - "sh" 
           - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.index.dependency}} != "200" ]]; do sleep 11; done'
+          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.index.dependency}})" != "200" ]]; do sleep 11; done'
       - name: init-index
         image: busybox
         imagePullPolicy: IfNotPresent

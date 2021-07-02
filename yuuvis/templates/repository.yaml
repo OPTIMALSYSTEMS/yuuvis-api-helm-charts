@@ -22,7 +22,7 @@ spec:
         command: 
           - "sh" 
           - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.repository.dependency}} != "403" ]]; do sleep 11; done'
+          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.repository.dependency}})" != "403" ]]; do sleep 11; done'
       - name: init-repository
         image: busybox
         imagePullPolicy: IfNotPresent
