@@ -25,13 +25,6 @@ spec:
           - "-c" 
           - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.index.dependencyCheck.url}})" != "200" ]]; do sleep 11; done'      
       {{- end}}
-      - name: dependency-check
-        image: radial/busyboxplus:curl
-        imagePullPolicy: IfNotPresent
-        command: 
-          - "sh" 
-          - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.index.dependency}})" != "200" ]]; do sleep 11; done'
       - name: init-index
         image: busybox
         imagePullPolicy: IfNotPresent
