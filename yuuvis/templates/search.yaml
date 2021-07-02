@@ -16,13 +16,15 @@ spec:
         name: search
     spec:
       initContainers:
+      {{- if .Values.yuuvis.services.search.dependencyCheck.enable }}
       - name: dependency-check
         image: radial/busyboxplus:curl
         imagePullPolicy: IfNotPresent
         command: 
           - "sh" 
           - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.search.dependency}})" != "200" ]]; do sleep 11; done'
+          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.search.dependencyCheck.url}})" != "200" ]]; do sleep 11; done'      
+      {{- end}}
       - name: init-search
         image: busybox
         imagePullPolicy: IfNotPresent

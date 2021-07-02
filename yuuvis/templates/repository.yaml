@@ -16,13 +16,15 @@ spec:
         name: repository
     spec:
       initContainers:
+      {{- if .Values.yuuvis.services.repository.dependencyCheck.enable }}
       - name: dependency-check
         image: radial/busyboxplus:curl
         imagePullPolicy: IfNotPresent
         command: 
           - "sh" 
           - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.repository.dependency}})" != "403" ]]; do sleep 11; done'
+          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.repository.dependencyCheck.url}})" != "403" ]]; do sleep 11; done'      
+      {{- end}}
       - name: init-repository
         image: busybox
         imagePullPolicy: IfNotPresent
