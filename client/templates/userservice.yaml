@@ -88,8 +88,6 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['bash', '/yuuvis/script/init.bash']
         volumeMounts:
-        - mountPath: /yuuvis/data
-          name: configyml
         - mountPath: /yuuvis/script/init.bash
           name: initscript
           subPath: init.bash
@@ -98,9 +96,6 @@ spec:
       - configMap:
           name: inituserserviceconfigmap
         name: initscript
-      - configMap:
-          name: userserviceconfigconfigmap
-        name: configyml
       {{- if .Values.yuuvis.client.userservice.database.createdb }}
       - configMap:
           name: inituserservicedbconfigmap
