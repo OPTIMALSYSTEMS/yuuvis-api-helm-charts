@@ -21,7 +21,7 @@ data:
       echo 'must create application-userservice.yml'
       postyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/application-userservice.yml" http://configservice/api/resources/application-userservice.yml)
       
-      if [ $getuseryml != 200 ]
+      if [ $postyml != 200 ]
       then
         echo 'post userservice yml failed'
         exit 1
