@@ -1,0 +1,14 @@
+{{- if .Values.yuuvis.management.console.deploy }}
+apiVersion: v1
+data:
+  config.json: |+
+    {
+      "productTitle": "yuuvis® Impulse",
+      "appTitle": "management console",
+      "apiBase": "/api/",
+      "registerCustomerByUser": false
+    }
+kind: ConfigMap
+metadata:
+  name: console-client-config
+{{- end}}

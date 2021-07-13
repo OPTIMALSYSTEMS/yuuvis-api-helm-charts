@@ -6,7 +6,7 @@ metadata:
     name: architect
   name: architect
 spec:
-  replicas: 1
+  replicas: {{.Values.yuuvis.client.architect.instances}}
   selector:
     matchLabels:
       name: architect

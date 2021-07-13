@@ -161,6 +161,29 @@ kubectl get po -n yuuvis
 helm install rendition ./rendition --namespace yuuvis
 ```
 
+### Install the yuuvis rendition Helm chart
+
+install management services with:
+```shell
+kubectl get po -n yuuvis
+helm install management ./management --namespace yuuvis
+```
+
+The management helm chart contains services for managing tenants.  
+It provides a tenant-management api and a tenant management console.  
+By default the deployment of the tenant management console services is disabled.  
+To deploy the services the parameter *yuuvis.management.console.deploy* must be set to *true* in the values.yaml.  
+
+```javascript
+yuuvis:
+  management:
+    console:
+      deploy: true
+```
+
+For configuration of the tenant management console client please refer to:
+[tenant management console client configuration](https://help.optimal-systems.com/yuuvis_develop/pages/viewpage.action?pageId=51839656)
+
 #### Using Grafana 
 * Make Grafana pod accessible
 

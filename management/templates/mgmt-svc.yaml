@@ -1,0 +1,17 @@
+{{- if .Values.yuuvis.management.console.deploy }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: console-client
+    yuuvis: "true"
+  name: console-client
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: 80
+  selector:
+    name: console-client
+{{- end}}

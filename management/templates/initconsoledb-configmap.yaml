@@ -1,0 +1,24 @@
+{{- if .Values.yuuvis.management.console.deploy }}
+{{- if .Values.yuuvis.management.console.api.config.db.createdb }}
+apiVersion: v1
+data:
+  initdb.sh: |-
+    if [ "$( psql -h {{.Values.yuuvis.management.console.api.config.db.host}} -p {{.Values.yuuvis.management.console.api.config.db.port}} -U $PGUSER -tAc "SELECT 1 FROM pg_database WHERE datname='${DBNAME}';" )" = '1' ]
+    then
+        echo "Database already exists"
+    else
+        psql -h {{.Values.yuuvis.management.console.api.config.db.host}} -p {{.Values.yuuvis.management.console.api.config.db.port}} -U $PGUSER -c "CREATE DATABASE ${DBNAME};";
+    fi
+    if [ "$( psql -h {{.Values.yuuvis.management.console.api.config.db.host}} -p {{.Values.yuuvis.management.console.api.config.db.port}} -U $PGUSER -tAc "SELECT 1 FROM pg_roles WHERE rolname='${DBUSER}'" )" = '1' ]
+    then
+        echo "user already exists"
+    else
+        psql -h {{.Values.yuuvis.management.console.api.config.db.host}} -p {{.Values.yuuvis.management.console.api.config.db.port}} -U $PGUSER -c "CREATE USER ${DBUSER} WITH ENCRYPTED PASSWORD '${DBPWD}';";
+    fi
+    psql -h {{.Values.yuuvis.management.console.api.config.db.host}} -p {{.Values.yuuvis.management.console.api.config.db.port}} -U $PGUSER -c "GRANT ALL PRIVILEGES ON DATABASE ${DBNAME} TO ${DBUSER};";
+    psql -h {{.Values.yuuvis.management.console.api.config.db.host}} -p {{.Values.yuuvis.management.console.api.config.db.port}} -U $PGUSER -d $DBNAME -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"";
+kind: ConfigMap
+metadata:
+  name: initconsoledbconfigmap
+{{- end}}
+{{- end}}

@@ -39,7 +39,7 @@ yuuvis:
     port: 6379
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
-    
+
     management:
       endpoints:
         web:
