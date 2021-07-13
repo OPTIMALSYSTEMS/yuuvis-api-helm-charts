@@ -161,7 +161,7 @@ kubectl get po -n yuuvis
 helm install rendition ./rendition --namespace yuuvis
 ```
 
-### Install the yuuvis rendition Helm chart
+### Install the yuuvis management Helm chart
 
 install management services with:
 ```shell
