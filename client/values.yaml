@@ -64,7 +64,7 @@ yuuvis:
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.0.1
+      dockerImage: docker.yuuvis.org/yuuvis/client:2.0.2
       instances: 1
     custom:
       dockerImage: docker.yuuvis.org/yuuvis/client:2.0.1
