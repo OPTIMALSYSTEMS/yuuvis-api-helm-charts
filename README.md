@@ -28,7 +28,7 @@ helm dep up monitoring
 helm install monitoring ./monitoring -n monitoring --create-namespace --debug
 ```
 
-Further information on configuration and available dashboards can be found in the [monitoring module readme](momentum/monitoring/README.md).
+Further information on configuration and available dashboards can be found in the [monitoring module readme](monitoring/README.md).
 
 ## yuuvis installation
 

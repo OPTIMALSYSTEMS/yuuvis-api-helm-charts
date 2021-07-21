@@ -67,6 +67,6 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: {{.Values.elasticsearch.storage}}
+          storage: {{.Values.elasticsearch.highAvailability.master.storage}}
       storageClassName: {{.Values.elasticsearch.storageClassName}}
 {{- end}}       

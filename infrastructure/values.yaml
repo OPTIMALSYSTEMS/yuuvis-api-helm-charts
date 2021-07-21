@@ -54,10 +54,12 @@ elasticsearch:
     enabled: true
     data:
       nodes: 2
+      storage: 200Gi
       memory:
         requests: "8Gi"
     master:
       nodes: 3
+      storage: 50Gi
       initial_master_nodes: elasticsearch-master-0, elasticsearch-master-1, elasticsearch-master-2
       memory:
         requests: "8Gi" 
