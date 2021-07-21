@@ -64,7 +64,7 @@ spec:
   resources:
     requests:
       storage: {{.Values.gogs.persistence.size}}
-  storageClassName: {{.Values.gogs.persistence.storageClassName}}    
+  storageClassName: {{.Values.gogs.persistence.storageClass}}    
 ---
 apiVersion: v1
 data:

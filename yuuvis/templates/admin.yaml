@@ -44,7 +44,9 @@ spec:
         {{- end}}
         resources:
           requests:
-            memory: {{.Values.yuuvis.services.admin.requests.memory}}
+            memory: {{.Values.yuuvis.services.admin.memory.requests}}
+          limits:
+            memory: {{.Values.yuuvis.services.admin.memory.limits}}  
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.admin.java.maxHeap}}

@@ -1,14 +1,15 @@
-{{- if not .Values.elasticsearch.highAvailability.enabled}}
+{{- if .Values.elasticsearch.highAvailability.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elasticsearch
+  name: elasticsearch-data
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: elasticsearch
+    role: data
 spec:
   serviceName: elasticsearch
-  replicas: {{.Values.elasticsearch.replicas}}
+  replicas: {{.Values.elasticsearch.highAvailability.data.nodes}}
   selector:
     matchLabels:
       name: elasticsearch
@@ -35,7 +36,7 @@ spec:
         args:
         - elasticsearch
         - -E
-        - node.master=true
+        - node.master=false
         - -E
         - node.data=true
         - -E
@@ -43,10 +44,10 @@ spec:
         - -E
         - discovery.seed_hosts=elasticsearch
         - -E
-        - cluster.initial_master_nodes={{.Values.elasticsearch.initial_master_nodes}}
+        - cluster.initial_master_nodes={{.Values.elasticsearch.highAvailability.master.initial_master_nodes}}
         resources:
           requests:
-            memory: {{.Values.elasticsearch.memory.requests}}
+            memory: {{.Values.elasticsearch.highAvailability.data.memory.requests}}
         ports:
         - containerPort: 9300
           name: transport
@@ -54,9 +55,6 @@ spec:
         - containerPort: 9200
           name: http
           protocol: TCP
-        env:
-        - name: "ES_JAVA_OPTS"
-          value: {{.Values.elasticsearch.javaOpts}}
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data

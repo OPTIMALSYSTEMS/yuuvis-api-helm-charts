@@ -44,7 +44,9 @@ spec:
         {{- end}}
         resources:
           requests:
-            memory: {{.Values.yuuvis.services.authentication.requests.memory}}
+            memory: {{.Values.yuuvis.services.authentication.memory.requests}}
+          limits:
+            memory: {{.Values.yuuvis.services.authentication.memory.limits}}  
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.authentication.java.maxHeap}}
