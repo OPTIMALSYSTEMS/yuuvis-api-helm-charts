@@ -32,9 +32,7 @@ yuuvis:
     init:
       index:
         name: yuuvis
-        # Each shard should hold betweeen 10-50GB of data
-        number_of_shards: 2
-        # Number of data nodes minus original data node being replicated 
+        number_of_shards: 3
         number_of_replicas: 1
   redis:
     host: redis-master.infrastructure
@@ -292,15 +290,14 @@ yuuvis:
       tag: 4.7.4
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
+      java:
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       port: 7450
       nodeport:
         use: false
         value: 30033
-      java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "640Mi"
+      requests:
+        memory: "512Mi"
     admin:
       dockerRegistry: docker.yuuvis.org/yuuvis/admin
       tag: 5.7.2.1
@@ -309,10 +306,9 @@ yuuvis:
       port: 7273
       nodePort: 30273
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "640Mi"
+        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "128Mi"
     audit:
       dockerRegistry: docker.yuuvis.org/yuuvis/audit
       tag: 4.7.4
@@ -320,10 +316,9 @@ yuuvis:
       instances: 1
       port: 7251
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "768Mi"
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "512Mi"
     authentication:
       nodeport:
         use: true
@@ -334,11 +329,10 @@ yuuvis:
       instances: 1
       port: 8080
       managePort: 9091
+      requests:
+        memory: "512Mi"
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "512Mi"
-        limits: "1024Mi"
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       volumes: |
         - name: keycloak-tls-selfsigned
           secret:
@@ -353,10 +347,9 @@ yuuvis:
       instances: 1
       port: 7282
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "640Mi"
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "256Mi"
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
       tag: 4.7.4
@@ -364,10 +357,9 @@ yuuvis:
       instances: 2
       port: 7430
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "640Mi"
-        limits: "1024Mi"
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "1024Mi"
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,docker,kubernetes,redis,metrics
@@ -378,21 +370,19 @@ yuuvis:
         enable: true
         url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "768Mi"
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "1024Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
       tag: 4.7.4
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
+      requests:
+        memory: "256Mi"
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "640Mi"
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
       volumes: |
         - name: keycloak-tls-selfsigned
           secret:
@@ -408,25 +398,22 @@ yuuvis:
       instances: 1
       port: 7510
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "640Mi"
-        limits: "1024Mi"  
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "1024Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
       tag: 4.7.4
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
-      maxUsers: 100000
       dependencyCheck:
         enable: false
         url: http://minio.infrastructure.svc.cluster.local:9000
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "640Mi"
-        limits: "1024Mi"
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "1024Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
       tag: 4.7.4
@@ -437,10 +424,9 @@ yuuvis:
         enable: true
         url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "640Mi"
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "1024Mi"
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
@@ -448,10 +434,9 @@ yuuvis:
       instances: 1
       port: 7400
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "768Mi"
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "512Mi"
     archive:
       deploy: false
       dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice
@@ -459,10 +444,9 @@ yuuvis:
       profiles: prod,docker,storage
       instances: 1
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "768Mi"
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "512Mi"
       # if testMode: true a pvc will be created and mounted to the archiveservice container
       testMode: true
       storageClassName: standard
@@ -487,10 +471,9 @@ yuuvis:
       instances: 1
       port: 7332
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "768Mi"
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "512Mi"
       volumes: |
         - name: keycloak-tls-selfsigned
           secret:
@@ -505,13 +488,9 @@ yuuvis:
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420
-      dependencyCheck:
-        enable: true
-        url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
-        maxHeap: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      memory:
-        requests: "384Mi"
-        limits: "640Mi"
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "1024Mi"
 initContainer:
   command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"

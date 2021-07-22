@@ -16,15 +16,6 @@ spec:
         name: textextractor
     spec:
       initContainers:
-      {{- if .Values.yuuvis.services.textextractor.dependencyCheck.enable }}
-      - name: dependency-check
-        image: radial/busyboxplus:curl
-        imagePullPolicy: IfNotPresent
-        command: 
-          - "sh" 
-          - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.textextractor.dependencyCheck.url}})" != "200" ]]; do sleep 11; done'      
-      {{- end}}
       - name: init-textextractor
         image: busybox
         imagePullPolicy: IfNotPresent
@@ -53,9 +44,7 @@ spec:
        {{- end}}
         resources:
           requests:
-            memory: {{.Values.yuuvis.services.textextractor.memory.requests}}
-          limits:
-            memory: {{.Values.yuuvis.services.textextractor.memory.limits}} 
+            memory:  {{.Values.yuuvis.services.textextractor.requests.memory}}
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.textextractor.java.maxHeap}}
