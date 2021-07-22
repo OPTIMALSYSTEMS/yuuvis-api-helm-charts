@@ -44,31 +44,17 @@ elasticsearch:
   image: docker.yuuvis.org/yuuvis/elasticsearch:2021-02-09
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
-  storage: 100Gi
+  storage: 5Gi
   storageClassName: standard
+  javaOpts: -Xms1024m -Xmx1024m
+  replicas: 1
   port: 9300
   targetPort: 9300
   port2: 9200
   targetPort2: 9200
-  highAvailability:
-    enabled: true
-    data:
-      nodes: 2
-      storage: 200Gi
-      memory:
-        requests: "8Gi"
-    master:
-      nodes: 3
-      storage: 50Gi
-      initial_master_nodes: elasticsearch-master-0, elasticsearch-master-1, elasticsearch-master-2
-      memory:
-        requests: "8Gi" 
-  # Default values if high availability is disabled. Nodes function as both data and master nodes simultaneously.
-  nodes: 1
-  initial_master_nodes: elasticsearch-0  
-  memory:
-    requests: "2Gi"
-
+  # value for the elastic parameter uster.initial_master_nodes
+  # if more than 1 node should be used, adjust initial master nodes value
+  initial_master_nodes: elasticsearch-0
 
 postgresql:
   enabled: true
@@ -87,6 +73,7 @@ postgresql:
     enabled: false
   initdbScriptsConfigMap: postgresql-initdb
   postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB"}
+
 
 rabbitmq:
   enabled: true

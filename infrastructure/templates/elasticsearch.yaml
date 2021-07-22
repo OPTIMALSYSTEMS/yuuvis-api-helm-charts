@@ -1,4 +1,3 @@
-{{- if not .Values.elasticsearch.highAvailability.enabled}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -35,18 +34,9 @@ spec:
         args:
         - elasticsearch
         - -E
-        - node.master=true
-        - -E
-        - node.data=true
-        - -E
-        - node.ingest=false
-        - -E
         - discovery.seed_hosts=elasticsearch
         - -E
         - cluster.initial_master_nodes={{.Values.elasticsearch.initial_master_nodes}}
-        resources:
-          requests:
-            memory: {{.Values.elasticsearch.memory.requests}}
         ports:
         - containerPort: 9300
           name: transport
@@ -71,4 +61,3 @@ spec:
         requests:
           storage: {{.Values.elasticsearch.storage}}
       storageClassName: {{.Values.elasticsearch.storageClassName}}
-{{- end}}    
