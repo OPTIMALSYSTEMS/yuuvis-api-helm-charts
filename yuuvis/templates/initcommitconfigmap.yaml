@@ -4,23 +4,31 @@ data:
     git config --global user.email yuuvis-init@yuuvis.org
     git config --global user.name yuuvis-init
 
+    until wget -q --spider {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.server}}
+    do 
+        echo waiting for git
+        sleep 11
+    done
+    
     echo git clone
+    
     if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} \
         --branch {{.Values.yuuvis.git.branch}}; 
     then
         echo git branch {{.Values.yuuvis.git.branch}} already exists
         cd {{.Values.yuuvis.git.name}}
-        if [ -f application-docker.yml ]; 
-        then 
-            echo application-docker.yml exists 
-            exit 0
-        fi
     else
         git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}}
         cd {{.Values.yuuvis.git.name}}
         echo creating new {{.Values.yuuvis.git.branch}}
         echo git checkout -b
         git checkout -b {{.Values.yuuvis.git.branch}}
+    fi
+    
+    if [ -f application-docker.yml ]; 
+    then 
+        echo application-docker.yml exists 
+        exit 0
     fi
 
     cp /yuuvis/data/*.yml . 
@@ -33,7 +41,7 @@ data:
 
     git add .
     git commit -m "init config"
-   
+    
     echo 'git push'    
     if git push origin {{.Values.yuuvis.git.branch}}
     then
@@ -41,7 +49,7 @@ data:
     else
         echo 'push unsucessful'
         exit 1
-    fi
+    fi    
 kind: ConfigMap
 metadata:
   name: initcommitconfigmap

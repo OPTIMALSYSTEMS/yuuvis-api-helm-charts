@@ -13,6 +13,7 @@ yuuvis:
   git:
     protocol: http
     url: gogs.infrastructure/yuuvis/yuuvis-config.git
+    server: gogs.infrastructure
     name: yuuvis-config
     user: yuuvis
     password: changeme
