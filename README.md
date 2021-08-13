@@ -149,15 +149,6 @@ kubectl get po -n yuuvis
 helm install rendition ./rendition --namespace yuuvis
 ```
 
-#### Using Grafana 
-* Make Grafana pod accessible
-
-```shell
-kubectl port-forward prometheus-operator-grafana-xxxxx 3000 -n infrastructure
-```
-
-* Dashboards need to be exported via share -> export -> export for sharing externally
-
 ## Version upgrades
 
 The upgrade of the infrastructure chart is not supported at the moment.
