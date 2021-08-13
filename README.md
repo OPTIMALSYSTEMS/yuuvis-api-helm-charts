@@ -20,6 +20,16 @@ limitations under the License.
 
 Please use helm version [v3.2.4](https://github.com/helm/helm/releases/tag/v3.2.4), newer versions may not be compatible with some of the helm charts.
 
+#### Installing the Monitoring Helm chart
+
+Installing monitoring chart
+```
+helm dep up monitoring
+helm install monitoring ./monitoring -n monitoring --create-namespace --debug
+```
+
+Further information on configuration and available dashboards can be found in the [monitoring module readme](monitoring/README.md).
+
 ## yuuvis installation
 
 First please add your credentials for the docker.yuuvis.org registry in the values yaml files of the helm charts.  For any questions about credentials please contact support@yuuvis.com.
@@ -68,27 +78,6 @@ There are 2 jobs that prepare the git server and the keycloak environment that n
 NAME                              COMPLETIONS   DURATION   AGE
 gogsrepo-init                     1/1           83s        8m4s
 keycloak-create-selfsigned-cert   1/1           8m4s       8m4s
-```
-
-#### Installing Monitoring services
-
-Installing Prometheus Operator
-```
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.38/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
-
-helm install prometheus-operator prometheus-community/prometheus-operator  --namespace infrastructure --values ./monitoring/values.yaml --set prometheusOperator.createCustomResource=false
-```
-
-Installing the monitoring chart
-```shell
-helm install monitoring ./monitoring --namespace infrastructure
 ```
 
 #### Edit the yuuvis values.yaml
@@ -179,6 +168,7 @@ Check version of deployed helm chart
 
 ```shell
 helm list -n yuuvis 
+helm list -n monitoring
 ```
 
 
@@ -186,6 +176,7 @@ helm list -n yuuvis
 helm upgrade yuuvis ./yuuvis --namespace yuuvis 
 helm upgrade client ./client --namespace yuuvis 
 helm upgrade bpm ./bpm --namespace yuuvis 
+helm upgrade monitoring ./monitoring --namespace monitoring 
 ```
 Check version of upgraded helm chart
 
