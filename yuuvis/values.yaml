@@ -73,6 +73,7 @@ yuuvis:
       - endpoints: /manage/info,/manage/health
         expose: true
       - endpoints: /manage/refresh
+        expose: true
       - endpoints: /*/manage/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
     ### API-endpoints
