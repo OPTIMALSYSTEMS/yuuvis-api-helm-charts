@@ -302,7 +302,7 @@ yuuvis:
         memory: "512Mi"
     admin:
       dockerRegistry: docker.yuuvis.org/yuuvis/admin
-      tag: 5.7.2.2
+      tag: 5.7.2.3
       profiles: prod,docker,kubernetes
       instances: 1
       port: 7273
@@ -345,7 +345,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 5.7.2.2
+      tag: 5.7.2.3
       instances: 1
       port: 7282
       java:
