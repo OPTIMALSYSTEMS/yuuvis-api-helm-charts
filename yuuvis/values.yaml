@@ -505,6 +505,9 @@ yuuvis:
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420
+      dependencyCheck:
+        enable: true
+        url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
