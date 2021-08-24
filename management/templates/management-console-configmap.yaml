@@ -47,5 +47,5 @@ data:
     IP_KEYCLOAK_HOST={{.Values.yuuvis.management.console.api.config.ip.keycloak.host}}
 kind: ConfigMap
 metadata:
-  name: console-app-config
+  name: management-console-app-config
 {{- end}}

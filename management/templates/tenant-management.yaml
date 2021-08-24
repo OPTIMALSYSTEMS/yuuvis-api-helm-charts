@@ -7,7 +7,7 @@ metadata:
     name: tenant-management
   name: tenant-management
 spec:
-  replicas: {{.Values.yuuvis.apitm.instances}}
+  replicas: {{.Values.yuuvis.tenantmanagement.instances}}
   selector:
     matchLabels:
       name: tenant-management
@@ -24,14 +24,14 @@ spec:
       containers:
       - env:
         - name: JAVA_OPTS
-          value: {{.Values.yuuvis.apitm.java.maxHeap}}
+          value: {{.Values.yuuvis.tenantmanagement.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
-          value: {{.Values.yuuvis.apitm.profiles}}
+          value: {{.Values.yuuvis.tenantmanagement.profiles}}
         - name: CLIENT_ROOTURL
-          value: {{.Values.yuuvis.apitm.client.rooturl}}
-        image: "{{.Values.yuuvis.apitm.dockerImage }}"
+          value: {{.Values.yuuvis.tenantmanagement.client.rooturl}}
+        image: "{{.Values.yuuvis.tenantmanagement.dockerImage }}"
         imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -55,13 +55,13 @@ spec:
         ports:
         - containerPort: 7560
           protocol: TCP
-        {{- if .Values.yuuvis.apitm.volumeMounts }}
+        {{- if .Values.yuuvis.tenantmanagement.volumeMounts }}
         volumeMounts:
-{{ tpl .Values.yuuvis.apitm.volumeMounts . | indent 8 }}
+{{ tpl .Values.yuuvis.tenantmanagement.volumeMounts . | indent 8 }}
         {{- end }}
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
-      {{- if .Values.yuuvis.apitm.volumes }}
+      {{- if .Values.yuuvis.tenantmanagement.volumes }}
       volumes:
-{{ tpl .Values.yuuvis.apitm.volumes . | indent 6 }}
+{{ tpl .Values.yuuvis.tenantmanagement.volumes . | indent 6 }}
       {{- end}}

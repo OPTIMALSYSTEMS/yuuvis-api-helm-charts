@@ -4,17 +4,17 @@ kind: Deployment
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
-    name: console-client
-  name: console-client
+    name: management-console-client
+  name: management-console-client
 spec:
   replicas: {{.Values.yuuvis.management.console.client.instances}}
   selector:
     matchLabels:
-      name: console-client
+      name: management-console-client
   template:
     metadata:
       labels:
-        name: console-client
+        name: management-console-client
     spec:
       containers:
       - name: console-client
@@ -29,7 +29,7 @@ spec:
       volumes:
       - name: client-configmap-volume
         configMap:
-          name: console-client-config
+          name: management-console-client-config
           items:
           - key: config.json
             path: config.json

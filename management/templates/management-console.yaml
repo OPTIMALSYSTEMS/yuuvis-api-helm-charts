@@ -3,20 +3,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: console
-  name: console
+    app: management-console
+  name: management-console
 spec:
   replicas: {{.Values.yuuvis.management.console.api.instances}}
   selector:
     matchLabels:
-      app: console
+      app: management-console
   template:
     metadata:
       labels:
-        app: console
+        app: management-console
     spec:
       containers:
-      - name: console
+      - name: management-console
         image: "{{.Values.yuuvis.management.console.api.dockerImage}}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         ports:
@@ -64,7 +64,7 @@ spec:
       volumes:
       - name: app-configmap-volume
         configMap:
-          name: console-app-config
+          name: management-console-app-config
           items:
           - key: .env
             path: .env

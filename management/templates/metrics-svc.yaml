@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
-    name: metricsservice
+    name: metrics
   name: metricsservice
 spec:
   ports:
@@ -12,5 +12,5 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    name: metricsservice
+    name: metrics
   type: ClusterIP

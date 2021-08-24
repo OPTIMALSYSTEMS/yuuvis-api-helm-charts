@@ -3,36 +3,36 @@ kind: Deployment
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
-    name: metricsservice
-  name: metricsservice
+    name: metrics
+  name: metrics
 spec:
-  replicas: {{.Values.yuuvis.metricsservice.instances}}
+  replicas: {{.Values.yuuvis.metrics.instances}}
   selector:
     matchLabels:
-      name: metricsservice
+      name: metrics
   template:
     metadata:
       labels:
-        name: metricsservice
+        name: metrics
     spec:
       containers:
       - env:
         - name: JAVA_OPTS
-          value: {{.Values.yuuvis.metricsservice.java.maxHeap}}
+          value: {{.Values.yuuvis.metrics.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
-          value: {{.Values.yuuvis.metricsservice.profiles}}
-        image: "{{.Values.yuuvis.metricsservice.dockerImage}}"
+          value: {{.Values.yuuvis.metrics.profiles}}
+        image: "{{.Values.yuuvis.metrics.dockerImage}}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
-        name: metricsservice
+        name: metrics
         ports:
         - containerPort: 8080
           protocol: TCP
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
       initContainers:
-      - name: init-metricsservice
+      - name: init-metrics
         image: busybox
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]

@@ -18,14 +18,14 @@ yuuvis:
     periodSeconds: 30
     timeoutSeconds: 5
     path: /manage/health
-  metricsservice:
+  metrics:
     dockerImage: docker.yuuvis.org/yuuvis/metrics:1.2.0
     profiles: postgres,dbs
     instances: 1
     java:
       maxHeap: -Xmx128m
-  apitm:
-    dockerImage: docker.yuuvis.org/yuuvis/tenant-management:1.4.1
+  tenantmanagement:
+    dockerImage: docker.yuuvis.org/yuuvis/tenant-management:1.5.0
     profiles: prod,docker,kubernetes,oauth2
     instances: 1
     java:
@@ -67,7 +67,7 @@ yuuvis:
           db:
             host: postgresql.infrastructure
             port: "5432"
-            name: consoledb
+            name: changeme
             user: changeme
             password: changeme
             createdb: true
@@ -80,7 +80,7 @@ yuuvis:
             # the privilege user must have the rights to create databases, users
             # and grand privileges to users
             privilege:
-              user: postgres
+              user: changeme
               password: changeme
           smtp:
             host: changeme

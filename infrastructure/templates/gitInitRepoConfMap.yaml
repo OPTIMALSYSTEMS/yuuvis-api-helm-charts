@@ -1,24 +1,36 @@
 apiVersion: v1
 data:
   gitInitRepo.sh: |-
-    until $(curl --output /dev/null --silent --head --fail http://gogs);
+    until $(curl --output /dev/null --silent --head --fail http://gitea-http:3000);
     do 
-      echo 'waiting for gogs'
+      echo 'waiting for gitea'
       sleep 11;
     done
 
     sleep 42
 
     echo 'create user'
-    curl -d "user_name={{.Values.gogs.git.user}}&email=yuuvis%40yuuvis.org&password={{.Values.gogs.git.password}}&retype={{.Values.gogs.git.password}}" -c cookies.txt http://gogs/user/sign_up 
-
-    echo 'login git'
-    CSRF=$(cat ./cookies.txt | grep _csrf | cut -f 7)
-    curl -d "_csrf=$CSRF&user_name={{.Values.gogs.git.user}}&password={{.Values.gogs.git.password}}" -c cookies2.txt -L http://gogs/user/login
-
+    curl -X 'POST' \
+    'http://gitea_admin:{{.Values.gitea.gitea.admin.password}}@gitea-http:3000/api/v1/admin/users' \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+       "email": "{{.Values.yuuvis.git.user}}@yuuvis.com",
+       "must_change_password": false,
+       "password": "{{.Values.yuuvis.git.password}}",
+       "username": "{{.Values.yuuvis.git.user}}"
+    }'
+    
     echo 'create git repository'
-    CSRF2=$(cat ./cookies2.txt | grep _csrf | cut -f 7)
-    curl -d "_csrf=$CSRF2&user_id=1&repo_name=yuuvis-config&private=on&description=&gitignores=&license=&readme=Default&auto_init=on" -b cookies2.txt -L http://gogs/repo/create
+    curl -X 'POST'   'http://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@gitea-http:3000/api/v1/user/repos'   -H 'accept: application/json'   -H 'Content-Type: application/json'   -d '{
+      "auto_init": true,
+      "default_branch": "main",
+      "description": "yuuvis config files",
+      "name": "yuuvis-config",
+      "private": true,
+      "template": true,
+      "trust_model": "default"
+    }'
 kind: ConfigMap
 metadata:
   name: gitinitrepo

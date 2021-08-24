@@ -4,4 +4,4 @@
 4. rabbitmq - messaging example 
 5. keycloak - example for an identity provider
 6. minio - as an s3 storage example
-7. gogs - git server for demo only
+7. gitea - git server for demo only

@@ -18,7 +18,7 @@ spec:
         yuuvislog: "true"
     spec:
       initContainers:
-      - name: init-sothook
+      - name: init-api-web
         image: busybox
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent

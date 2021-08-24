@@ -10,5 +10,5 @@ data:
     }
 kind: ConfigMap
 metadata:
-  name: console-client-config
+  name: management-console-client-config
 {{- end}}

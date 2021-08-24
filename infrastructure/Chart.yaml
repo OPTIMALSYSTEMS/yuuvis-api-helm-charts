@@ -5,7 +5,7 @@ description: umbrella chart with examples for infrastructure components of an yu
              this chart is for demo use only 
              do not use this chart for production
 name: infrastructure
-version: 0.8.0
+version: 0.9.0
 dependencies:
 - name: minio
   version: ^8.0.0
@@ -22,3 +22,6 @@ dependencies:
 - name: rabbitmq
   version: ^7.7.1
   repository: https://charts.bitnami.com/bitnami
+- name: gitea
+  version: ^4.0.1
+  repository: https://dl.gitea.io/charts/

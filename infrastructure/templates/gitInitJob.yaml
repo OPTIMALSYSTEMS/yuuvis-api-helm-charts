@@ -1,16 +1,16 @@
-{{- if .Values.gogs.useCustomDeployment }}
+{{- if .Values.gitea.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gogsrepo-init
+  name: gitea-init
   labels:
-    app: gogsrepo
+    app: giteainit
 spec:
   template:
     spec:
       containers:
-      - name: gogsrepo-init
-        image: {{.Values.gogs.initcontainer.image}}
+      - name: gitea-init
+        image: {{.Values.yuuvis.git.initcontainer.image}}
         imagePullPolicy: IfNotPresent
         command: ['sh', '/yuuvis/script/gitInitRepo.sh']
         volumeMounts:
@@ -18,7 +18,7 @@ spec:
           name: initscript
           subPath: gitInitRepo.sh
       imagePullSecrets:
-      - name:  {{.Values.gogs.initcontainer.secret}}
+      - name:  {{.Values.yuuvis.git.initcontainer.secret}}
       volumes:
       - configMap:
           name: gitinitrepo

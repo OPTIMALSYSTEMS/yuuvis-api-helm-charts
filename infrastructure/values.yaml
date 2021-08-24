@@ -1,8 +1,8 @@
 imageCredentials:
   dockeryuuvisorg:
     registry: docker.yuuvis.org
-    username:
-    password:
+    username: 
+    password: 
 
 yuuvis:
   # !!! Change before running
@@ -39,22 +39,43 @@ yuuvis:
         user:
           name: root
           password: changeme
-    
+  git:
+    user: yuuvis
+    password: changeme
+    initcontainer:
+      image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      secret: dockeryuuvisorg
+
+
 elasticsearch:
   image: docker.yuuvis.org/yuuvis/elasticsearch:2021-02-09
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
-  storage: 5Gi
+  storage: 100Gi
   storageClassName: standard
-  javaOpts: -Xms1024m -Xmx1024m
-  replicas: 1
   port: 9300
   targetPort: 9300
   port2: 9200
   targetPort2: 9200
-  # value for the elastic parameter uster.initial_master_nodes
-  # if more than 1 node should be used, adjust initial master nodes value
-  initial_master_nodes: elasticsearch-0
+  highAvailability:
+    enabled: false
+    data:
+      nodes: 2
+      storage: 200Gi
+      memory:
+        requests: "8Gi"
+    master:
+      nodes: 3
+      storage: 50Gi
+      initial_master_nodes: elasticsearch-master-0, elasticsearch-master-1, elasticsearch-master-2
+      memory:
+        requests: "8Gi"
+  # Default values if high availability is disabled. Nodes function as both data and master nodes simultaneously.
+  nodes: 1
+  javaOpts: -Xms1024m -Xmx1024m
+  initial_master_nodes: elasticsearch-0  
+  memory:
+    requests: "2Gi"
 
 postgresql:
   enabled: true
@@ -74,7 +95,6 @@ postgresql:
   initdbScriptsConfigMap: postgresql-initdb
   postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB"}
 
-
 rabbitmq:
   enabled: true
   fullnameOverride: rabbitmq
@@ -91,21 +111,35 @@ rabbitmq:
     enabled: true
     storageClass: standard
     size: 1Gi
-
-gogs:
-  useCustomDeployment: true
-  image: gogs/gogs:0.11.91
-  imagePullPolicy: IfNotPresent
-  initcontainer:
-    image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
-    secret: dockeryuuvisorg
-  persistence:
-    size: 100Mi
-    storageClass: standard
-  git:
-    user: yuuvis
-    password: changeme
     
+gitea:
+  enabled: true
+  fullnameOverride: gitea
+  ingress:
+    enabled: true
+  gitea:
+    admin:
+      password: changeme
+    config:
+      database: 
+        DB_TYPE: sqlite3
+        ## https://gitea.com/gitea/helm-chart/issues/95#issuecomment-122875
+        ## Note that the intit script checks to see if the IP & port of the database service is accessible, so make sure you set those to something that resolves as successful (since sqlite uses files on disk setting the port & ip won't affect the running of gitea).
+        HOST: example.com
+        PORT: 80
+      service:
+        DISABLE_REGISTRATION: true  
+    database:
+      builtIn:
+        postgresql:
+          enabled: false
+    cache:
+      builtIn:
+        enabled: false
+  persistence:
+    enabled: true
+    size: 1Gi
+  
 minio:
   enabled: true
   fullnameOverride: minio
