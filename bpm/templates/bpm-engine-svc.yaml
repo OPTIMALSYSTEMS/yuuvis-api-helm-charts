@@ -4,6 +4,7 @@ metadata:
   labels:
     app: bpm-engine
     name: bpm-engine
+    yuuvis: "true"
   name: bpm-engine
 spec:
   ports:
