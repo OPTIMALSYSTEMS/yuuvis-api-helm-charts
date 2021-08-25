@@ -59,23 +59,21 @@ elasticsearch:
   targetPort2: 9200
   highAvailability:
     enabled: false
+    # Combined memory of all elasticsearch nodes should not exceed 50% of capacity
     data:
       nodes: 2
       storage: 200Gi
-      memory:
-        requests: "8Gi"
+      memory: -Xms4096m -Xmx4096m
     master:
       nodes: 3
       storage: 50Gi
+      memory: -Xms1024m -Xmx1024m
       initial_master_nodes: elasticsearch-master-0, elasticsearch-master-1, elasticsearch-master-2
-      memory:
-        requests: "8Gi"
   # Default values if high availability is disabled. Nodes function as both data and master nodes simultaneously.
   nodes: 1
-  javaOpts: -Xms1024m -Xmx1024m
   initial_master_nodes: elasticsearch-0  
-  memory:
-    requests: "2Gi"
+  memory: -Xms1024m -Xmx1024m
+
 
 postgresql:
   enabled: true
