@@ -48,9 +48,9 @@ yuuvis:
       deploy: false
       client:
         instances: 1
-        dockerImage: docker.yuuvis.org/yuuvis/management-console-client:1.2.1
+        dockerImage: docker.yuuvis.org/yuuvis/management-console-client:1.3.1
       api:
-        dockerImage: docker.yuuvis.org/yuuvis/management-console:1.2.0
+        dockerImage: docker.yuuvis.org/yuuvis/management-console:1.3.0
         instances: 1
         config:
           host: changeme
