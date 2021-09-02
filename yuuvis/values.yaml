@@ -91,9 +91,6 @@ yuuvis:
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
       - endpoints: /api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
-      - endpoints: /api/dms/objects
-        method: POST
-        access: hasAuthority('YUUVIS_CREATE_OBJECT')
       - endpoints: /api/dms/**
     ### endpoints for api swagger
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
