@@ -217,6 +217,7 @@ yuuvis:
           <role>
             <name>YUUVIS_DEFAULT</name>
             <permission>
+              <action>create</action>
               <action>read</action>
               <action>write</action>
               <action>delete</action>
@@ -225,6 +226,7 @@ yuuvis:
           <role>
             <name>YUUVIS_TENANT_ADMIN</name>
             <permission>
+              <action>create</action>
               <action>read</action>
               <action>write</action>
               <action>delete</action>
@@ -233,6 +235,7 @@ yuuvis:
           <role>
             <name>YUUVIS_SYSTEM_INTEGRATOR</name>
             <permission>
+              <action>create</action>
               <action>read</action>
               <action>write</action>
               <action>delete</action>
