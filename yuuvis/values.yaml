@@ -432,6 +432,15 @@ yuuvis:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
+    commander:
+      dockerRegistry: docker.yuuvis.org/yuuvis/commander
+      profiles: prod,docker,kubernetes,dbs,es
+      tag: 4.6.6
+      instances: 0
+      java:
+        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
+      requests:
+        memory: "512Mi"
     archive:
       deploy: false
       dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice

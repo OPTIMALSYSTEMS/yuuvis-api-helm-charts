@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: commander
+  name: commander
+spec:
+  replicas: {{.Values.yuuvis.services.commander.instances}}
+  selector:
+    matchLabels:
+      name: commander
+  template:
+    metadata:
+      labels:
+        name: commander
+    spec:
+      initContainers:
+      - name: init-commander
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      containers:
+      - name: commander
+        image: "{{.Values.yuuvis.services.commander.dockerRegistry}}:{{ .Values.yuuvis.services.commander.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        resources:
+          requests:
+            memory: {{.Values.yuuvis.services.commander.requests.memory}}        
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.services.commander.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.services.commander.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          valueFrom:
+            configMapKeyRef:
+              name: yuuvis-common-env
+              key: CONFIGSERVICEURL
+        ports:
+        - containerPort: 8022
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: yuuvisorg
