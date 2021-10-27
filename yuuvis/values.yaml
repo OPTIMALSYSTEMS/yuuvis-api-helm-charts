@@ -133,10 +133,9 @@ yuuvis:
         s3:
           profiles: ['s3profile1']
           default: true
-        netapp:
-          profiles: ['netapplike']
-          url:  http://archive/api/profiles/{profile}/dms/objects
-          useDiscovery: true
+        archive_s3:
+          profiles: ['s3profile2']
+          default: false
       profiles:
         s3:
           s3profile1:
@@ -144,12 +143,12 @@ yuuvis:
             secret-key: 'changeme'
             url: 'http://minio.infrastructure:9000'
             bucket: 'dmscloudrepodocker'
-        netapp:
-          netapplike:
-            # use mountpoint of the persistent volume claim that provides the netapp storage
-            # must be the same in the deployment of the archive app
-            volume: '/var/lib/netapp/data'
-            defaultRetentionInDays: 10
+          s3profile2:
+            access-key: 'MGMWCOYTDUSLNCFE'
+            secret-key: 'changeme'
+            url: 'http://minio.infrastructure:9000'
+            bucket: 's3archive'
+            pathTemplate: '{tenant}-{objectTypeId}/{DATE(yyyy)}/{DATE(MM)}/{DATE(dd)}'
   oauth2: |
     # configuration for the yuuvis authentication service
     keycloak.host: {{.Values.yuuvis.keycloak.address}}
@@ -303,7 +302,7 @@ yuuvis:
   services:
     api:
       dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
@@ -326,7 +325,7 @@ yuuvis:
         memory: "128Mi"
     audit:
       dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
       instances: 1
       port: 7251
@@ -340,7 +339,7 @@ yuuvis:
         use: true
         value: 30080
       dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -360,7 +359,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 4.8.7
+      tag: 4.8.8
       instances: 1
       port: 7282
       java:
@@ -369,7 +368,7 @@ yuuvis:
         memory: "256Mi"
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -380,7 +379,7 @@ yuuvis:
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.8.7
+      tag: 4.8.8
       instances: 1
       port: 7291
       dependencyCheck:
@@ -392,7 +391,7 @@ yuuvis:
         memory: "1024Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -410,7 +409,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     registry:
       dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -420,7 +419,7 @@ yuuvis:
         memory: "1024Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -433,7 +432,7 @@ yuuvis:
         memory: "1024Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.8.7
+      tag: 4.8.8
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -447,7 +446,7 @@ yuuvis:
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.8.7
+      tag: 4.8.8
       instances: 1
       port: 7400
       java:
@@ -457,7 +456,7 @@ yuuvis:
     commander:
       dockerRegistry: docker.yuuvis.org/yuuvis/commander
       profiles: prod,docker,kubernetes,dbs,es
-      tag: 4.8.7
+      tag: 4.8.8
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -473,23 +472,7 @@ yuuvis:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
-      # if testMode: true a pvc will be created and mounted to the archiveservice container
-      testMode: true
-      storageClassName: standard
-      storage: 500Mi
       port: 7530
-      volumes: |
-        - name: archiveservice-netapp
-          persistentVolumeClaim:
-            claimName: archiveservice-netapp
-      volumeMounts: |
-        - mountPath: /var/lib/netapp/data
-          name: archiveservice-netapp
-      pvc:
-        name: archiveservice-netapp
-        storageclass: standard
-        storage: 500Mi
-        accessmode: ReadWriteMany
     controller:
       dockerRegistry: docker.yuuvis.org/yuuvis/controller
       tag: 4.7.1
