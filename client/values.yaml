@@ -7,7 +7,7 @@ yuuvis:
   git:
     protocol: http
     # please not that since infrastructure helm chart 0.9.0 gitea is used 
-    # in previous versions gogs was used
+    # in previous versions gogs was  used
     # url: gogs.infrastructure/yuuvis/yuuvis-config.git
     url: gitea-http.infrastructure:3000/yuuvis/yuuvis-config.git
     name: yuuvis-config
