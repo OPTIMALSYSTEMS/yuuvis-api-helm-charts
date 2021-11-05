@@ -31,7 +31,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.8.2
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.8.3
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       instances: 1
