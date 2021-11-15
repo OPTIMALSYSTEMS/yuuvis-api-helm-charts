@@ -25,7 +25,7 @@ yuuvis:
     java:
       maxHeap: -Xmx128m
   tenantmanagement:
-    dockerImage: docker.yuuvis.org/yuuvis/tenant-management:1.5.2
+    dockerImage: docker.yuuvis.org/yuuvis/tenant-management:1.6.0
     profiles: prod,docker,kubernetes,oauth2
     instances: 1
     java:
@@ -48,9 +48,9 @@ yuuvis:
       deploy: false
       client:
         instances: 1
-        dockerImage: docker.yuuvis.org/yuuvis/management-console-client:1.3.1
+        dockerImage: docker.yuuvis.org/yuuvis/management-console-client:1.4.0
       api:
-        dockerImage: docker.yuuvis.org/yuuvis/management-console:1.3.0
+        dockerImage: docker.yuuvis.org/yuuvis/management-console:1.4.0
         instances: 1
         config:
           host: changeme

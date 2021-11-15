@@ -16,8 +16,6 @@ spec:
         - mountPath: /yuuvis/script/init.bash
           name: initscript
           subPath: init.bash
-      imagePullSecrets:
-      - name:  {{.Values.yuuvis.image.imagePullSecret }}
       volumes:
       - configMap:
           name: adduserserviceconfigconfigmap

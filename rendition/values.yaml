@@ -2,6 +2,14 @@ yuuvis:
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
+  livenessProbe:
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 5
   configservice:
     url: http://configservice/config
   livenessProbe:
@@ -15,11 +23,17 @@ yuuvis:
     periodSeconds: 30
     timeoutSeconds: 5
   renditionservice:
-    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.0.6
+    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.1.0
     profiles: prod
     instances: 1
     java:
       maxHeap: -Xmx2048m -XX:+ExitOnOutOfMemoryError
+  renditionrepository:
+    dockerImage: docker.yuuvis.org/yuuvis/rendition-repository:1.0.0
+    profiles: prod,storage,dbspostgres
+    instances: 1
+    java:
+      options: -Xmx256m -XX:+ExitOnOutOfMemoryError
         
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

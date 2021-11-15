@@ -62,4 +62,4 @@ spec:
       automountServiceAccountToken: false
       imagePullSecrets:
       - name: yuuvisorg
-{{- end }}
+{{- end}}

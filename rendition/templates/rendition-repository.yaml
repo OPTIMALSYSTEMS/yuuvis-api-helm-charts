@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rendition
+    name: renditionrepository
+  name: renditionrepository
+spec:
+  replicas: {{.Values.yuuvis.renditionrepository.instances}}
+  selector:
+    matchLabels:
+      name: renditionrepository
+  template:
+    metadata:
+      labels:
+        name: renditionrepository
+    spec:
+      containers:
+      - name: renditionrepository
+        image: {{.Values.yuuvis.renditionrepository.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 9876
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        readinessProbe:
+          httpGet:
+            path: /manage/info
+            port: 9876
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.renditionrepository.java.options}}
+        - name: SERVER_PORT
+          value: "9876"
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.renditionrepository.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        ports:
+        - containerPort: 9876
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      - name: init-renditionrepository
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
