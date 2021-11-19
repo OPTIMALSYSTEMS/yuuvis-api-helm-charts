@@ -73,7 +73,7 @@ yuuvis:
       dockerImage: docker.yuuvis.org/yuuvis/client:2.2.1
       instances: 0
     viewer:
-      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.0.0
+      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.0.1
       instances: 1
     architect:
       dockerImage: docker.yuuvis.org/yuuvis/architect:1.4.0
