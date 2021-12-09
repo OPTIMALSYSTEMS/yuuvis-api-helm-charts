@@ -30,7 +30,7 @@ yuuvis:
       maxHeap: -Xmx2048m -XX:+ExitOnOutOfMemoryError
   renditionrepository:
     dockerImage: docker.yuuvis.org/yuuvis/rendition-repository:1.0.0
-    profiles: prod,storage,dbspostgres
+    profiles: prod,storage,dbs
     instances: 1
     java:
       options: -Xmx256m -XX:+ExitOnOutOfMemoryError
