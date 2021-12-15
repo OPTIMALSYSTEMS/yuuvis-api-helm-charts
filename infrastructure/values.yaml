@@ -48,7 +48,7 @@ yuuvis:
 
 
 elasticsearch:
-  image: docker.yuuvis.org/yuuvis/elasticsearch:2021-02-09
+  image: docker.yuuvis.org/yuuvis/elasticsearch:2021-12-15
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 100Gi
