@@ -124,10 +124,9 @@ yuuvis:
         s3:
           profiles: ['s3profile1']
           default: true
-        netapp:
-          profiles: ['netapplike']
-          url:  http://archive/api/profiles/{profile}/dms/objects
-          useDiscovery: true
+        archive_s3:
+          profiles: ['s3profile2']
+          default: false
       profiles:
         s3:
           s3profile1:
@@ -135,12 +134,12 @@ yuuvis:
             secret-key: 'changeme'
             url: 'http://minio.infrastructure:9000'
             bucket: 'dmscloudrepodocker'
-        netapp:
-          netapplike:
-            # use mountpoint of the persistent volume claim that provides the netapp storage
-            # must be the same in the deployment of the archive app
-            volume: '/var/lib/netapp/data'
-            defaultRetentionInDays: 10
+          s3profile2:
+            access-key: 'MGMWCOYTDUSLNCFE'
+            secret-key: 'changeme'
+            url: 'http://minio.infrastructure:9000'
+            bucket: 's3archive'
+            pathTemplate: '{tenant}-{objectTypeId}/{DATE(yyyy)}/{DATE(MM)}/{DATE(dd)}'
   oauth2: |
     # configuration for the yuuvis authentication service
     keycloak.host: {{.Values.yuuvis.keycloak.address}}
@@ -451,23 +450,7 @@ yuuvis:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
-      # if testMode: true a pvc will be created and mounted to the archiveservice container
-      testMode: true
-      storageClassName: standard
-      storage: 500Mi
       port: 7530
-      volumes: |
-        - name: archiveservice-netapp
-          persistentVolumeClaim:
-            claimName: archiveservice-netapp
-      volumeMounts: |
-        - mountPath: /var/lib/netapp/data
-          name: archiveservice-netapp
-      pvc:
-        name: archiveservice-netapp
-        storageclass: standard
-        storage: 500Mi
-        accessmode: ReadWriteMany
     controller:
       dockerRegistry: docker.yuuvis.org/yuuvis/controller
       tag: 4.6.0
