@@ -107,7 +107,7 @@ yuuvis:
       - endpoints: /custom/**
         expose: true
     ### api-web
-      - endpoints: /api-web/swagger-ui.html/**,/api-web/**/springfox-swagger-ui/**,/api-web/**/swagger-resources/**,/api-web/**/v2/api-docs/**
+      - endpoints: /api-web/swagger-ui.html/**,/api-web/**/springfox-swagger-ui/**,/api-web/**/swagger-resources/**,/api-web/**/v2/api-docs/**,/api-web/**/swagger-ui**/**,/api-web/springfox**,/api-web/favicon**
       - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**
       - endpoints: /api-web/api/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
