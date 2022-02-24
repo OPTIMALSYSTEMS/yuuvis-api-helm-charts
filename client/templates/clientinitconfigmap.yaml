@@ -5,7 +5,7 @@ data:
     git config --global user.name yuuvis-init
 
     echo 'git clone'
-    if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} --branch {{.Values.yuuvis.git.branch}}; 
+    if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} --branch {{.Values.yuuvis.git.branch}} >/dev/null ; 
     then
         echo 'git branch {{.Values.yuuvis.git.branch}} exists'
         cd {{.Values.yuuvis.git.name}}
@@ -37,7 +37,9 @@ data:
             mv merge_i18n_en.json apps/api-web/text/i18n_en.json
         fi
 
-        jq -s '.[0] * .[1]' system/systemHookConfiguration.json /yuuvis/data/systemHookConfiguration.json > merge_hook.json
+        jq -s '.[0].systemhooks.amqp=([.[].systemhooks.amqp]|flatten|group_by(.predicate)|map(add))|.[0]' system/systemHookConfiguration.json /yuuvis/data/systemHookConfiguration.json > merge_hook.json
+        jq -s '.[0].systemhooks.webhooks=([.[].systemhooks.webhooks]|flatten|group_by(.predicate,.url)|map(add))|.[0]' system/systemHookConfiguration.json /yuuvis/data/systemHookConfiguration.json > merge_hook.json
+        
         rm system/systemHookConfiguration.json
         mv merge_hook.json system/systemHookConfiguration.json
         
@@ -48,7 +50,7 @@ data:
         git pull -s recursive -X ours
 
         echo 'git push'    
-        if git push origin {{.Values.yuuvis.git.branch}}
+        if git push origin {{.Values.yuuvis.git.branch}}  &> /dev/null
         then
             echo 'push sucessful'
         else

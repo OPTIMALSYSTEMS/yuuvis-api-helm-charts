@@ -54,9 +54,11 @@ spec:
         resources:
           requests:
             memory: {{.Values.yuuvis.services.repository.requests.memory}}
-        env:
+       env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.repository.java.maxHeap}}
+        - name: REQUESTS_MAXPARALLEL
+          value: {{quote .Values.yuuvis.services.repository.maxRequests}}  
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.services.repository.profiles}}
         - name: SPRING_CLOUD_CONFIG_URI

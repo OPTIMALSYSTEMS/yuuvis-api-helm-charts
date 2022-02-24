@@ -434,6 +434,7 @@ yuuvis:
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
+      maxRequests: 100
       dependencyCheck:
         enable: true
         url: http://minio.infrastructure.svc.cluster.local:9000

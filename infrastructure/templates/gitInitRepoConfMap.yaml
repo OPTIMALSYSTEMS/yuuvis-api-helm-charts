@@ -10,7 +10,7 @@ data:
     sleep 42
 
     echo 'create user'
-    curl -X 'POST' \
+    curl -s -o /dev/null -X 'POST' \
     'http://gitea_admin:{{.Values.gitea.gitea.admin.password}}@gitea-http:3000/api/v1/admin/users' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
@@ -22,7 +22,7 @@ data:
     }'
     
     echo 'create git repository'
-    curl -X 'POST'   'http://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@gitea-http:3000/api/v1/user/repos'   -H 'accept: application/json'   -H 'Content-Type: application/json'   -d '{
+    curl -s -o /dev/null -X 'POST' 'http://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@gitea-http:3000/api/v1/user/repos'   -H 'accept: application/json'   -H 'Content-Type: application/json'   -d '{
       "auto_init": true,
       "default_branch": "main",
       "description": "yuuvis config files",
