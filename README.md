@@ -99,6 +99,8 @@ In the values yaml of the helm chart edit the:
 *Since version 0.9.0 of the infrastructure helm chart gitea is used as an example git server.*
 *In case of an previously created system you must change the git url.*
 
+*Since version 0.14.0 of the yuuvis helm chart the configservice is deployed as an statefulset.*
+
 ### Install the yuuvis Helm chart
 
 ```shell
@@ -212,6 +214,19 @@ Check version of upgraded helm chart
 helm list -n yuuvis 
 ```
 
+### 2021 winter and 2022spring
+
+With the yuuvis helm chart version *0.14.0* and the docker tags *4.9.9 (2021winter)* and *4.10.1 (2022spring)* the functionality of the configuration service is changed.  
+Starting with these versions the configservice applies all changes to configuration files to its local resources first. At regular intervals of 5 minutes, the remote resources on the git server are synchronized.  
+Thus since version *0.14.0* of the yuuvis helm chart the configuration service is deployed as an statefulset.  
+For more informations on the change, please refer to the documentaion at: 
+[configservice changes](https://help.optimal-systems.com/yuuvis_develop/display/YM21WI/Breaking+Changes)  
+
+More information on the configuration of the configservice can be found here:
+[configservice config](https://help.optimal-systems.com/yuuvis_develop/display/YM21WI/CONFIGSERVICE)
+
+### past versions
+
 ### 2021 autumn
 
 With this version changes to the authentication service configuration and authentication service kubernetes resources are mandatory.  
@@ -233,8 +248,6 @@ If you use the service names in your configuration please note that:
 * new *management-console-client* old: *console-client* 
 * new *management-console*  old: *console*  
 are changed.  
-
-### past versions
 
 #### 2021 summer
 

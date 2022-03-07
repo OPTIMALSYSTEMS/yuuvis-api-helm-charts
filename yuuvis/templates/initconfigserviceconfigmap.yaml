@@ -1,6 +1,7 @@
 apiVersion: v1
 data:
   checkgit.sh: |
+    cd /tmp
     git config --global user.email yuuvis-init@yuuvis.org
     git config --global user.name yuuvis-init
 

@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
@@ -7,6 +7,7 @@ metadata:
     yuuvis: "true"
   name: configservice
 spec:
+  serviceName: config-sts
   replicas: {{.Values.yuuvis.services.config.instances}} 
   selector:
     matchLabels:
@@ -75,6 +76,9 @@ spec:
           value: /config/
         ports:
         - containerPort: {{.Values.yuuvis.services.config.port}}
+        volumeMounts:
+        - mountPath: /tmp/configservice
+          name: configservice-local
       restartPolicy: Always
       automountServiceAccountToken: false
       imagePullSecrets:
@@ -83,4 +87,33 @@ spec:
       - configMap:
           name: initconfigserviceconfigmap
         name: initscript
-
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: configservice-local
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{.Values.yuuvis.services.config.storage.request}}
+{{- if .Values.yuuvis.services.config.storage.class }}
+      storageClassName: {{.Values.yuuvis.services.config.storage.class}}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-sts
+  labels:
+    name: config-sts
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: 7282
+  selector:
+    name: configservice
+  clusterIP: None
