@@ -113,8 +113,6 @@ rabbitmq:
 gitea:
   enabled: true
   fullnameOverride: gitea
-  ingress:
-    enabled: true
   gitea:
     admin:
       password: changeme
