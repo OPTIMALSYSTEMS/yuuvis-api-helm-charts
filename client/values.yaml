@@ -31,14 +31,14 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.9.2
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.9.6
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       instances: 1
       java:
         maxHeap: -Xmx512m
     userservice:
-      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.5.0
+      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.5.1
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,userservice
       instances: 1
@@ -67,10 +67,10 @@ yuuvis:
         keycloak.admin.username: keycloak
         keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.2.3
+      dockerImage: docker.yuuvis.org/yuuvis/client:2.2.4
       instances: 1
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.2.2
+      dockerImage: docker.yuuvis.org/yuuvis/client:2.2.4
       instances: 0
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.0.1
