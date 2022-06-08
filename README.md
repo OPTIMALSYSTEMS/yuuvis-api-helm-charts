@@ -42,6 +42,7 @@ Replace all **changeme** default passwords in the values.yaml of the charts you 
 helm repo add minio https://helm.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add gitea-charts https://dl.gitea.io/charts/
+helm repo add bitnami-pre-2022 https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
 ```
 ### Install the infrastructure Helm chart
 
@@ -63,6 +64,8 @@ cd ..
 * Optionally change the used storage classes
 
 *Since version 0.9.0 of the infrastructure helm chart gitea is used as an example git server.*
+
+*Since june 2022 the infrastructure helm chart requires the bitnami-pre-2022 repository.*
 
 #### Install infrastructure services
 

@@ -5,7 +5,7 @@ description: umbrella chart with examples for infrastructure components of an yu
              this chart is for demo use only 
              do not use this chart for production
 name: infrastructure
-version: 0.9.0
+version: 0.9.1
 dependencies:
 - name: minio
   version: ^8.0.0
@@ -15,13 +15,13 @@ dependencies:
   repository: https://codecentric.github.io/helm-charts/
 - name: redis
   version: ^11.2.3
-  repository: https://charts.bitnami.com/bitnami
+  repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
 - name: postgresql
   version: ^9.8.7
-  repository: https://charts.bitnami.com/bitnami
+  repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
 - name: rabbitmq
   version: ^7.7.1
-  repository: https://charts.bitnami.com/bitnami
+  repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
 - name: gitea
   version: ^4.0.1
   repository: https://dl.gitea.io/charts/
