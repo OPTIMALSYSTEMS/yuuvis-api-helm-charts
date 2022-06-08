@@ -38,9 +38,12 @@ Replace all **changeme** default passwords in the values.yaml of the charts you 
 
 ### Add required Helm repositorys:
 
+*Since june 2022 the infrastructure helm chart requires the bitnami-pre-2022 repository.*
+
 ```shell
 helm repo add minio https://helm.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add bitnami-pre-2022 https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
 ```
 ### Install the infrastructure Helm chart
 
