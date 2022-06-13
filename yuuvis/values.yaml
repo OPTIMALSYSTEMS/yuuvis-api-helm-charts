@@ -313,7 +313,7 @@ yuuvis:
   services:
     api:
       dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
@@ -336,7 +336,7 @@ yuuvis:
         memory: "128Mi"
     audit:
       dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
       instances: 1
       port: 7251
@@ -350,7 +350,7 @@ yuuvis:
         use: true
         value: 30080
       dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -370,7 +370,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 4.9.13
+      tag: 4.9.14
       instances: 1
       port: 7282
       java:
@@ -382,7 +382,7 @@ yuuvis:
         class: 
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -393,7 +393,7 @@ yuuvis:
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.9.13
+      tag: 4.9.14
       instances: 1
       port: 7291
       dependencyCheck:
@@ -405,7 +405,7 @@ yuuvis:
         memory: "1024Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -423,7 +423,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     registry:
       dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -433,7 +433,7 @@ yuuvis:
         memory: "1024Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -447,7 +447,7 @@ yuuvis:
         memory: "1024Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.9.13
+      tag: 4.9.14
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -461,7 +461,7 @@ yuuvis:
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.9.13
+      tag: 4.9.14
       instances: 1
       port: 7400
       java:
@@ -471,7 +471,7 @@ yuuvis:
     commander:
       dockerRegistry: docker.yuuvis.org/yuuvis/commander
       profiles: prod,docker,kubernetes,dbs,es
-      tag: 4.9.13
+      tag: 4.9.14
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
