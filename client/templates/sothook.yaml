@@ -6,7 +6,7 @@ metadata:
     name: sothook
   name: sothook
 spec:
-  replicas: 1
+  replicas: {{.Values.yuuvis.client.sothook.instances}}
   selector:
      matchLabels:
       name: sothook
