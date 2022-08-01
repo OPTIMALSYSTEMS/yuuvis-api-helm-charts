@@ -490,7 +490,7 @@ yuuvis:
       port: 7530
     controller:
       dockerRegistry: docker.yuuvis.org/yuuvis/controller
-      tag: 4.11.2
+      tag: 4.9.0
       profiles: prod,docker,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -508,7 +508,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     textextractor:
       dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
-      tag: 4.11.2
+      tag: 4.9.0
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420
