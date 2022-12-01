@@ -159,6 +159,8 @@ keycloak:
   image:
     repository: docker.yuuvis.org/yuuvis/keycloak
     tag: 11.0.2-stable1
+  imagePullSecrets:
+  - dockeryuuvisorg
   livenessProbe: |
     httpGet:
       path: /auth/
