@@ -5,6 +5,23 @@ data:
     yuuvis.db.server: {{.Values.yuuvis.db.server}}
     yuuvis.db.username: {{.Values.yuuvis.db.user}}
     yuuvis.db.password: {{.Values.yuuvis.db.password}}
+    storage:
+      databases:   
+        defaultdb:
+          datasource: defaultds
+          predicate: 'spel:false'
+          default: true
+      datasources:
+        defaultds:
+          url: jdbc:postgresql://${yuuvis.db.server}/${yuuvis.db.name}
+          username: ${yuuvis.db.username}
+          password: ${yuuvis.db.password}
+          driver-class-name: org.postgresql.Driver
+  application-dbstmp.yml: |
+    yuuvis.db.name: {{.Values.yuuvis.db.name}}
+    yuuvis.db.server: {{.Values.yuuvis.db.server}}
+    yuuvis.db.username: {{.Values.yuuvis.db.user}}
+    yuuvis.db.password: {{.Values.yuuvis.db.password}}
 
     spring.datasource.url: jdbc:postgresql://${yuuvis.db.server}/${yuuvis.db.name}
     spring.datasource.driver-class-name: org.postgresql.Driver

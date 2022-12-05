@@ -13,4 +13,4 @@ spec:
     - yuuvis
   selector:
     matchLabels:
-      app: yuuvis
+      app: yuuvis   

@@ -5,5 +5,5 @@ name: monitoring
 version: 0.7.0
 dependencies:
 - name: kube-prometheus-stack
-  version: ^16.14.1
+  version: 20.0.*
   repository: https://prometheus-community.github.io/helm-charts

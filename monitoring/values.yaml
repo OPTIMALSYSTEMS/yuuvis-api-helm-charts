@@ -1,12 +1,33 @@
+monitoring:
+  address: changeme
+
 kube-prometheus-stack:
   prometheus:
     prometheusSpec:
+      retention: 7d
+      enableAdminAPI: true
+      ruleSelectorNilUsesHelmValues: false
+      ruleSelector: {}
       serviceMonitorSelectorNilUsesHelmValues: false
-      serviceMonitorNamespaceSelector: {}     
-      retention: 10d    
+      serviceMonitorSelector: {}
+      podMonitorSelectorNilUsesHelmValues: false   
+      podMonitorSelector: {}
   grafana:
     adminPassword: changeme
+    address: 
     service:
       enabled: true
       type: NodePort
       targetPort: 3000
+  PrometheusOperator:
+    admissionWebhooks:
+      enabled: false
+      patch:
+        enabled: false
+
+prometheus-elasticsearch-exporter:
+  es:
+    uri: http://elasticsearch.infrastructure:9200
+    cluster_settings: true
+  serviceMonitor:
+    enabled: true

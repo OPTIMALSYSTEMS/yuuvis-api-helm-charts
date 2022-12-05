@@ -263,31 +263,7 @@ data:
                 ]
               }
             ],
-            "policies": [
-              {
-                "id": "cdb2d32c-99af-4eb1-99f7-fb06db0ee06d",
-                "name": "Default Policy",
-                "description": "A policy that grants access only for users within this realm",
-                "type": "js",
-                "logic": "POSITIVE",
-                "decisionStrategy": "AFFIRMATIVE",
-                "config": {
-                  "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
-                }
-              },
-              {
-                "id": "9b45b7ac-dd14-4352-b7fa-14f6ce790d04",
-                "name": "Default Permission",
-                "description": "A permission that applies to the default resource type",
-                "type": "resource",
-                "logic": "POSITIVE",
-                "decisionStrategy": "UNANIMOUS",
-                "config": {
-                  "defaultResourceType": "urn:yuuvis-authentication-service:resources:default",
-                  "applyPolicies": "[\"Default Policy\"]"
-                }
-              }
-            ],
+            "policies": [],
             "scopes": []
           }
         }
@@ -1599,31 +1575,7 @@ data:
                 ]
               }
             ],
-            "policies": [
-              {
-                "id": "65eddc42-079c-418a-8476-0735b46b9b4c",
-                "name": "Default Policy",
-                "description": "A policy that grants access only for users within this realm",
-                "type": "js",
-                "logic": "POSITIVE",
-                "decisionStrategy": "AFFIRMATIVE",
-                "config": {
-                  "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
-                }
-              },
-              {
-                "id": "0f852a7f-3090-4abd-ada9-41033f8a2b0f",
-                "name": "Default Permission",
-                "description": "A permission that applies to the default resource type",
-                "type": "resource",
-                "logic": "POSITIVE",
-                "decisionStrategy": "UNANIMOUS",
-                "config": {
-                  "defaultResourceType": "urn:yuuvis-authentication-service:resources:default",
-                  "applyPolicies": "[\"Default Policy\"]"
-                }
-              }
-            ],
+            "policies": [],
             "scopes": []
           }
         }

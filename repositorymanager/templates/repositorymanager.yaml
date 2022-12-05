@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-repositorymanager
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: repositorymanager
+  name: repositorymanager
+spec:
+  replicas: {{.Values.yuuvis.repositorymanager.instances}}
+  selector:
+    matchLabels:
+      name: repositorymanager
+  template:
+    metadata:
+      labels:
+        name: repositorymanager
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.repositorymanager.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{.Values.yuuvis.configservice.url}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.repositorymanager.profile}},docker,kubernetes
+        image: "{{.Values.yuuvis.repositorymanager.dockerRegistry}}:{{.Values.yuuvis.repositorymanager.tag}}"
+        imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+        name: repositorymanager
+        ports:
+        - containerPort: 8010
+          protocol: TCP
+        volumeMounts:
+          - name: storage
+            mountPath: {{.Values.yuuvis.repositorymanager.core.workingdir}}
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: data-repositorymanager
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      - name: init-repositorymanager
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]

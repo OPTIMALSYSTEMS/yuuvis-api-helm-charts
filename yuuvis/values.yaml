@@ -44,10 +44,9 @@ yuuvis:
     port: 6379
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
-    
+
     management.server.port: {{.Values.yuuvis.services.authentication.managePort}}
     management.server.servlet.context-path: /
-    
     management:
       endpoints:
         web:
@@ -57,7 +56,6 @@ yuuvis:
             - health
             - info
             - refresh
-            - prometheus
       endpoint:
         refresh:
           enabled: true
@@ -65,34 +63,36 @@ yuuvis:
           enabled: true
         health:
           enabled: true
-        prometheus:
-          enabled: true
+
     routing.endpoints:
       - 'authentication'
       - 'api'
       - 'search'
-      - 'client'
+      - 'userservice'
       - 'api-web'
+      - 'client'
       - 'tenant-management'
       - 'viewer'
       - 'architect'
-      - 'custom'
-      - 'userservice'
+      - 'metricsservice'
       - 'bpm-engine'
-
+      - 'renditionrepository'
+      - 'dashlet365'
+      - 'office365'
+        
     authorization.accesses:
-    ### manage-endpoints
+    ### Manage-Endpunkte
       - endpoints: /manage/**
         expose: true
-      - endpoints: /*/manage/**
+      - endpoints: /*/manage/**,/session/invalidateAll/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
-    ### API-endpoints
+    ### API-Endpunkte
       - endpoints: /api/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
       - endpoints: /api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/dms/**
-    ### endpoints for api swagger
+    ### Endpunkte für Swagger-Webclient des API-Gateways
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
       - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
       - endpoints: /api/api/system/**
@@ -104,28 +104,39 @@ yuuvis:
       - endpoints: /search/**,/viewer/**,/architect/**
       - endpoints: /client/**
         expose: true
-      - endpoints: /custom/**
+    ### Viewer Service
+      - endpoints: /viewer/view/**,/viewer/assets/**,/viewer/download/**
         expose: true
-    ### api-web
-      - endpoints: /api-web/swagger-ui.html/**,/api-web/**/springfox-swagger-ui/**,/api-web/**/swagger-resources/**,/api-web/**/v2/api-docs/**,/api-web/**/swagger-ui**/**,/api-web/springfox**,/api-web/favicon**
-      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**
-      - endpoints: /api-web/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
-      - endpoints: /api-web/api/admin/**
-        access: hasAuthority('YUUVIS_TENANT_ADMIN')
-    ### tenant-management
-      - endpoints: /tenant-management/swagger-ui.html/**,/tenant-management/**/springfox-swagger-ui/**,/tenant-management/**/swagger-resources/**,/tenant-management/**/v2/api-docs/**
-      - endpoints: /tenant-management/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
-      - endpoints: /tenant-management/api/admin/**
-        access: hasAuthority('YUUVIS_TENANT_ADMIN')
-    ### userservice
+      - endpoints: /viewer/**    
+    ### Userservice
       - endpoints: /userservice/**
     ### bpm-engine
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
       - endpoints: /bpm-engine/internal/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+    ### Metricsservice
+      - endpoints: /metricsservice/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+    ### api-web
+      - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
+      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**
+      - endpoints: /api-web/api/system/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+      - endpoints: /api-web/api/admin/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN') 
+    ### tenant-management
+      - endpoints: /tenant-management/swagger-ui.html,/tenant-management/swagger-ui/**,/tenant-management/**/v3/api-docs/**
+      - endpoints: /tenant-management/api/system/**
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+      - endpoints: /tenant-management/api/admin/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN')
+      - endpoints: /tenant-management/api/admin/users/**
+        access: hasAnyAuthority('YUUVIS_MANAGE_SETTINGS')
+      - endpoints: /renditionrepository/**
+    ### office 365
+      - endpoints: /office365/**
+      - endpoints: /dashlet365/**  
 
   storage: |
     storage:
@@ -173,7 +184,7 @@ yuuvis:
       userAuthorizationUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/auth
       accessTokenUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/token
       userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout?redirect_uri=${redir}
+      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout
       userNameExtractionPattern: $.sub
     - name: testyuuvis
       clientId: yuuvis-authentication-service
@@ -181,7 +192,7 @@ yuuvis:
       userAuthorizationUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/auth
       accessTokenUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/token
       userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout?redirect_uri=${redir}
+      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout
       userNameExtractionPattern: $.sub 
 
     # configuration for the yuuvis organization service
@@ -313,30 +324,17 @@ yuuvis:
   services:
     api:
       dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       port: 7450
-      nodeport:
-        use: false
-        value: 30033
       requests:
         memory: "512Mi"
-    admin:
-      dockerRegistry: docker.yuuvis.org/yuuvis/admin
-      tag: 5.7.2.3
-      profiles: prod,docker,kubernetes
-      instances: 1
-      port: 7273
-      java:
-        maxHeap: -Xmx128m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "128Mi"
     audit:
       dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
       instances: 1
       port: 7251
@@ -350,7 +348,7 @@ yuuvis:
         use: true
         value: 30080
       dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -370,7 +368,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 4.9.21
+      tag: 4.13.0
       instances: 1
       port: 7282
       java:
@@ -379,10 +377,10 @@ yuuvis:
         memory: "256Mi"
       storage:
         request: 100Mi
-        class: 
+        class:
     contentanalyzer:
       dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -393,7 +391,7 @@ yuuvis:
     index:
       dockerRegistry: docker.yuuvis.org/yuuvis/index
       profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.9.21
+      tag: 4.13.0
       instances: 1
       port: 7291
       dependencyCheck:
@@ -405,7 +403,7 @@ yuuvis:
         memory: "1024Mi"
     organization:
       dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -423,7 +421,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     registry:
       dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -433,7 +431,7 @@ yuuvis:
         memory: "1024Mi"
     repository:
       dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -447,7 +445,7 @@ yuuvis:
         memory: "1024Mi"
     search:
       dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.9.21
+      tag: 4.13.0
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -461,7 +459,7 @@ yuuvis:
     system:
       dockerRegistry: docker.yuuvis.org/yuuvis/system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.9.21
+      tag: 4.13.0
       instances: 1
       port: 7400
       java:
@@ -471,7 +469,7 @@ yuuvis:
     commander:
       dockerRegistry: docker.yuuvis.org/yuuvis/commander
       profiles: prod,docker,kubernetes,dbs,es
-      tag: 4.9.21
+      tag: 4.13.0
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -480,7 +478,7 @@ yuuvis:
     archive:
       deploy: false
       dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice
-      tag: 5.25.2
+      tag: 4.13.0
       profiles: prod,docker,storage
       instances: 1
       java:
@@ -490,7 +488,7 @@ yuuvis:
       port: 7530
     controller:
       dockerRegistry: docker.yuuvis.org/yuuvis/controller
-      tag: 4.9.0
+      tag: 4.13.0
       profiles: prod,docker,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -508,7 +506,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     textextractor:
       dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
-      tag: 4.9.0
+      tag: 4.13.0
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420

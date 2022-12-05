@@ -1,0 +1,36 @@
+imageCredentials:
+  yuuvisorg:
+    registry: docker.yuuvis.org
+    username:  # Add correct credentials
+    password: # Add correct credentials
+
+yuuvis:
+  image:
+    imagePullPolicy: Always
+    imagePullSecret: yuuvisorg
+  configservice:
+    url: http://configservice.yuuvis/config
+  repositorymanager:
+    initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+    instances: 1
+    profile: prod # With every instance of rm this should be changed
+    dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager
+    tag: 4.2.0
+    core:
+      workingdir: /working-dir
+      api:
+        password: optimal      # Change value
+        tenant: instance1tenant # Change value
+        username: root  # Change value
+        client: http://client.yuuvis
+    java:
+      maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+    mq:
+      dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager-mq
+      tag: 1.1.0
+      instances: 1
+      java:
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+       
+initContainer:
+  command: "until wget -q --spider http://configservice.yuuvis/manage/health; do echo waiting for configservice; sleep 11; done;"

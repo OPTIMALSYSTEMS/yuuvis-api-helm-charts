@@ -31,16 +31,16 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.9.6
+      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.13.1
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: prod,docker,kubernetes
       instances: 1
       java:
         maxHeap: -Xmx512m
     userservice:
-      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.5.1
+      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.10.1
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
-      profiles: postgres,userservice
+      profiles: postgres
       instances: 1
       java:
         maxHeap: -Xmx128m
@@ -62,29 +62,46 @@ yuuvis:
         privilege:
           user: postgres
           password: changeme
-      userserviceyml: |
-        keycloak.server: http://keycloak-http.infrastructure/auth
-        keycloak.admin.username: keycloak
-        keycloak.admin.password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.2.8
-      instances: 1
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.1
+    instances: 1
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:2.2.8
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.1
       instances: 0
     viewer:
-      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.0.1
+      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.3.0
       instances: 1
     architect:
-      dockerImage: docker.yuuvis.org/yuuvis/architect:1.4.0
+      dockerImage: docker.yuuvis.org/yuuvis/architect:1.8.0
       instances: 1
     sothook:
-      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.7.1
+      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.13.0
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
-        
+    office365:
+      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-provider-client:1.0.1
+      instances: 1  
+      profiles: prod,docker,kubernetes
+      user: changeme
+      password: changeme
+      providerUrl: https://provider-staging.prod.enaio.io/
+      hostUrl: https://host-staging.prod.enaio.io/
+      dmsUrl: http://authentication/api/dms/  
+      workDir: /tmp
+      enableRecovery: "false"
+      java:
+        maxHeap: -Xmx128m    
+    dashlet:
+      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:1.0.1
+      instances: 1  
+      profiles: prod,docker,kubernetes
+      java:
+        maxHeap: -Xmx128m    
+      configservice:
+        url: http://configservice/config  
+      
 initContainer:
   command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"
 
@@ -122,57 +139,6 @@ configfiles:
         <classification>appClient:required</classification>
       </typeSecondaryDefinition>
     </schema>
-  systemHookConfiguration: |
-    {"systemhooks" :
-      {"amqp" : [
-        {"enable" : true,
-         "predicate" : "spel:(contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null && contentStreams[0]['range'].length() > 0) ? true : false",
-         "type" : "object.insert.document",
-         "url" : "{{.Values.yuuvis.amqp.url}}:{{.Values.yuuvis.amqp.port}}",
-         "user" : "{{.Values.yuuvis.amqp.user}}",
-         "password" : "{{.Values.yuuvis.amqp.password}}",
-         "queue" : "lc.textextraction",
-         "bulkSize" : 1
-        }
-      ],
-      "webhooks": [
-         {
-           "enable": true,
-           "predicate": "spel:true",
-           "type": "user.info",
-           "url": "http://organization/api/userinfo/${tenant}/${userId}"
-         },
-         {
-           "enable": true,
-           "predicate": "spel:T(java.util.List).of(100,101).contains(options['action'])",
-           "type": "dms.request.objects.upsert.storage-before",
-           "url": "http://sothook/api/dms/request/import",
-           "useDiscovery": true
-         },
-         {
-           "enable": true,
-           "predicate": "spel:T(java.util.List).of(300).contains(options['action']) && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
-           "type": "dms.request.objects.upsert.storage-before",
-           "url": "http://sothook/api/dms/request/update/metadata",
-           "useDiscovery": true
-         },
-         {
-           "enable": false,
-           "predicate": "spel:(options==null || options['currentVersion']==null)",
-           "type": "dms.request.import.storage.before",
-           "url": "http://sothook/api/dms/request/import",
-           "useDiscovery": true
-         },
-         {
-           "enable": false,
-           "predicate": "spel:options!=null && options['currentVersion']!=null && options['currentVersion']['properties']['system:secondaryObjectTypeIds'] != null && options['currentVersion']['properties']['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
-           "type": "dms.request.update.metadata",
-           "url": "http://sothook/api/dms/request/update/metadata",
-           "useDiscovery": true
-         }
-       ]
-     }
-    }
   appclientsystemschema: |
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
@@ -181,6 +147,7 @@ configfiles:
         <propertyType>string</propertyType>
         <cardinality>single</cardinality>
         <required>true</required>
+        <classification>appClient:standardform:hidden</classification>
       </propertyStringDefinition>
       <typeSecondaryDefinition>
         <id>leadingType</id>
@@ -189,6 +156,27 @@ configfiles:
         <propertyReference>leadingTypeId</propertyReference>
       </typeSecondaryDefinition>
     </schema>
+  appclientsystemsystemHookConfiguration: |
+    {"systemhooks" :
+      {"amqp" : [],
+      "webhooks": [
+         {
+           "enable" : true,
+           "predicate" : "spel:T(java.util.List).of(100,101).contains(options['action']) && properties['system:secondaryObjectTypeIds'] != null && properties['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
+           "type" : "dms.request.objects.upsert.database-before",
+           "url" : "http://sothook/api/dms/request/import/databasebefore",
+           "useDiscovery" : true
+         },
+         {
+           "enable" : true,
+           "predicate" : "spel:T(java.util.List).of(300).contains(options['action']) && properties['system:secondaryObjectTypeIds'] != null && properties['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
+           "type" : "dms.request.objects.upsert.database-before",
+           "url" : "http://sothook/api/dms/request/updatemetadata/databasebefore",
+           "useDiscovery" : true
+         }
+       ]
+     }
+    }
   i18nde: |
     {
       "system:folder_label": "Alle Ordner",

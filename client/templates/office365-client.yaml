@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: office365
+  name: office365
+spec:
+  replicas: {{.Values.yuuvis.client.office365.instances}}
+  selector:
+    matchLabels:
+      name: office365
+  template:
+    metadata:
+      labels:
+        name: office365
+        yuuvislog: "true"
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: office365
+          image: {{.Values.yuuvis.client.office365.dockerImage}}
+          imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+          env: 
+          - name: JAVA_OPTS
+            value: {{.Values.yuuvis.client.office365.java.maxHeap}}
+          - name: SPRING_PROFILES_ACTIVE
+            value: {{.Values.yuuvis.client.office365.profiles}}
+          - name: SPRING_CLOUD_CONFIG_URI
+            value: {{.Values.yuuvis.configservice.url }}  
+          - name: O365_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                key: user
+                name: office365-secret
+          - name: O365_TENANT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: office365-secret
+          - name: PROVIDER_URL
+            value: {{.Values.yuuvis.client.office365.providerUrl }}  
+          - name: HOST_URL
+            value:  {{.Values.yuuvis.client.office365.hostUrl }}  
+          - name: DMS_URL
+            value:  {{.Values.yuuvis.client.office365.dmsUrl }}    
+          - name: WORKING_DIR
+            value:  {{.Values.yuuvis.client.office365.workDir }}  
+          - name: ENABLE_RECOVERY
+            value: "{{.Values.yuuvis.client.office365.enableRecovery }}"
+          ports:
+            - containerPort: 8091
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret }}
+      restartPolicy: Always

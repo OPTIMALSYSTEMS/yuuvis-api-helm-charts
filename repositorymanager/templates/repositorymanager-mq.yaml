@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: repositorymanager-mq
+  name: repositorymanager-mq
+spec:
+  replicas: {{.Values.yuuvis.repositorymanager.mq.instances}}
+  selector:
+    matchLabels:
+      name: repositorymanager-mq
+  template:
+    metadata:
+      labels:
+        name: repositorymanager-mq
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.repositorymanager.mq.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        image: "{{.Values.yuuvis.repositorymanager.mq.dockerRegistry}}:{{.Values.yuuvis.repositorymanager.mq.tag}}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: repositorymanager-mq
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      - name: init-repositorymanager
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]

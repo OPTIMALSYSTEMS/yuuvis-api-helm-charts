@@ -84,18 +84,11 @@ spec:
           subPath: initdb.sh
       {{- end}}
       - name: init-config
-        image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
+        image: busybox
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
-        command: ['bash', '/yuuvis/script/init.bash']
-        volumeMounts:
-        - mountPath: /yuuvis/script/init.bash
-          name: initscript
-          subPath: init.bash
       restartPolicy: Always
       volumes:
-      - configMap:
-          name: inituserserviceconfigmap
-        name: initscript
       {{- if .Values.yuuvis.client.userservice.database.createdb }}
       - configMap:
           name: inituserservicedbconfigmap

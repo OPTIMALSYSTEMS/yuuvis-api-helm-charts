@@ -3,10 +3,10 @@ kind: ConfigMap
 data:
   schema.xml: |
 {{ tpl .Values.configfiles.appclientschema . | indent 4 }}
-  systemHookConfiguration.json: |
-{{ tpl .Values.configfiles.systemHookConfiguration . | indent 4 }}
   clientsystem_schema.xml: | 
 {{ tpl .Values.configfiles.appclientsystemschema . | indent 4 }}
+  clientsystem_systemHookConfiguration.json: | 
+{{ tpl .Values.configfiles.appclientsystemsystemHookConfiguration . | indent 4 }}
   i18n_de.json: |
 {{ tpl .Values.configfiles.i18nde . | indent 4 }}
   i18n_en.json: |

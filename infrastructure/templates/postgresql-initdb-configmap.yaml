@@ -7,6 +7,6 @@ data:
     CREATE DATABASE yuuvis;
     CREATE USER {{.Values.yuuvis.db.user}} WITH ENCRYPTED PASSWORD '{{.Values.yuuvis.db.password}}';
     GRANT ALL PRIVILEGES ON DATABASE yuuvis TO {{.Values.yuuvis.db.user}};
-    CREATE DATABASE keycloak;
-    CREATE USER {{.Values.yuuvis.keycloak.db.user}} WITH ENCRYPTED PASSWORD '{{.Values.yuuvis.keycloak.db.password}}';
-    GRANT ALL PRIVILEGES ON DATABASE keycloak TO {{.Values.yuuvis.keycloak.db.user}};
+    CREATE DATABASE {{.Values.keycloak.database.database}};
+    CREATE USER {{.Values.keycloak.database.username}} WITH ENCRYPTED PASSWORD '{{.Values.keycloak.database.password}}';
+    GRANT ALL PRIVILEGES ON DATABASE keycloak TO {{.Values.keycloak.database.username}};
