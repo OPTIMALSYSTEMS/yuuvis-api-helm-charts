@@ -63,10 +63,10 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.1
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.3
     instances: 1
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.1
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.3
       instances: 0
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.3.0
@@ -81,7 +81,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
     office365:
-      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-provider-client:1.0.1
+      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-provider-client:1.0.2
       instances: 1  
       profiles: prod,docker,kubernetes
       user: changeme
@@ -94,7 +94,7 @@ yuuvis:
       java:
         maxHeap: -Xmx128m    
     dashlet:
-      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:1.0.1
+      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:1.0.3
       instances: 1  
       profiles: prod,docker,kubernetes
       java:
