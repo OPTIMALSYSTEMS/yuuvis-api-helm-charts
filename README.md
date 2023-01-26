@@ -20,16 +20,6 @@ limitations under the License.
 
 Please use helm version [v3.2.4](https://github.com/helm/helm/releases/tag/v3.2.4), newer versions may not be compatible with some of the helm charts.
 
-#### Installing the Monitoring Helm chart
-
-Installing monitoring chart
-```
-helm dep up monitoring
-helm install monitoring ./monitoring -n monitoring --create-namespace --debug
-```
-
-Further information on configuration and available dashboards can be found in the [monitoring module readme](monitoring/README.md).
-
 ## yuuvis installation
 
 First please add your credentials for the docker.yuuvis.org registry in the values yaml files of the helm charts.  For any questions about credentials please contact support@yuuvis.com.
@@ -44,6 +34,7 @@ Replace all **changeme** default passwords in the values.yaml of the charts you 
 helm repo add minio https://helm.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add bitnami-pre-2022 https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
+helm repo add codecentric https://codecentric.github.io/helm-charts
 ```
 ### Install the infrastructure Helm chart
 
@@ -178,6 +169,16 @@ Check version of upgraded helm chart
 helm list -n yuuvis 
 ```
 
+## Installing the Monitoring Helm chart
+
+Installing monitoring chart
+```
+helm dep up monitoring
+helm install monitoring ./monitoring -n monitoring --create-namespace --debug
+```
+
+Further information on configuration and available dashboards can be found in the [monitoring module readme](monitoring/README.md).
+
 ## Uninstall
 
 ```shell
@@ -211,3 +212,4 @@ kubectl delete pv name(replace with pv from gogs --check value with kubectl get 
 ```
 
 Before deleting the persistent volumes and persistent volume claims, please delete corresponding pods.
+
