@@ -354,6 +354,7 @@ yuuvis:
       port: 8080
       # for the manage endpoints a dedicated port is used
       managePort: 9091
+      internalPort: 8081
       requests:
         memory: "512Mi"
       java:
