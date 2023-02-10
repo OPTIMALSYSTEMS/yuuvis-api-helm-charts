@@ -4,7 +4,7 @@ metadata:
   name: postgresql-initdb
 data:
   create_enaio_dbs.sql: |
-    CREATE DATABASE yuuvis;
+    CREATE DATABASE {{.Values.yuuvis.db.name}};
     CREATE USER {{.Values.yuuvis.db.user}} WITH ENCRYPTED PASSWORD '{{.Values.yuuvis.db.password}}';
     GRANT ALL PRIVILEGES ON DATABASE yuuvis TO {{.Values.yuuvis.db.user}};
     CREATE DATABASE {{.Values.keycloak.database.database}};

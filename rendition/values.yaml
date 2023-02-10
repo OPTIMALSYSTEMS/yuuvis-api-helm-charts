@@ -23,7 +23,7 @@ yuuvis:
     periodSeconds: 30
     timeoutSeconds: 5
   renditionservice:
-    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.4.0
+    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.4.1
     profiles: prod
     instances: 1
     java:

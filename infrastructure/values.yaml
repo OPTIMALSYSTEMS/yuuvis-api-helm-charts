@@ -21,6 +21,7 @@ yuuvis:
   labels:
     app: yuuvis
   db:
+    name: yuuvis
     user: yuuvis
     password: changeme
   keycloak:
