@@ -76,7 +76,6 @@ yuuvis:
       - 'architect'
       - 'metricsservice'
       - 'bpm-engine'
-      - 'renditionrepository'
       - 'dashlet365'
       - 'office365'
         
@@ -133,7 +132,6 @@ yuuvis:
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /tenant-management/api/admin/users/**
         access: hasAnyAuthority('YUUVIS_MANAGE_SETTINGS')
-      - endpoints: /renditionrepository/**
     ### office 365
       - endpoints: /office365/**
       - endpoints: /dashlet365/**  
