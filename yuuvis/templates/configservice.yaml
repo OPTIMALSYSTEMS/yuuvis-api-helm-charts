@@ -56,12 +56,12 @@ spec:
           value: {{.Values.yuuvis.services.config.java.maxHeap}}
         - name: SERVER_PORT
           value: "{{.Values.yuuvis.services.config.port}}"
+        - name: SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS
+          value: file:/tmp/configservice/resource-git
         - name: SPRING_CLOUD_CONFIG_LABEL
           value: {{.Values.yuuvis.git.branch}}
         - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT-LABEL
           value: {{.Values.yuuvis.git.branch}}
-        - name: SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS
-          value: file:/tmp/configservice/resource-git
         - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
           valueFrom:
             secretKeyRef:

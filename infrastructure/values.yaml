@@ -1,34 +1,30 @@
 imageCredentials:
   dockeryuuvisorg:
     registry: docker.yuuvis.org
-    username: 
-    password: 
+    username:
+    password:
 
 yuuvis:
   # !!! Change before running
   # replace the value with the namespace you intent to use for the yuuvis API services
   # this chart creates a k8s job that generatey a selfsigned certificate and deploys the
   # crt file as a secret to the given namespace
-  namespaces: 
+  namespaces:
     yuuvis: yuuvis
     infrastructure: infrastructure
   authentication:
     # we assume test deployment in minikube
     # ip is the ip of the vm minikube creates
     # to get the ip: minikube ip
-    ip: 192.168.99.100
+    ip: 127.0.0.1
     port: 30080
   labels:
     app: yuuvis
   db:
+    name: yuuvis
     user: yuuvis
     password: changeme
   keycloak:
-    user: keycloak
-    password: changeme
-    db:
-      user: keycloak
-      password: changeme
     nodePort: 30111
     realm:
       yuuvistest:
@@ -48,7 +44,7 @@ yuuvis:
 
 
 elasticsearch:
-  image: docker.yuuvis.org/yuuvis/elasticsearch:2022-01-11
+  image: docker.yuuvis.org/yuuvis/elasticsearch:2022-08-01
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 100Gi
@@ -59,7 +55,7 @@ elasticsearch:
   targetPort2: 9200
   highAvailability:
     enabled: false
-    # Combined memory of all elasticsearch nodes should not exceed 50% of capacity
+    # Combined memory of all elasticsearch nodes should not exceed 50% of total memory available on k8s node.
     data:
       nodes: 2
       storage: 200Gi
@@ -74,14 +70,18 @@ elasticsearch:
   initial_master_nodes: elasticsearch-0  
   memory: -Xms1024m -Xmx1024m
 
-
 postgresql:
   enabled: true
   fullnameOverride: postgresql
-  postgresqlPassword: changeme
+  architecture: standalone
+  global:
+    postgresql:
+      auth:
+        postgresPassword: changeme
+      servicePort: 5432
   persistence:
     storageClass: standard
-    size: 500Mi
+    size: 50Gi
   resources:
     requests:
       memory: 128Mi
@@ -90,8 +90,9 @@ postgresql:
     enabled: false
   readinessProbe:
     enabled: false
-  initdbScriptsConfigMap: postgresql-initdb
-  postgresqlExtendedConf: {"max_connections": "400", "shared_buffers": "128MB"}
+  primary:
+    initdb:
+      scriptsConfigMap: postgresql-initdb
 
 rabbitmq:
   enabled: true
@@ -125,13 +126,10 @@ gitea:
         PORT: 80
       service:
         DISABLE_REGISTRATION: true  
-    database:
-      builtIn:
-        postgresql:
-          enabled: false
-    cache:
-      builtIn:
-        enabled: false
+  memcached:
+    enabled: false
+  postgresql:
+    enabled: false
   persistence:
     enabled: true
     size: 1Gi
@@ -139,94 +137,104 @@ gitea:
 minio:
   enabled: true
   fullnameOverride: minio
-  accessKey: "MGMWCOYTDUSLNCFE"
-  secretKey: "changeme"
+  mode: standalone
+  rootUser: minio
+  rootPassword: "changeme"
   persistence:
+    enabled: true
     storageClass: standard
     size: 10Gi
-  resources: {}
-  # for gateway usage with azure blob storage set access  key and secret key to your
-  # storage account credentials, activate azure gateway mode and disable persistence
-  # persistence:
-  #   enabled: false
-  # azuregateway:
-  #   enabled: true
-  #   replicas: 1 
-
+  resources:
+    requests:
+      memory: 1Gi
+  users:
+  - accessKey: console
+    secretKey: changeme
+    policy: consoleAdmin
+  - accessKey: MGMWCOYTDUSLNCFE
+    secretKey: changeme
+    policy:  readwrite
+    
 keycloak:
   enabled: true
   fullnameOverride: "keycloak"
   image:
     repository: docker.yuuvis.org/yuuvis/keycloak
-    tag: 11.0.2-stable1
-  imagePullSecrets:
-  - dockeryuuvisorg
-  livenessProbe: |
-    httpGet:
-      path: /auth/
-      port: http
-    initialDelaySeconds: 600
-    timeoutSeconds: 5
-  postgresql:
-    enabled: false
-  extraEnv: |
-    - name: KEYCLOAK_USER_FILE
-      value: /secrets/keycloak/user
-    - name: KEYCLOAK_PASSWORD_FILE
-      value: /secrets/keycloak/password
-    - name: PROXY_ADDRESS_FORWARDING
-      value: "true"
-    - name: DB_VENDOR
-      value: postgres
-    - name: DB_ADDR
-      value: postgresql
-    - name: DB_PORT
-      value: "5432"
-    - name: DB_DATABASE
-      value: keycloak
-    - name: DB_USER_FILE
-      value: /secrets/db-creds/user
-    - name: DB_PASSWORD_FILE
-      value: /secrets/db-creds/password
-    - name: KEYCLOAK_IMPORT
-      value: "/realm/yuuvistest.json,/realm/testyuuvis.json -Dkeycloak.profile.feature.upload_scripts=enabled"
+    tag: "19.0.3-stable1"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: 
+   - name: dockeryuuvisorg
+  http:
+    # For backwards compatibility reasons we set this to the value used by previous Keycloak versions.
+    relativePath: "/auth"
+  database:
+    vendor: postgres
+    hostname: postgresql 
+    port: 5432
+    database: keycloak
+    username: keycloak
+    password: changeme
+  secrets:
+    keycloakuser:
+      stringData:
+        user: keycloak
+        password: changeme
   extraVolumes: |
     - name: realm-config
       configMap:
         name: realmconfigmap
-    - name: keycloak-tls-localhost
+    - name: tls-secret
       secret:
-        defaultMode: 420
         secretName: keycloak-selfsigned-tls-secret
-    - name: db-creds
-      secret:
-        secretName: keycloakdb
-    - name: kc-creds
-      secret:
-        secretName: keycloakuser
   extraVolumeMounts: |
     - name: realm-config
-      mountPath: "/realm/"
+      mountPath: "/opt/keycloak/data/import"
       readOnly: true
-    - name: keycloak-tls-localhost
-      mountPath: "/etc/x509/https/"
-    - name: db-creds
-      mountPath: /secrets/db-creds
+    - name: tls-secret
+      mountPath: "/opt/keycloak/conf/tls"
       readOnly: true
-    - name: kc-creds
-      mountPath: /secrets/keycloak
-      readOnly: true
+  command:
+    - /opt/keycloak/bin/kc.sh
+    - --verbose
+    - start
+    - --auto-build
+    - --hostname-strict=false
+    - --hostname-strict-https=false
+    - --spi-events-listener-jboss-logging-success-level=info
+    - --spi-events-listener-jboss-logging-error-level=warn
+    - --import-realm
+  extraEnv: |
+    - name: KEYCLOAK_ADMIN
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "keycloak.fullname" . }}-keycloakuser
+          key: user
+    - name: KEYCLOAK_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "keycloak.fullname" . }}-keycloakuser
+          key: password
+    - name: KC_CACHE
+      value: local
+    - name: KC_HTTPS_CERTIFICATE_FILE
+      value: /opt/keycloak/conf/tls/tls.crt
+    - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+      value: /opt/keycloak/conf/tls/tls.key
+  cache:
+    stack: custom
 
 redis:
+  enabled: true
   fullnameOverride: redis
   ## Cluster settings
-  cluster:
+  architecture: standalone
+  auth:
     enabled: false
-  usePassword: false
+    password: changeme
   master:
     livenessProbe:
       initialDelaySeconds: 600
     persistence:
       enabled: false
       storageClass: standard
-      size: 50Mi
+      size: 1Gi

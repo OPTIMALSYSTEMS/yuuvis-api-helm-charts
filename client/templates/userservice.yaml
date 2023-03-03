@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: userservice
   name: userservice
 spec:
@@ -39,7 +39,7 @@ spec:
           value: {{.Values.yuuvis.client.userservice.database.port | quote }}
         - name: DB_NAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
-        image: {{.Values.yuuvis.client.userservice.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: userservice
         ports:
@@ -75,7 +75,7 @@ spec:
               name: userservice-dbsecret
         - name: DBNAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
-        image: {{.Values.yuuvis.client.userservice.initContainerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
         volumeMounts:
@@ -84,18 +84,11 @@ spec:
           subPath: initdb.sh
       {{- end}}
       - name: init-config
-        image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:latest
+        image: busybox
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
-        command: ['bash', '/yuuvis/script/init.bash']
-        volumeMounts:
-        - mountPath: /yuuvis/script/init.bash
-          name: initscript
-          subPath: init.bash
       restartPolicy: Always
       volumes:
-      - configMap:
-          name: inituserserviceconfigmap
-        name: initscript
       {{- if .Values.yuuvis.client.userservice.database.createdb }}
       - configMap:
           name: inituserservicedbconfigmap

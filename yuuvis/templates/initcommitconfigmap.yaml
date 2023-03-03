@@ -1,9 +1,6 @@
 apiVersion: v1
 data:
   initgit.sh: |
-    git config --global user.email yuuvis-init@yuuvis.org
-    git config --global user.name yuuvis-init
-
     until wget -q --spider {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.server}}
     do 
         echo waiting for git
@@ -39,6 +36,8 @@ data:
     cp /yuuvis/data/system/*.json .
     cd ..
 
+    git config --local user.email yuuvis-init@yuuvis.org
+    git config --local user.name yuuvis-init
     git add .
     git commit -m "init config"
     

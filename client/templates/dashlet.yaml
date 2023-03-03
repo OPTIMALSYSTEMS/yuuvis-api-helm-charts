@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: dashlet365
+    yuuvislog: "true"
+  name: dashlet365
+spec:
+  replicas: {{.Values.yuuvis.client.dashlet.instances}}
+  selector:
+    matchLabels:
+      name: dashlet365
+  template:
+    metadata:
+      labels:
+        name: dashlet365
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: dashlet365
+          image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.dashlet.dockerImage}}
+          imagePullPolicy: Always
+          env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.client.dashlet.java.maxHeap}}
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{.Values.yuuvis.client.dashlet.profiles}}
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: {{ .Values.yuuvis.client.dashlet.configservice.url }} 
+          ports:
+            - containerPort: 8099
+      imagePullSecrets:
+      - name: yuuvisorg
+      restartPolicy: Always

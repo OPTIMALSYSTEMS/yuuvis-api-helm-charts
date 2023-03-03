@@ -1,15 +1,7 @@
 apiVersion: v1
 data:
   application-dbs.yml: |
-    yuuvis.db.name: {{.Values.yuuvis.db.name}}
-    yuuvis.db.server: {{.Values.yuuvis.db.server}}
-    yuuvis.db.username: {{.Values.yuuvis.db.user}}
-    yuuvis.db.password: {{.Values.yuuvis.db.password}}
-
-    spring.datasource.url: jdbc:postgresql://${yuuvis.db.server}/${yuuvis.db.name}
-    spring.datasource.driver-class-name: org.postgresql.Driver
-    spring.datasource.username: ${yuuvis.db.username}
-    spring.datasource.password: ${yuuvis.db.password}
+{{ tpl .Values.yuuvis.dbconfig . | indent 4 }}
   application-docker.yml: |
     docker.enabled: true
   application-kubernetes.yml: |

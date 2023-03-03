@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: repositorymanager-init-config
+spec:
+  template:
+    spec:
+      containers:
+      - name: repositorymanager-init-config
+        image: {{.Values.yuuvis.repositorymanager.initContainerImage}}
+        imagePullPolicy: IfNotPresent
+        command: ['bash', '/yuuvis/script/repositorymanager{{.Values.yuuvis.repositorymanager.profile}}init.bash']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: repositorymanageryml
+        - mountPath: /yuuvis/script/repositorymanager{{.Values.yuuvis.repositorymanager.profile}}init.bash
+          name: repositorymanagerinitscript
+          subPath: repositorymanager{{.Values.yuuvis.repositorymanager.profile}}init.bash
+      volumes:
+      - configMap:
+          name: initrepositorymangerconfigmap
+        name: repositorymanagerinitscript
+      - configMap:
+          name: repositorymanagerconfigmap
+        name: repositorymanageryml
+      restartPolicy: OnFailure

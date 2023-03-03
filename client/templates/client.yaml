@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: client
   name: client
 spec:
@@ -16,7 +16,7 @@ spec:
         name: client
     spec:
       containers:
-      - image: {{.Values.yuuvis.client.client.dockerImage}}
+      - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.client.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: client
         ports:

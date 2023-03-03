@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  repositorymanager-{{.Values.yuuvis.repositorymanager.profile}}.yml: |
+    core.api.password: {{.Values.yuuvis.repositorymanager.core.api.password}}
+    core.api.tenant: {{.Values.yuuvis.repositorymanager.core.api.tenant}}
+    core.api.url: "{{.Values.yuuvis.repositorymanager.core.api.client}}"
+    core.api.username: {{.Values.yuuvis.repositorymanager.core.api.username}}
+    spring.activemq.broker-url: "tcp://repositorymanager-mq:61616"
+    repository-manager.working-dir: "{{.Values.yuuvis.repositorymanager.core.workingdir}}"
+kind: ConfigMap
+metadata:
+  name: repositorymanagerconfigmap

@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  application-userservice.yml: |
-{{ tpl .Values.yuuvis.client.userservice.userserviceyml . | indent 4 }}
-kind: ConfigMap
-metadata:
-  name: userserviceconfigconfigmap

@@ -1,45 +1,52 @@
-# License
+# YUUVIS API HELM CHARTS
 
-Copyright 2021 OPTIMAL SYSTEMS GmbH
+Yuuvis Api Helm Charts are tool for accelerated development of tailored content and information management solutions.
+Solutions build using Yuuvis Api Helm Charts are highly scalable, run either cloud native or on premises and exhibit outstanding performance.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+## Table of Contents
 
-    http://www.apache.org/licenses/LICENSE-2.0
+* [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+    - [Add required Helm repositorys:](#add-required-helm-repositorys-)
+    + [Install the infrastructure Helm chart](#install-the-infrastructure-helm-chart)
+    + [Install the yuuvis Helm chart](#install-the-yuuvis-helm-chart)
+    + [Install the yuuvis client Helm chart](#install-the-yuuvis-client-helm-chart)
+    + [Install the yuuvis bpm Helm chart](#install-the-yuuvis-bpm-helm-chart)
+    + [Install the yuuvis rendition Helm chart](#install-the-yuuvis-rendition-helm-chart)
+    + [Install the yuuvis management Helm chart](#install-the-yuuvis-management-helm-chart)
+    + [Install the yuuvis repositorymanager Helm chart](#install-the-yuuvis-repositorymanager-helm-chart)
+  * [Version upgrades](#version-upgrades)
+    + [2021 autumn](#2021-autumn)
+    + [2021 summer](#2021-summer)
+	+ [2022 winter](#2022-winter)
+  * [Uninstall](#uninstall)
+- [License](#license)
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 
-# yuuvis api helm charts
+## Prerequisites 
 
-## Prerequisites
+Please use helm version 3.
 
-Please use helm version [v3.2.4](https://github.com/helm/helm/releases/tag/v3.2.4), newer versions may not be compatible with some of the helm charts.
+## Installation
 
-## yuuvis installation
-
-First please add your credentials for the docker.yuuvis.org registry in the values yaml files of the helm charts.  For any questions about credentials please contact support@yuuvis.com.
+First please **add your credentials for the docker.yuuvis.org** registry in **the values yaml** files of the helm charts.  For any questions about credentials please contact support@yuuvis.com.
 
 Replace all **changeme** default passwords in the values.yaml of the charts you plan to use.   
 
-### Add required Helm repositorys:
+**Important: an helm update with the infrastructure chart is not supported."
+
+#### Add required Helm repositorys:
 
 ```shell
-helm repo add minio https://helm.min.io/
+helm repo add minio https://charts.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add gitea-charts https://dl.gitea.io/charts/
-helm repo add bitnami-pre-2022 https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
 helm repo add codecentric https://codecentric.github.io/helm-charts/
 ```
+
 ### Install the infrastructure Helm chart
 
-Important: an update of the infrastructure helm chart is not supported.  
-
-#### Update infrastructure dependencies
+**Update infrastructure dependencies**
 
 ```shell
 cd infrastructure
@@ -48,7 +55,7 @@ helm repo add stable https://charts.helm.sh/stable
 cd ..
 ```
 
-#### Edit the infrastructure values.yaml
+**Edit the infrastructure values.yaml** 
 
 * Edit the docker registry credentials. 
 * Optionally change passwords
@@ -56,9 +63,11 @@ cd ..
 
 *Since version 0.9.0 of the infrastructure helm chart gitea is used as an example git server.*
 
-*Since june 2022 the infrastructure helm chart requires the bitnami-pre-2022 repository.*
+*Since version 0.11.0 of the infrastructure helm chart the minio https://charts.min.io repository is used.*
 
-#### Install infrastructure services
+*Since version 0.12.0 of the infrastructure helm chart the codecentric keycloakx helm chart is used.*
+
+**Install infrastructure services**
 
 ```shell
 kubectl create namespace infrastructure
@@ -79,23 +88,15 @@ gitea-init                        1/1           83s        8m4s
 keycloak-create-selfsigned-cert   1/1           8m4s       8m4s
 ```
 
-#### Edit the yuuvis values.yaml
+#### Changes with version 0.12
 
-In the values yaml of the helm chart edit the:  
-* docker registry credentials.
-* git parameters
-* keycloak address
-* database parameters
-* amqp parameters
-* elasticsearch index parameters
-* redis parameters 
-
-*Since version 0.9.0 of the infrastructure helm chart gitea is used as an example git server.*
-*In case of an previously created system you must change the git url.*
-
-*Since version 0.14.0 of the yuuvis helm chart the configservice is deployed as an statefulset.*
+Starting with version *0.12.0* of the infrastructure helm chart the codecentric keycloakx helm chart is used.  
+Thus the configuration paramters for the keycloak changed.  
+The yuuvis api version *2022 winter* uses keycloak1 version 19.  
 
 ### Install the yuuvis Helm chart
+
+**Edit the yuuvis values.yaml and docker registry credentials**
 
 ```shell
 kubectl create namespace yuuvis
@@ -108,11 +109,11 @@ wait till all pods are ready
 kubectl get po -n yuuvis
 ```
 
-#### Edit the client values.yaml
+### Install the yuuvis client Helm chart
 
-* Edit the docker registry credentials.
+**Edit the client values.yaml and docker registry credentials**
 
-### Install the yuuvis client Helm chart:
+*With version 0.6.0 of the client helm chart an app systemHookConfiguration.json is used for the sothook. The global systemHookConfiguration.json is no longer used/changed by the init script.*
 
 ```shell
 helm install client ./client --namespace yuuvis
@@ -124,7 +125,7 @@ wait till all pods are ready
 kubectl get po -n yuuvis
 ```
 
-#### Post-install tasks for the client
+**Post-install tasks for the client**
 
 The client helm chart will change the *systemHookConfiguration.json*.  
 Services that use this configuration will only read it once at startup.  
@@ -136,14 +137,12 @@ To restart the api gateway:
 kubectl rollout restart deployment api -n yuuvis
 ```
 
-A role *YUUVIS_CREATE_OBJECT* must be created and assigned to users who should be able to create objects in the client.  
-
-#### Edit the bpm values.yaml
-
-* Edit the docker registry credentials.
+A role *YUUVIS_CREATE_OBJECT* must be created and assigned to users who should be able to create objects in the client.
 
 
 ### Install the yuuvis bpm Helm chart
+
+**Edit the bpm values.yaml and docker registry credentials**
 
 install bpm services with:
 ```shell
@@ -159,33 +158,38 @@ kubectl get po -n yuuvis
 helm install rendition ./rendition --namespace yuuvis
 ```
 
-### Install the yuuvis management Helm chart
+### Install the yuuvis repositorymanager Helm chart
 
-install management services with:
+**Edit the repositorymanager values.yaml and docker registry credentials**
+
+The repositorymanager is connector that provides solution for **ArchiveLink** and **ILM** protocols of SAP.
+
+_It is possible to have **more than one instance** of repositorymanager.
+To use that possibility repositorymanager will not be part of yuuvis namespace and for **every instance** it is needed to be created **new namespace**._
+
+> **_NOTE: CORS Ingress_**
+In Ingress controller because of communication with SAP protocols, please disable CORS e.g.  nginx.ingress.kubernetes.io/enable-cors: "false", or if you use cloud provider you should disable there.
+
+Install the yuuvis repositorymanager chart:
+
 ```shell
+
+# Check if yuuvis core services running
 kubectl get po -n yuuvis
-helm install management ./management --namespace yuuvis
+
+# For every instance create new namespace e.g. xxxxx
+kubectl create namespace xxxxx
+
+# Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
+helm install repositorymanager ./repositorymanager --namespace xxxxx 
 ```
-
-The management helm chart contains services for managing tenants.  
-It provides a tenant-management api and a tenant management console.  
-By default the deployment of the tenant management console services is disabled.  
-To deploy the services the parameter *yuuvis.management.console.deploy* must be set to *true* in the values.yaml.  
-
-```javascript
-yuuvis:
-  management:
-    console:
-      deploy: true
-```
-
-For configuration of the tenant management console client please refer to:
-[tenant management console client configuration](https://help.optimal-systems.com/yuuvis_develop/display/YMY/MANAGEMENT-CONSOLE-CLIENT+Service)
 
 ## Version upgrades
 
-The upgrade of the infrastructure chart is not supported.
+The upgrade of the infrastructure chart is not supported at the moment.
+
 For upgrading the yuuvis or monitoring components get the new Helm charts version, edit the values.yaml of each chart with your modifications and the upgrade the Helm deployments:
+
 Check version of deployed helm chart
 
 ```shell
@@ -197,16 +201,40 @@ helm list -n monitoring
 helm upgrade yuuvis ./yuuvis --namespace yuuvis 
 helm upgrade client ./client --namespace yuuvis 
 helm upgrade bpm ./bpm --namespace yuuvis
-helm upgrade rendition ./rendition --namespace yuuvis 
-helm upgrade management ./management --namespace yuuvis 
 helm upgrade monitoring ./monitoring --namespace monitoring 
-
+helm upgrade repositorymanager ./repositorymanager --namespace xxxxx
 ```
 Check version of upgraded helm chart
 
 ```shell
 helm list -n yuuvis 
 ```
+
+### 2023 spring
+
+With version *2023 spring* the management helm chart has been removed.  
+Before updating to *2023 spring* please delete the helm chart with the previous used version.  
+
+```shell
+helm del management  --namespace yuuvis
+``` 
+
+Since version *2022 winter* the tenant-management-api service is required for the client.  
+Thus the service is moved into the client helm chart.  
+The metricsservice is depcrecated.  
+For this release the metricsservice is included in the client helm chart.  
+
+### 2022 winter
+
+With version *2022 winter* yuuvis api uses keycloak 19.  
+It is required to manually adjust the endSessionUri parameter for each tenant in the *application-oauth2.yml* configuration file.  
+The previously used parameter *redirect_uri* must be removed.  
+
+Further the db connection format used in the *application-dbs.yml* changed.  
+
+
+More information can be found here:
+[yuuvis 2022 winter changes](https://yuuvisdevelop.atlassian.net/wiki/spaces/YMY/pages/320047771/Breaking+Changes)
 
 ### 2021 winter and 2022spring
 
@@ -219,31 +247,15 @@ For more informations on the change, please refer to the documentaion at:
 More information on the configuration of the configservice can be found here:
 [configservice config](https://help.optimal-systems.com/yuuvis_develop/display/YM21WI/CONFIGSERVICE)
 
-### past versions
 
 ### 2021 autumn
 
-With this version changes to the authentication service configuration and authentication service kubernetes resources are mandatory.  
-Please refer to the documentation for more details: [authentication configuration changes](https://help.optimal-systems.com/yuuvis_develop/display/YMY/Update+Instructions+2021+Autumn#UpdateInstructions2021Autumn-Actuator)  
-The yuuvis helm chart contains a *pre-hook* **pre-upgrade-job-2021autumn** that attempts to change the authentication configuration in the git.  
-This hook is executed when *helm upgrade* is called and before the kubernetes configuration resources are updated.  
-The authentication manage endpoints are now exposed on a separated port.  
-This is configured in the *authentication-prod.yml* config file, which is stored in the git.  
-With this version a special kubernetes resource *authentication-manage* is used to access the manage endpoints of the authentication service inside the cluster.  
-The liveness and readiness probe target ports are changed in the authentication service deployment.  
-With the version **1.5.0** of the tenant-management-api service the kubernetes configuration provided with the yuuvis helm chart version **0.13.0** is mandatory.  
+The example git service in the infrastructure helm chart is changed from gogs to gitea.  
 
-Since version 0.9.0 of the infrastructure helm chart gitea is used as an example git server in the cluster.  
-With the yuuvis helm chart version 0.13.0 the default git url in the yuuvis helm chart is changed to match the new infrastructure git server.  
-In case of an previously created system you must change the git url before running *helm upgrade* for the yuuvis helm chart.  
+In the management helm charts the deployments and services are renamed to match the docker image names.  
 
-With the version 0.4.0 of the management helm chart the deployments and services created by the helm chart are renamed to match the docker image names.  
-If you use the service names in your configuration please note that:  
-* new *management-console-client* old: *console-client* 
-* new *management-console*  old: *console*  
-are changed.  
 
-#### 2021 summer
+### 2021 summer
 
 The configuration files will not be changed during an upgrade.  
 Please follow the instructions provied at:
@@ -267,26 +279,17 @@ helm install monitoring ./monitoring -n monitoring --create-namespace --debug
 
 Further information on configuration and available dashboards can be found in the [monitoring module readme](monitoring/README.md).
 
+
 ## Uninstall
 
 ```shell
  helm uninstall infrastructure  --namespace infrastructure
  helm uninstall prometheus-operator --namespace infrastructure
- helm uninstall monitoring  --namespace infrastructure
  helm uninstall yuuvis  --namespace yuuvis
  helm uninstall client  --namespace yuuvis
  helm uninstall bpm  --namespace yuuvis
-```
-
-```shell
-kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
-kubectl delete crd alertmanagers.monitoring.coreos.com
-kubectl delete crd podmonitors.monitoring.coreos.com
-kubectl delete crd probes.monitoring.coreos.com
-kubectl delete crd prometheuses.monitoring.coreos.com
-kubectl delete crd prometheusrules.monitoring.coreos.com
-kubectl delete crd servicemonitors.monitoring.coreos.com
-kubectl delete crd thanosrulers.monitoring.coreos.com
+ helm uninstall repositorymanager  --namespace xxxx
+ helm uninstall monitoring  --namespace monitoring
 ```
 
 ```shell
@@ -300,3 +303,20 @@ kubectl delete pv name(replace with pv from gogs --check value with kubectl get 
 ```
 
 Before deleting the persistent volumes and persistent volume claims, please delete corresponding pods.
+
+
+# License
+
+Copyright 2022 OPTIMAL SYSTEMS GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

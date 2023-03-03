@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin
   labels:
     app: {{.Values.yuuvis.labels.app}}
-    name: admin
+    name: dashlet365
     yuuvis: "true"
+  name: dashlet365
 spec:
   ports:
   - name: "http"
     port: 80
-    targetPort: {{.Values.yuuvis.services.admin.port}}
-  selector:
-    name: admin 
+    targetPort: 8099
   type: ClusterIP
+  selector:
+    name: dashlet365

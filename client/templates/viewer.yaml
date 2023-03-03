@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: viewer
   name: viewer
 spec:
@@ -16,7 +16,7 @@ spec:
         name: viewer
     spec:
       containers:
-      - image: {{.Values.yuuvis.client.viewer.dockerImage}}
+      - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.viewer.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:

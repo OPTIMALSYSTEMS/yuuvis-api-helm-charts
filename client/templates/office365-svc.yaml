@@ -4,14 +4,13 @@ metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     yuuvis: "true"
-    name: sothook
-  name: sothook
+    name: office365
+  name: office365
 spec:
   ports:
   - name: http
     port: 80
     protocol: TCP
-    targetPort: 10779
+    targetPort: 8091
   selector:
-    name: sothook
-  type: ClusterIP
+    name: office365
