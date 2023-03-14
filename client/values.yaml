@@ -63,19 +63,19 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.4
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.5
     instances: 1
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.4
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.5
       instances: 0
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:2.3.0
       instances: 1
     architect:
-      dockerImage: docker.yuuvis.org/yuuvis/architect:1.8.0
+      dockerImage: docker.yuuvis.org/yuuvis/architect:1.8.2
       instances: 1
     sothook:
-      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.13.0
+      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.13.6
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
