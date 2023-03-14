@@ -66,19 +66,19 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.0.0
+      dockerImage: client:5.0.1
     instances: 1
     custom:
-      dockerImage: client:5.0.0
+      dockerImage: client:5.0.1
       instances: 0
     viewer:
       dockerImage: viewerservice:2.3.0
       instances: 1
     architect:
-      dockerImage: architect:1.9.0
+      dockerImage: architect:1.9.1
       instances: 1
     sothook:
-      dockerImage: sandbox/sothook:4.14.0
+      dockerImage: sandbox/sothook:4.14.2
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
