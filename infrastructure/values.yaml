@@ -93,6 +93,9 @@ postgresql:
   primary:
     initdb:
       scriptsConfigMap: postgresql-initdb
+    extendedConfiguration: | 
+      max_connections=400
+      shared_buffers='128MB'
 
 rabbitmq:
   enabled: true
