@@ -34,7 +34,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.14.3
+      dockerImage: api-web:1.14.4
       initContainerImage: helper/init-helper:latest
       profiles: prod,docker,kubernetes
       instances: 1
@@ -66,10 +66,10 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.0.1
+      dockerImage: client:5.0.2
     instances: 1
     custom:
-      dockerImage: client:5.0.1
+      dockerImage: client:5.0.2
       instances: 0
     viewer:
       dockerImage: viewerservice:2.3.0
