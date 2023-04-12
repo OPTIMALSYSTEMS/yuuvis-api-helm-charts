@@ -132,6 +132,7 @@ yuuvis:
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /tenant-management/api/admin/users/**
         access: hasAnyAuthority('YUUVIS_MANAGE_SETTINGS')
+      - endpoints: /tenant-management/api/idm/**
     ### office 365
       - endpoints: /office365/**
       - endpoints: /dashlet365/**  
