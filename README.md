@@ -287,7 +287,7 @@ Error: unable to build kubernetes objects from release manifest: error validatin
 ]
 ```
 
-Execute the following this commands and deploy the monitoring helm charts again
+Execute the following commands and deploy the monitoring helm charts again
 ```shell
 kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
 kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
