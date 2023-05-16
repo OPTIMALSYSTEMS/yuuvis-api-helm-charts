@@ -79,9 +79,6 @@ postgresql:
       auth:
         postgresPassword: changeme
       servicePort: 5432
-  persistence:
-    storageClass: standard
-    size: 50Gi
   resources:
     requests:
       memory: 128Mi
@@ -96,6 +93,9 @@ postgresql:
     extendedConfiguration: | 
       max_connections=400
       shared_buffers='128MB'
+    persistence:
+      storageClass: standard
+      size: 50Gi
 
 rabbitmq:
   enabled: true
