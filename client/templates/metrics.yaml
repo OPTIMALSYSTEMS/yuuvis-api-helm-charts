@@ -6,7 +6,7 @@ metadata:
     name: metrics
   name: metrics
 spec:
-  replicas: {{.Values.yuuvis.metrics.instances}}
+  replicas: {{.Values.yuuvis.client.metrics.instances }}
   selector:
     matchLabels:
       name: metrics
@@ -18,12 +18,12 @@ spec:
       containers:
       - env:
         - name: JAVA_OPTS
-          value: {{.Values.yuuvis.metrics.java.maxHeap}}
+          value: {{.Values.yuuvis.client.metrics.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
-          value: {{.Values.yuuvis.metrics.profiles}}
-        image: "{{.Values.yuuvis.metrics.dockerImage}}"
+          value: {{.Values.yuuvis.client.metrics.profiles}}
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.metrics.dockerImage}}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: metrics
         ports:

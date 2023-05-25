@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: dashlet365
     yuuvislog: "true"
   name: dashlet365
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: dashlet365
-          image: {{.Values.yuuvis.client.dashlet.dockerImage}}
+          image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.dashlet.dockerImage}}
           imagePullPolicy: Always
           env:
             - name: JAVA_OPTS

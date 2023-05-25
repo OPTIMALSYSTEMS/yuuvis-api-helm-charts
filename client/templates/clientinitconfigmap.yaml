@@ -1,9 +1,6 @@
 apiVersion: v1
 data:
   clientgitinit.bash: |
-    git config --global user.email yuuvis-init@yuuvis.org
-    git config --global user.name yuuvis-init
-
     echo 'git clone'
     if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} --branch {{.Values.yuuvis.git.branch}}; 
     then
@@ -38,6 +35,8 @@ data:
             mv merge_i18n_en.json apps/api-web/text/i18n_en.json
         fi
         
+        git config --local user.email yuuvis-init@yuuvis.org
+        git config --local user.name yuuvis-init
         git add .
         git commit -m 'init api-web config'
 

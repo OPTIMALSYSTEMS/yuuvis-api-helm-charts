@@ -1,10 +1,10 @@
 apiVersion: v1
-appVersion: "2022winter"
+appVersion: "2023summer"
 description: example deployment of yuuvis API components for kubernetes
              for demo use only
              the purpose, of this chart, is to display a template of an yuuvis API installation
 name: yuuvis
-version: 0.14.0
+version: 0.15.0
 keywords:
 - yuuvis
 home: https://yuuvis.com/scalable-content-services

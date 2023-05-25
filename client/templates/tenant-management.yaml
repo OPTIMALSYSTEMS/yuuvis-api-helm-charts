@@ -7,7 +7,7 @@ metadata:
     name: tenant-management
   name: tenant-management
 spec:
-  replicas: {{.Values.yuuvis.tenantmanagement.instances}}
+  replicas: {{.Values.yuuvis.client.tenantmanagement.instances}}
   selector:
     matchLabels:
       name: tenant-management
@@ -24,19 +24,19 @@ spec:
       containers:
       - env:
         - name: JAVA_OPTS
-          value: {{.Values.yuuvis.tenantmanagement.java.maxHeap}}
+          value: {{.Values.yuuvis.client.tenantmanagement.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
-          value: {{.Values.yuuvis.tenantmanagement.profiles}}
+          value: {{.Values.yuuvis.client.tenantmanagement.profiles}}
         - name: CLIENT_ROOTURL
-          value: {{.Values.yuuvis.tenantmanagement.client.rooturl}}
-        image: "{{.Values.yuuvis.tenantmanagement.dockerImage }}"
+          value: {{.Values.yuuvis.client.tenantmanagement.client.rooturl}}
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.tenantmanagement.dockerImage }}"
         imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
           httpGet:
-            path: {{.Values.yuuvis.livenessProbe.path }}
+            path: /manage/info
             port: 7560
           initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
@@ -45,7 +45,7 @@ spec:
         {{- if .Values.yuuvis.readinessProbe.enable }}
         readinessProbe:
           httpGet:
-            path: {{.Values.yuuvis.readinessProbe.path }}
+            path: /manage/health
             port: 7560
           initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
@@ -55,13 +55,13 @@ spec:
         ports:
         - containerPort: 7560
           protocol: TCP
-        {{- if .Values.yuuvis.tenantmanagement.volumeMounts }}
+        {{- if .Values.yuuvis.client.tenantmanagement.volumeMounts }}
         volumeMounts:
-{{ tpl .Values.yuuvis.tenantmanagement.volumeMounts . | indent 8 }}
+{{ tpl .Values.yuuvis.client.tenantmanagement.volumeMounts . | indent 8 }}
         {{- end }}
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
-      {{- if .Values.yuuvis.tenantmanagement.volumes }}
+      {{- if .Values.yuuvis.client.tenantmanagement.volumes }}
       volumes:
-{{ tpl .Values.yuuvis.tenantmanagement.volumes . | indent 6 }}
+{{ tpl .Values.yuuvis.client.tenantmanagement.volumes . | indent 6 }}
       {{- end}}

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: custom
   name: custom
 spec:
@@ -16,7 +16,7 @@ spec:
         name: custom
     spec:
       containers:
-      - image: {{.Values.yuuvis.client.custom.dockerImage}}
+      - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.custom.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: custom
         ports:

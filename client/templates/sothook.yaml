@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: sothook
   name: sothook
 spec:
@@ -23,7 +23,7 @@ spec:
         imagePullPolicy: IfNotPresent
       containers:
       - name: sothook
-        image: {{.Values.yuuvis.client.sothook.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.sothook.dockerImage}}
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.client.sothook.java.maxHeap}}
