@@ -63,10 +63,10 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.7
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.8
     instances: 1
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.7
+      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.8
       instances: 0
     viewer:
       dockerImage: docker.yuuvis.org/yuuvis/viewerservice:3.0.1
