@@ -75,7 +75,7 @@ yuuvis:
       dockerImage: viewerservice:3.0.1
       instances: 1
     architect:
-      dockerImage: architect:2.0.0
+      dockerImage: architect:2.0.1
       instances: 1
     sothook:
       dockerImage: sandbox/sothook:4.15.0
