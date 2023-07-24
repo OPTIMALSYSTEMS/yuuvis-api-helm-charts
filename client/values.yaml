@@ -41,7 +41,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m
     userservice:
-      dockerImage: userservice:1.10.2
+      dockerImage: userservice:1.10.3
       initContainerImage: helper/init-helper:latest
       profiles: postgres
       instances: 1
