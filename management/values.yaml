@@ -19,7 +19,7 @@ yuuvis:
     timeoutSeconds: 5
     path: /manage/health
   metrics:
-    dockerImage: docker.yuuvis.org/yuuvis/metrics:1.4.1
+    dockerImage: docker.yuuvis.org/yuuvis/metrics:1.4.2
     profiles: postgres,dbstmp
     instances: 1
     java:
