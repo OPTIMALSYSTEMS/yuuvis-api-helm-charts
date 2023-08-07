@@ -103,7 +103,7 @@ yuuvis:
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
     metrics:
-      dockerImage: metrics:1.4.1
+      dockerImage: metrics:1.4.2
       profiles: postgres,dbstmp
       instances: 1
       java:
