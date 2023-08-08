@@ -78,7 +78,7 @@ yuuvis:
       dockerImage: architect:2.0.1
       instances: 1
     sothook:
-      dockerImage: sandbox/sothook:4.15.0
+      dockerImage: sandbox/sothook:4.15.1
       instances: 1
       profiles: prod,cloud,kubernetes
       java:
