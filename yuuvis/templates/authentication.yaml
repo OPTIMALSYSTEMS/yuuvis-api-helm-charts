@@ -22,7 +22,7 @@ spec:
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: authentication
-        image: "{{.Values.yuuvis.services.authentication.dockerRegistry}}:{{ .Values.yuuvis.services.authentication.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.authentication.dockerImage}}:{{ .Values.yuuvis.services.authentication.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:

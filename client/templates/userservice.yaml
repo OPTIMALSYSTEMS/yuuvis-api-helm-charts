@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: userservice
   name: userservice
 spec:
@@ -39,7 +39,7 @@ spec:
           value: {{.Values.yuuvis.client.userservice.database.port | quote }}
         - name: DB_NAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
-        image: {{.Values.yuuvis.client.userservice.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: userservice
         ports:
@@ -75,7 +75,7 @@ spec:
               name: userservice-dbsecret
         - name: DBNAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
-        image: {{.Values.yuuvis.client.userservice.initContainerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
         volumeMounts:

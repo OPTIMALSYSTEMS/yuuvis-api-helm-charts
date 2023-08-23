@@ -22,7 +22,7 @@ spec:
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: commander
-        image: "{{.Values.yuuvis.services.commander.dockerRegistry}}:{{ .Values.yuuvis.services.commander.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.commander.dockerImage}}:{{ .Values.yuuvis.services.commander.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         resources:
           requests:

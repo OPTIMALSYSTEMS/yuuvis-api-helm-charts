@@ -44,7 +44,7 @@ yuuvis:
 
 
 elasticsearch:
-  image: docker.yuuvis.org/yuuvis/elasticsearch:2023-08-02
+  image: docker.yuuvis.org/yuuvis/elasticsearch:2023-08-07
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 100Gi
@@ -163,7 +163,7 @@ keycloak:
   fullnameOverride: "keycloak"
   image:
     repository: docker.yuuvis.org/yuuvis/keycloak
-    tag: "19.0.3-stable1"
+    tag: "22.0.1-stable1"
     pullPolicy: IfNotPresent
   imagePullSecrets: 
    - name: dockeryuuvisorg
@@ -238,6 +238,6 @@ redis:
     livenessProbe:
       initialDelaySeconds: 600
     persistence:
-      enabled: false
+      enabled: true
       storageClass: standard
       size: 1Gi

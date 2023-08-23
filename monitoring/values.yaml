@@ -19,30 +19,6 @@ kube-prometheus-stack:
       enabled: true
       type: NodePort
       targetPort: 3000
-      port: 3000
-    ingress:
-      # Enable this to deploy an ingress for the grafana dashboard
-      enabled: false
-      annotations:
-        # This must match your global ClusterIssuer (Default: letsencrypt-prod)
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-        ingress.kubernetes.io/ssl-redirect: "true"
-        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-        nginx.ingress.kubernetes.io/rewrite-target: /
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-        nginx.ingress.kubernetes.io/enable-cors: "true"
-        nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
-        nginx.ingress.kubernetes.io/cors-allow-headers: Authorization,X-ID-TENANT-NAME,DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range
-        nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-        nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-      hosts:
-        - changeme
-      path: /
-      tls:
-      - secretName: grafana-general-tls
-        hosts:
-        - changeme
-
   PrometheusOperator:
     admissionWebhooks:
       enabled: false

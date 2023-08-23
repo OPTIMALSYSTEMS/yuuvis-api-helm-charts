@@ -23,13 +23,13 @@ yuuvis:
     periodSeconds: 30
     timeoutSeconds: 5
   renditionservice:
-    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.4.1
+    dockerImage: docker.yuuvis.org/yuuvis/renditionservice:2.7.0
     profiles: prod
     instances: 1
     java:
       maxHeap: -Xmx2048m -XX:+ExitOnOutOfMemoryError
   renditionrepository:
-    dockerImage: docker.yuuvis.org/yuuvis/rendition-repository:1.0.8
+    dockerImage: docker.yuuvis.org/yuuvis/rendition-repository:1.0.9
     profiles: prod,storage,dbs
     instances: 1
     java:

@@ -13,11 +13,11 @@ Solutions build using Yuuvis Api Helm Charts are highly scalable, run either clo
     + [Install the yuuvis client Helm chart](#install-the-yuuvis-client-helm-chart)
     + [Install the yuuvis bpm Helm chart](#install-the-yuuvis-bpm-helm-chart)
     + [Install the yuuvis rendition Helm chart](#install-the-yuuvis-rendition-helm-chart)
-    + [Install the yuuvis management Helm chart](#install-the-yuuvis-management-helm-chart)
     + [Install the yuuvis repositorymanager Helm chart](#install-the-yuuvis-repositorymanager-helm-chart)
   * [Version upgrades](#version-upgrades)
-    + [2021 autumn](#2021-autumn)
-    + [2021 summer](#2021-summer)
+    + [2023 autumn](#2023-autumn)
+    + [2023 summer](#2023-summer)
+    + [2023 spring](#2023-spring)
 	+ [2022 winter](#2022-winter)
   * [Uninstall](#uninstall)
 - [License](#license)
@@ -137,9 +137,6 @@ To restart the api gateway:
 kubectl rollout restart deployment api -n yuuvis
 ```
 
-A role *YUUVIS_CREATE_OBJECT* must be created and assigned to users who should be able to create objects in the client.
-
-
 ### Install the yuuvis bpm Helm chart
 
 **Edit the bpm values.yaml and docker registry credentials**
@@ -157,29 +154,6 @@ install rendition services with:
 kubectl get po -n yuuvis
 helm install rendition ./rendition --namespace yuuvis
 ```
-### Install the yuuvis management Helm chart
-
-install management services with:
-```shell
-kubectl get po -n yuuvis
-helm install management ./management --namespace yuuvis
-```
-
-The management helm chart contains services for managing tenants.  
-It provides a tenant-management api and a tenant management console.  
-By default the deployment of the tenant management console services is disabled.  
-To deploy the services the parameter *yuuvis.management.console.deploy* must be set to *true* in the values.yaml.  
-
-```javascript
-yuuvis:
-  management:
-    console:
-      deploy: true
-```
-
-For configuration of the tenant management console client please refer to:
-[tenant management console client configuration](https://help.optimal-systems.com/yuuvis_develop/pages/viewpage.action?pageId=51839656)
-
 
 ### Install the yuuvis repositorymanager Helm chart
 
@@ -232,6 +206,52 @@ Check version of upgraded helm chart
 ```shell
 helm list -n yuuvis 
 ```
+
+### 2023 autumn
+
+With version *2023 autumn* yuuvis api uses Keycloak 22.  
+Since Keycloak version *19.0.2* a *scope* parameter is mandatory in the oauth2 client configuration.  
+See Keycloak documentation *user-endpoint-changes - Other Changes*.  
+[keycloak openid required](https://www.keycloak.org/docs/latest/upgrading/index.html#userinfo-endpoint-changes)  
+Since Keycloak version 20 login will fail without the scope parameter.  
+
+The yuuvis momentum elasticsearch connection configuration is changed with *2023autumn*.  
+
+More information can be found here:  
+[yuuvis 2023 autumn changes](https://yuuvisdevelop.atlassian.net/wiki/spaces/YMY/pages/320047771/Breaking+Changes)
+
+An optional update helm upgrade job *pre-upgrade-job-2023autumn* is provided with the yuuvis helm chart.  
+The job will run during a helm upgrade before after the templates are rendered and before kubernetes resources are changed.  
+[helm upgrade hooks](https://helm.sh/docs/topics/charts_hooks/#the-available-hooks)  
+The update job can be enabled/disabled in the yuuvis values yaml.  
+```yaml
+yuuvis:
+  update:
+    autumn2023:
+      enable: true
+```
+
+If configured the job will try to load the application-oauth2.yml and add 
+the paramter *scope: openid* to the configurations if not present.  
+
+Optionally the update job will load the application-es.yml and map the parameters to the new format.  
+This job assumes the existing application-es.yml used in previous helm chart versions.  
+
+With *2023 autumn* the metricsservice is removed.  
+
+### 2023 spring
+
+With version *2023 spring* the management helm chart has been removed.  
+Before updating to *2023 spring* please delete the helm chart with the previous used version.  
+
+```shell
+helm del management  --namespace yuuvis
+``` 
+
+Since version *2022 winter* the tenant-management-api service is required for the client.  
+Thus the service is moved into the client helm chart.  
+The metricsservice is depcrecated.  
+For this release the metricsservice is included in the client helm chart.  
 
 ### 2022 winter
 
@@ -288,25 +308,6 @@ helm install monitoring ./monitoring -n monitoring --create-namespace --debug
 
 Further information on configuration and available dashboards can be found in the [monitoring module readme](monitoring/README.md).
 
-If the follwing error appears:
-```shell
-Error: unable to build kubernetes objects from release manifest: error validating "": error validating data: [
-  ValidationError(Prometheus.spec): unknown field "hostNetwork" in com.coreos.monitoring.v1.Prometheus.spec,
-  ValidationError(Prometheus.spec): unknown field "tsdb" in com.coreos.monitoring.v1.Prometheus.spec
-]
-```
-
-Execute the following commands and deploy the monitoring helm charts again
-```shell
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-kubectl replace -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
-```
 
 ## Uninstall
 
@@ -335,7 +336,7 @@ Before deleting the persistent volumes and persistent volume claims, please dele
 
 # License
 
-Copyright 2022 OPTIMAL SYSTEMS GmbH
+Copyright 2023 OPTIMAL SYSTEMS GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -27,6 +27,8 @@ yuuvis:
     password: changeme
     url: rabbitmq.infrastructure
     port: 5672
+    queues:
+      textextraction: lc.textextraction
   db:
     name: yuuvis
     server: postgresql.infrastructure:5432
@@ -42,6 +44,25 @@ yuuvis:
   redis:
     host: redis-master.infrastructure
     port: 6379
+  # if enable true a helm hook 
+  # is used to run a job to try to change the config yaml files to the new format
+  # required with the momentum version
+  # set enable: false to disable the upgrade hook
+  update:
+    autumn2023:
+      enable: true
+      dockerImage: update
+      tag: 2023autumn
+      # if oauth2 value is true the update job will change the application-oauth2 yml in the configservice and
+      # add 'scope: openid' to every tenant entry
+      # this is required by the newer keycloak version used with 2023autumn
+      # disable with false
+      oauth2: true
+      # the elasticsearch connection config is changed with 2023autumn
+      # if true, the update job will change the application-es yml in the configservice and
+      # try to map the old entries to the new format
+      # disable with false
+      es: true
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
 
@@ -119,7 +140,7 @@ yuuvis:
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
-      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**
+      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**,/api-web/api/idm/**
       - endpoints: /api-web/api/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
       - endpoints: /api-web/api/admin/**
@@ -185,6 +206,7 @@ yuuvis:
       userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
       endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout
       userNameExtractionPattern: $.sub
+      scope: openid
     - name: testyuuvis
       clientId: yuuvis-authentication-service
       clientSecret: 61048b73-8cd7-4682-b78c-786c5dc8a2a1
@@ -193,6 +215,7 @@ yuuvis:
       userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
       endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout
       userNameExtractionPattern: $.sub 
+      scope: openid
 
     # configuration for the yuuvis organization service
     keycloak.server: https://keycloak-https.infrastructure/auth
@@ -268,7 +291,7 @@ yuuvis:
          "url" : "{{.Values.yuuvis.amqp.url}}:{{.Values.yuuvis.amqp.port}}",
          "user" : "{{.Values.yuuvis.amqp.user}}",
          "password" : "{{.Values.yuuvis.amqp.password}}",
-         "queue" : "lc.textextraction",
+         "queue" : "{{.Values.yuuvis.amqp.queues.textextraction}}",
          "bulkSize" : 1
         }
       ],
@@ -283,7 +306,6 @@ yuuvis:
      }
     }
   systemProd: |
-    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
     schema.changed.observers: /rest-ws/refreshschema?global=%s, /sothook/schema/refresh?global=%s, /primarysothook/schema/refresh?global=%s
   serviceConfiguration: |
     {"services": {
@@ -303,9 +325,64 @@ yuuvis:
         }
       }
     }
-
+  dbconfig: |
+    yuuvis.db.name: {{.Values.yuuvis.db.name}}
+    yuuvis.db.server: {{.Values.yuuvis.db.server}}
+    yuuvis.db.username: {{.Values.yuuvis.db.user}}
+    yuuvis.db.password: {{.Values.yuuvis.db.password}}
+    storage:
+      databases:   
+        defaultdb:
+          datasource: defaultds
+          predicate: 'spel:false'
+          default: true
+      datasources:
+        defaultds:
+          url: jdbc:postgresql://${yuuvis.db.server}/${yuuvis.db.name}
+          username: ${yuuvis.db.username}
+          password: ${yuuvis.db.password}
+          driver-class-name: org.postgresql.Driver
+  lcconfig: |
+    textextraction.in-queue: {{.Values.yuuvis.amqp.queues.textextraction}}
+    textextraction.job-queue: {{.Values.yuuvis.amqp.queues.textextraction}}.job
+  mqconfig: |
+    # amqp
+    amqp:
+      host: {{.Values.yuuvis.amqp.url}}
+      port: {{.Values.yuuvis.amqp.port}}
+      user: {{.Values.yuuvis.amqp.user}}
+      password: {{.Values.yuuvis.amqp.password}}
+  # api, system query the kubernetes api server for instances of other momentum services
+  # only services with metadata matching this filter will be used
+  kubernetesclientconfig: |
+    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
+  redisconfig: |
+    spring.redis.port: {{.Values.yuuvis.redis.port}}
+    spring.redis.host: {{.Values.yuuvis.redis.host}}
+  esconfig: |
+    storage:
+      searchdatabases:
+        database1:
+          datasource: dbsource1
+          predicate: 'spel:false'
+          default: true
+      searchdatasources:
+        dbsource1:
+          urls: '{{.Values.yuuvis.elastic.url}}:9200'
+          index: {{.Values.yuuvis.elastic.init.index.name}}
+          timeout: 60000
+          # will only be used once, when creating the index
+          creation:
+            settings:
+              number_of_shards: {{.Values.yuuvis.elastic.init.index.number_of_shards}}
+              number_of_replicas: {{.Values.yuuvis.elastic.init.index.number_of_replicas}}
+              codec: best_compression
+              mapping:
+                total_fields:
+                  limit: 10000
   image:
     imagePullPolicy: IfNotPresent
+    dockerRegistry: docker.yuuvis.org/yuuvis
   livenessProbe:
     enable: false
     initialDelaySeconds: 300
@@ -322,8 +399,8 @@ yuuvis:
     app: yuuvis
   services:
     api:
-      dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.13.14
+      dockerImage: api-gateway
+      tag: 4.16.0
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
@@ -332,9 +409,9 @@ yuuvis:
       requests:
         memory: "512Mi"
     audit:
-      dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.13.14
-      profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
+      dockerImage: audit
+      tag: 4.16.0
+      profiles: prod,jpapostgres,dbs,docker,kubernetes,redis,metrics
       instances: 1
       port: 7251
       java:
@@ -346,8 +423,8 @@ yuuvis:
       nodeport:
         use: true
         value: 30080
-      dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.13.14
+      dockerImage: authentication
+      tag: 4.16.0
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -367,8 +444,8 @@ yuuvis:
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
     config:
-      dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 4.13.14
+      dockerImage: config
+      tag: 4.16.0
       instances: 1
       port: 7282
       java:
@@ -379,8 +456,8 @@ yuuvis:
         request: 100Mi
         class:
     contentanalyzer:
-      dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.13.14
+      dockerImage: contentanalyzer
+      tag: 4.16.0
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -389,9 +466,9 @@ yuuvis:
       requests:
         memory: "1024Mi"
     index:
-      dockerRegistry: docker.yuuvis.org/yuuvis/index
+      dockerImage: index
       profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.13.14
+      tag: 4.16.0
       instances: 1
       port: 7291
       dependencyCheck:
@@ -402,8 +479,8 @@ yuuvis:
       requests:
         memory: "1024Mi"
     organization:
-      dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.13.14
+      dockerImage: organization
+      tag: 4.16.0
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -420,8 +497,8 @@ yuuvis:
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
     registry:
-      dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.13.14
+      dockerImage: registry
+      tag: 4.16.0
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -430,8 +507,8 @@ yuuvis:
       requests:
         memory: "1024Mi"
     repository:
-      dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.13.14
+      dockerImage: repository
+      tag: 4.16.0
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -444,8 +521,8 @@ yuuvis:
       requests:
         memory: "1024Mi"
     search:
-      dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.13.14
+      dockerImage: search
+      tag: 4.16.0
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -457,9 +534,9 @@ yuuvis:
       requests:
         memory: "1024Mi"
     system:
-      dockerRegistry: docker.yuuvis.org/yuuvis/system
+      dockerImage: system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.13.14
+      tag: 4.16.0
       instances: 1
       port: 7400
       java:
@@ -467,9 +544,9 @@ yuuvis:
       requests:
         memory: "512Mi"
     commander:
-      dockerRegistry: docker.yuuvis.org/yuuvis/commander
+      dockerImage: commander
       profiles: prod,docker,kubernetes,dbs,es
-      tag: 4.13.14
+      tag: 4.16.0
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -477,8 +554,8 @@ yuuvis:
         memory: "512Mi"
     archive:
       deploy: false
-      dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice
-      tag: 4.13.14
+      dockerImage: archiveservice
+      tag: 4.16.0
       profiles: prod,docker,storage
       instances: 1
       java:
@@ -487,8 +564,8 @@ yuuvis:
         memory: "512Mi"
       port: 7530
     controller:
-      dockerRegistry: docker.yuuvis.org/yuuvis/controller
-      tag: 4.13.0
+      dockerImage: controller
+      tag: 4.16.0
       profiles: prod,docker,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -505,8 +582,8 @@ yuuvis:
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
     textextractor:
-      dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
-      tag: 4.13.0
+      dockerImage: textextractor
+      tag: 4.16.0
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420

@@ -1,8 +1,8 @@
 apiVersion: v1
-appVersion: "2022winter"
+appVersion: "2023autumn"
 description: yuuvis rendition components
 name: yuuvis-rendition
-version: 0.2.0
+version: 0.3.0
 keywords:
 - yuuvis
 - rendition

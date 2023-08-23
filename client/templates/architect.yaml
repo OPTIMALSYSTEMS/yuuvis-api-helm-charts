@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: architect
   name: architect
 spec:
@@ -16,7 +16,7 @@ spec:
         name: architect
     spec:
       containers:
-      - image: {{.Values.yuuvis.client.architect.dockerImage}}
+      - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.architect.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: architect
         ports:

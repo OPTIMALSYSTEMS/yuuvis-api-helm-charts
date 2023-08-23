@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: office365
   name: office365
 spec:
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: office365
-          image: {{.Values.yuuvis.client.office365.dockerImage}}
+          image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.office365.dockerImage}}
           imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
           env: 
           - name: JAVA_OPTS

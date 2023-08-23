@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: api-web
   name: api-web
 spec:
@@ -30,7 +30,7 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.client.apiweb.profiles}}
-        image: {{.Values.yuuvis.client.apiweb.dockerImage }}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.apiweb.dockerImage }}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
