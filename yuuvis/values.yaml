@@ -52,7 +52,7 @@ yuuvis:
     autumn2023:
       enable: true
       dockerImage: update
-      tag: 2023autumn
+      tag: 2023autumn_v2
       # if oauth2 value is true the update job will change the application-oauth2 yml in the configservice and
       # add 'scope: openid' to every tenant entry
       # this is required by the newer keycloak version used with 2023autumn
