@@ -377,6 +377,7 @@ yuuvis:
               number_of_shards: {{.Values.yuuvis.elastic.init.index.number_of_shards}}
               number_of_replicas: {{.Values.yuuvis.elastic.init.index.number_of_replicas}}
               codec: best_compression
+              max_result_window: 2147483642
               mapping:
                 total_fields:
                   limit: 10000
