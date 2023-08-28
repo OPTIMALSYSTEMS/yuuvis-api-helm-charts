@@ -566,7 +566,7 @@ yuuvis:
       port: 7530
     controller:
       dockerImage: controller
-      tag: 4.16.0
+      tag: 4.16.1
       profiles: prod,docker,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -584,7 +584,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     textextractor:
       dockerImage: textextractor
-      tag: 4.16.0
+      tag: 4.16.1
       profiles: prod,docker,es,lc,mq,kubernetes
       instances: 1
       port: 7420
