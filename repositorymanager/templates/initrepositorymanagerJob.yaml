@@ -23,4 +23,6 @@ spec:
       - configMap:
           name: repositorymanagerconfigmap
         name: repositorymanageryml
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
       restartPolicy: OnFailure
