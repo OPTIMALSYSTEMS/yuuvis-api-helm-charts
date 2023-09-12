@@ -72,7 +72,7 @@ yuuvis:
       dockerImage: client:5.1.4
       instances: 0
     viewer:
-      dockerImage: viewerservice:3.0.1
+      dockerImage: viewerservice:3.0.7
       instances: 1
     architect:
       dockerImage: architect:2.0.1
