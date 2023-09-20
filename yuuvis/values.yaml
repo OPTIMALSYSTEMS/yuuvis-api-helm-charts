@@ -401,7 +401,7 @@ yuuvis:
   services:
     api:
       dockerImage: api-gateway
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,redis,docker,kubernetes,metrics
       instances: 1
       java:
@@ -411,7 +411,7 @@ yuuvis:
         memory: "512Mi"
     audit:
       dockerImage: audit
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,jpapostgres,dbs,docker,kubernetes,redis,metrics
       instances: 1
       port: 7251
@@ -425,7 +425,7 @@ yuuvis:
         use: true
         value: 30080
       dockerImage: authentication
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,oauth2,docker,kubernetes,metrics
       instances: 1
       port: 8080
@@ -446,7 +446,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     config:
       dockerImage: config
-      tag: 4.16.1
+      tag: 4.16.2
       instances: 1
       port: 7282
       java:
@@ -458,7 +458,7 @@ yuuvis:
         class:
     contentanalyzer:
       dockerImage: contentanalyzer
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,docker,kubernetes,metrics
       instances: 2
       port: 7430
@@ -469,7 +469,7 @@ yuuvis:
     index:
       dockerImage: index
       profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.16.1
+      tag: 4.16.2
       instances: 1
       port: 7291
       dependencyCheck:
@@ -481,7 +481,7 @@ yuuvis:
         memory: "1024Mi"
     organization:
       dockerImage: organization
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
       instances: 1
       port: 7440
@@ -499,7 +499,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     registry:
       dockerImage: registry
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       port: 7510
@@ -509,7 +509,7 @@ yuuvis:
         memory: "1024Mi"
     repository:
       dockerImage: repository
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,storage,docker,kubernetes,redis,metrics
       instances: 1
       port: 7500
@@ -523,7 +523,7 @@ yuuvis:
         memory: "1024Mi"
     search:
       dockerImage: search
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,es,docker,kubernetes,metrics
       instances: 1
       port: 7221
@@ -537,7 +537,7 @@ yuuvis:
     system:
       dockerImage: system
       profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.16.1
+      tag: 4.16.2
       instances: 1
       port: 7400
       java:
@@ -547,7 +547,7 @@ yuuvis:
     commander:
       dockerImage: commander
       profiles: prod,docker,kubernetes,dbs,es
-      tag: 4.16.1
+      tag: 4.16.2
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -556,7 +556,7 @@ yuuvis:
     archive:
       deploy: false
       dockerImage: archiveservice
-      tag: 4.16.1
+      tag: 4.16.2
       profiles: prod,docker,storage
       instances: 1
       java:
