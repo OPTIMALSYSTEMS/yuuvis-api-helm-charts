@@ -66,10 +66,10 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.2.0
+      dockerImage: client:5.2.1
     instances: 1
     custom:
-      dockerImage: client:5.2.0
+      dockerImage: client:5.2.1
       instances: 0
     viewer:
       dockerImage: viewerservice:3.0.8
