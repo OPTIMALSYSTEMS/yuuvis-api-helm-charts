@@ -15,7 +15,7 @@ yuuvis:
     instances: 1
     profile: prod # With every instance of rm this should be changed
     dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager
-    tag: 4.2.0
+    tag: 4.3.0
     core:
       workingdir: /working-dir
       api:
