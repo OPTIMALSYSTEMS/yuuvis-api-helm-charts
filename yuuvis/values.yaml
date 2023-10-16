@@ -521,6 +521,15 @@ yuuvis:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      # optional: mount certificates at /etc/yuuvis/certs via configmap
+      #volumes: |
+      #  - name: 
+      #    secret:
+      #      defaultMode: 420
+      #      secretName: 
+      #volumeMounts: |
+      #  - mountPath: /etc/yuuvis/certs
+      #    name: 
     search:
       dockerImage: search
       tag: 4.16.4
