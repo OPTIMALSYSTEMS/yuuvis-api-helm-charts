@@ -16,7 +16,7 @@ yuuvis:
     timeoutSeconds: 5
   bpm:
     engine:
-      dockerImage: docker.yuuvis.org/yuuvis/bpm-engine:0.11.1
+      dockerImage: docker.yuuvis.org/yuuvis/bpm-engine:0.11.2
       initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
       profiles: postgres,swagger,oauth2
       instances: 1
