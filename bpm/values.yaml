@@ -23,7 +23,7 @@ yuuvis:
       java:
         maxHeap: -Xmx128m
       database:
-        # user and password used by the bpm service to access the desired database
+        # user and password used by the bpm service to access the desired database 
         name: themis
         user: bpmusr
         password: changeme
