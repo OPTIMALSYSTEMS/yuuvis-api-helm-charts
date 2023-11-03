@@ -15,7 +15,7 @@ yuuvis:
     instances: 1
     profile: prod # With every instance of rm this should be changed
     dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager
-    tag: 4.2.0
+    tag: 4.3.1
     core:
       workingdir: /working-dir
       api:
@@ -27,7 +27,7 @@ yuuvis:
       maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
     mq:
       dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager-mq
-      tag: 1.1.0
+      tag: 1.2.0
       instances: 1
       java:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
