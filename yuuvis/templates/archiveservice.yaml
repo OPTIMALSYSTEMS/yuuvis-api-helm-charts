@@ -58,8 +58,16 @@ spec:
               key: CONFIGSERVICEURL
         ports:
         - containerPort: {{.Values.yuuvis.services.archive.port}}
+        {{- if .Values.yuuvis.services.archive.volumeMounts }}
+        volumeMounts:
+{{ tpl .Values.yuuvis.services.archive.volumeMounts . | indent 8 }}
+        {{- end }}
       restartPolicy: Always
       automountServiceAccountToken: false
       imagePullSecrets:
       - name: yuuvisorg
+      {{- if .Values.yuuvis.services.archive.volumes }}
+      volumes:
+{{ tpl .Values.yuuvis.services.archive.volumes . | indent 6 }}
+      {{- end}}
 {{- end}}
