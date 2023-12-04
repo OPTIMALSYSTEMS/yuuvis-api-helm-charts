@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.services.authentication.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: authentication-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: authentication
+spec:
+  selector:
+    matchLabels:
+      name: authentication
+  {{- if kindIs "int" .Values.yuuvis.services.authentication.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.services.authentication.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.services.authentication.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.services.authentication.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

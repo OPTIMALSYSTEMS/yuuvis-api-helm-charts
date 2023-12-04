@@ -15,24 +15,36 @@ spec:
       labels:
         name: audit
     spec:
+      {{- if or .Values.yuuvis.services.audit.nodeAffinity .Values.yuuvis.services.audit.podAffinity .Values.yuuvis.services.audit.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.audit.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.audit.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.audit.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-audit
-        image: busybox
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
       containers:
       - name: audit
-        image: "{{.Values.yuuvis.services.audit.dockerRegistry}}:{{ .Values.yuuvis.services.audit.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.audit.dockerImage}}:{{ .Values.yuuvis.services.audit.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
-# service may perform db updates, possible long duration
-# service uses liquibase, if killed during startup db lock possible never released
-#        livenessProbe:
-#          httpGet:
-#            path: /manage/info
-#            port: 7251
-#         initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
-#         periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
-#         timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- if and .Values.yuuvis.livenessProbe.enable .Values.yuuvis.services.audit.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 7251
+         initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+         periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+         timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
         {{- if .Values.yuuvis.readinessProbe.enable }}
         readinessProbe:
           httpGet:
@@ -59,5 +71,14 @@ spec:
         - containerPort: {{.Values.yuuvis.services.audit.port}}
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.audit.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.audit.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.audit.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.audit.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}

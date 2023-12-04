@@ -1,0 +1,20 @@
+{{- if .Values.yuuvis.client.apiweb.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: api-web-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: api-web
+spec:
+  selector:
+    matchLabels:
+      name: api-web
+      yuuvislog: "true"
+  {{- if kindIs "int" .Values.yuuvis.client.apiweb.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.apiweb.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.apiweb.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.apiweb.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

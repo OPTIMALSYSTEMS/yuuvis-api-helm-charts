@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: dashlet365
     yuuvislog: "true"
   name: dashlet365
@@ -17,9 +17,21 @@ spec:
         name: dashlet365
         release: {{ .Release.Name }}
     spec:
+      {{- if or .Values.yuuvis.client.dashlet.nodeAffinity .Values.yuuvis.client.dashlet.podAffinity .Values.yuuvis.client.dashlet.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.dashlet.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.dashlet.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.dashlet.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: dashlet365
-          image: {{.Values.yuuvis.client.dashlet.dockerImage}}
+          image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.dashlet.dockerImage}}
           imagePullPolicy: Always
           env:
             - name: JAVA_OPTS
@@ -33,3 +45,12 @@ spec:
       imagePullSecrets:
       - name: yuuvisorg
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.dashlet.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.dashlet.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.dashlet.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

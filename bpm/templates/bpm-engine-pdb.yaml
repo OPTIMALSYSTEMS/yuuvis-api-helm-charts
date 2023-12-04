@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.bpm.engine.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: bpm-engine-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: bpm-engine
+spec:
+  selector:
+    matchLabels:
+      name: bpm-engine
+  {{- if kindIs "int" .Values.yuuvis.bpm.engine.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.bpm.engine.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.bpm.engine.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.bpm.engine.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

@@ -15,14 +15,26 @@ spec:
       labels:
         name: api
     spec:
+      {{- if or .Values.yuuvis.services.api.nodeAffinity .Values.yuuvis.services.api.podAffinity .Values.yuuvis.services.api.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.api.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.api.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.api.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-api
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: api
-        image: "{{.Values.yuuvis.services.api.dockerRegistry}}:{{ .Values.yuuvis.services.api.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{ .Values.yuuvis.services.api.dockerImage }}:{{ .Values.yuuvis.services.api.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -59,5 +71,14 @@ spec:
         - containerPort: {{.Values.yuuvis.services.api.port}}
       restartPolicy: Always
       serviceAccount: apiserviceaccount
+      {{- with .Values.yuuvis.services.api.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.api.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name:  {{ .Values.yuuvis.image.imagePullSecret }}

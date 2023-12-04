@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: api-web
   name: api-web
 spec:
@@ -17,9 +17,21 @@ spec:
         name: api-web
         yuuvislog: "true"
     spec:
+      {{- if or .Values.yuuvis.client.apiweb.nodeAffinity .Values.yuuvis.client.apiweb.podAffinity .Values.yuuvis.client.apiweb.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.apiweb.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.apiweb.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.apiweb.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-api-web
-        image: busybox
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
       containers:
@@ -30,7 +42,7 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.client.apiweb.profiles}}
-        image: {{.Values.yuuvis.client.apiweb.dockerImage }}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.apiweb.dockerImage }}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -57,3 +69,12 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.apiweb.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.apiweb.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.apiweb.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

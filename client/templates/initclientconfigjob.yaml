@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: initclientconfig
-        image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.git.initjob.docker.image}}
         imagePullPolicy: IfNotPresent
         command: ['bash', '/yuuvis/script/init.bash']
         volumeMounts:

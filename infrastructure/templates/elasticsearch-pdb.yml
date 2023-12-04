@@ -1,0 +1,19 @@
+{{- if .Values.elasticsearch.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: elasticsearch-pdb
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: elasticsearch
+spec:
+  selector:
+    matchLabels:
+      name: elasticsearch
+  {{- if kindIs "int" .Values.elasticsearch.pdb.minAvailable }}
+  minAvailable: {{ .Values.elasticsearch.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.elasticsearch.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.elasticsearch.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

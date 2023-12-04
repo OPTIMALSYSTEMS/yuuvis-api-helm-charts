@@ -15,9 +15,21 @@ spec:
       labels:
         name: bpm-admin
     spec:
+      {{- if or .Values.yuuvis.bpm.admin.nodeAffinity .Values.yuuvis.bpm.admin.podAffinity .Values.yuuvis.bpm.admin.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.bpm.admin.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.admin.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.admin.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: bpm-admin
-        image: {{.Values.yuuvis.bpm.admin.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.admin.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         env:
         - name: JAVA_OPTS
@@ -41,3 +53,12 @@ spec:
       restartPolicy: Always
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
+      {{- with .Values.yuuvis.bpm.admin.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.bpm.admin.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.bpm.admin.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

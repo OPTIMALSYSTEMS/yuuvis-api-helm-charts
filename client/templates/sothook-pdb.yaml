@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.sothook.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: sothook-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: sothook
+spec:
+  selector:
+    matchLabels:
+      name: sothook
+  {{- if kindIs "int" .Values.yuuvis.client.sothook.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.sothook.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.sothook.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.sothook.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

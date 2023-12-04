@@ -15,18 +15,38 @@ yuuvis:
     url: gitea-http.infrastructure:3000/yuuvis/yuuvis-config.git
     server: gitea-http.infrastructure:3000
     # please not that since infrastructure helm chart 0.9.0 gitea is used 
-    # in previous versions gogs was used 
+    # in previous versions gogs was used
     # url: gogs.infrastructure/yuuvis/yuuvis-config.git
     # server: gogs.infrastructure
     name: yuuvis-config
     user: yuuvis
     password: changeme
     branch: master
+  initjob:
+    docker:
+      registry: docker.yuuvis.org/yuuvis
+      image: helper/init-realm
+      tag: 19
+    createrealm: "true"
+    keycloak: 
+      url: "http://keycloak-http.infrastructure/auth"
+      admin: "keycloak"
+      password: "changeme"
+      realm:
+        name: "myfirsttenant"
+        user: "root"
+        password: "changeme"
+    # !!! Change before  running
+    # this variable must contain the "public" ip of the authentication service
+    # this variable will be used by keycloak e.g. checked if it matches the redirect uri during login
+    authurl: "http://192.168.99.100:30080"
   amqp:
     user: rodger
     password: changeme
     url: rabbitmq.infrastructure
     port: 5672
+    queues:
+      textextraction: lc.textextraction
   db:
     name: yuuvis
     server: postgresql.infrastructure:5432
@@ -42,6 +62,25 @@ yuuvis:
   redis:
     host: redis-master.infrastructure
     port: 6379
+  # if enable true a helm hook 
+  # is used to run a job to try to change the config yaml files to the new format
+  # required with the momentum version
+  # set enable: false to disable the upgrade hook
+  update:
+    autumn2023:
+      enable: true
+      dockerImage: update
+      tag: 2023autumn_v2
+      # if oauth2 value is true the update job will change the application-oauth2 yml in the configservice and
+      # add 'scope: openid' to every tenant entry
+      # this is required by the newer keycloak version used with 2023autumn
+      # disable with false
+      oauth2: true
+      # the elasticsearch connection config is changed with 2023autumn
+      # if true, the update job will change the application-es yml in the configservice and
+      # try to map the old entries to the new format
+      # disable with false
+      es: true
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
 
@@ -119,7 +158,7 @@ yuuvis:
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
-      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**
+      - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**,/api-web/api/idm/**
       - endpoints: /api-web/api/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
       - endpoints: /api-web/api/admin/**
@@ -141,9 +180,12 @@ yuuvis:
     storage:
       default-rendition-repository: renrepo
       repositories:
+        s3_with_path:
+          profiles: ['s3profile_with_path']
+          default: true
         s3:
           profiles: ['s3profile1']
-          default: true
+          default: false
         archive_s3:
           profiles: ['s3profile2']
           default: false
@@ -157,6 +199,12 @@ yuuvis:
             secret-key: 'changeme'
             url: 'http://minio.infrastructure:9000'
             bucket: 'dmscloudrepodocker'
+          s3profile_with_path:
+            access-key: 'MGMWCOYTDUSLNCFE'
+            secret-key: 'changeme'
+            url: 'http://minio.infrastructure:9000'
+            bucket: 'dmscloudrepodocker'
+            pathTemplate: '{tenant}-{objectTypeId}/{DATE(yyyy)}/{DATE(MM)}/{DATE(dd)}'
           s3profile2:
             access-key: 'MGMWCOYTDUSLNCFE'
             secret-key: 'changeme'
@@ -177,27 +225,19 @@ yuuvis:
     authentication.provider: oauth2
     authentication.exposed.endpoints: ''
     authentication.oauth2.tenants:
-    - name: yuuvistest
-      clientId: yuuvis-authentication-service
-      clientSecret: dbdf4856-3c86-4e5f-aca7-96f3d93d35b4
-      userAuthorizationUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/auth
-      accessTokenUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/token
-      userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout
-      userNameExtractionPattern: $.sub
-    - name: testyuuvis
-      clientId: yuuvis-authentication-service
-      clientSecret: 61048b73-8cd7-4682-b78c-786c5dc8a2a1
-      userAuthorizationUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/auth
-      accessTokenUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/token
-      userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout
-      userNameExtractionPattern: $.sub 
-
+    # example
+    #- name: example
+    #  clientId: yuuvis-authentication-service
+    #  clientSecret: <my-secret>
+    #  userAuthorizationUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/auth
+    #  accessTokenUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/token
+    #  userInfoUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/userinfo
+    #  endSessionUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/logout
+    #  userNameExtractionPattern: $.sub
     # configuration for the yuuvis organization service
     keycloak.server: https://keycloak-https.infrastructure/auth
-    keycloak.admin.username: keycloak
-    keycloak.admin.password: changeme
+    keycloak.admin.username: {{.Values.yuuvis.initjob.keycloak.admin}}
+    keycloak.admin.password: {{.Values.yuuvis.initjob.keycloak.password}}
   systemschema: |
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
@@ -268,7 +308,7 @@ yuuvis:
          "url" : "{{.Values.yuuvis.amqp.url}}:{{.Values.yuuvis.amqp.port}}",
          "user" : "{{.Values.yuuvis.amqp.user}}",
          "password" : "{{.Values.yuuvis.amqp.password}}",
-         "queue" : "lc.textextraction",
+         "queue" : "{{.Values.yuuvis.amqp.queues.textextraction}}",
          "bulkSize" : 1
         }
       ],
@@ -283,7 +323,6 @@ yuuvis:
      }
     }
   systemProd: |
-    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
     schema.changed.observers: /rest-ws/refreshschema?global=%s, /sothook/schema/refresh?global=%s, /primarysothook/schema/refresh?global=%s
   serviceConfiguration: |
     {"services": {
@@ -303,9 +342,66 @@ yuuvis:
         }
       }
     }
-
+  dbconfig: |
+    yuuvis.db.name: {{.Values.yuuvis.db.name}}
+    yuuvis.db.server: {{.Values.yuuvis.db.server}}
+    yuuvis.db.username: {{.Values.yuuvis.db.user}}
+    yuuvis.db.password: {{.Values.yuuvis.db.password}}
+    storage:
+      databases:   
+        defaultdb:
+          datasource: defaultds
+          predicate: 'spel:false'
+          default: true
+      datasources:
+        defaultds:
+          url: jdbc:postgresql://${yuuvis.db.server}/${yuuvis.db.name}
+          username: ${yuuvis.db.username}
+          password: ${yuuvis.db.password}
+          driver-class-name: org.postgresql.Driver
+  lcconfig: |
+    textextraction.in-queue: {{.Values.yuuvis.amqp.queues.textextraction}}
+    textextraction.job-queue: {{.Values.yuuvis.amqp.queues.textextraction}}.job
+  mqconfig: |
+    # amqp
+    amqp:
+      host: {{.Values.yuuvis.amqp.url}}
+      port: {{.Values.yuuvis.amqp.port}}
+      user: {{.Values.yuuvis.amqp.user}}
+      password: {{.Values.yuuvis.amqp.password}}
+  # api, system query the kubernetes api server for instances of other momentum services
+  # only services with metadata matching this filter will be used
+  kubernetesclientconfig: |
+    spring.cloud.kubernetes.discovery.filter: metadata!=null && metadata.labels!=null && metadata.labels['yuuvis']=="true"
+  redisconfig: |
+    spring.redis.port: {{.Values.yuuvis.redis.port}}
+    spring.redis.host: {{.Values.yuuvis.redis.host}}
+  esconfig: |
+    storage:
+      searchdatabases:
+        database1:
+          datasource: dbsource1
+          predicate: 'spel:false'
+          default: true
+      searchdatasources:
+        dbsource1:
+          urls: '{{.Values.yuuvis.elastic.url}}:9200'
+          index: {{.Values.yuuvis.elastic.init.index.name}}
+          timeout: 60000
+          # will only be used once, when creating the index
+          creation:
+            settings:
+              number_of_shards: {{.Values.yuuvis.elastic.init.index.number_of_shards}}
+              number_of_replicas: {{.Values.yuuvis.elastic.init.index.number_of_replicas}}
+              codec: best_compression
+              max_result_window: 2147483642
+              mapping:
+                total_fields:
+                  limit: 10000
   image:
     imagePullPolicy: IfNotPresent
+    dockerRegistry: docker.yuuvis.org/yuuvis
+    imagePullSecret: yuuvisorg
   livenessProbe:
     enable: false
     initialDelaySeconds: 300
@@ -322,34 +418,74 @@ yuuvis:
     app: yuuvis
   services:
     api:
-      dockerRegistry: docker.yuuvis.org/yuuvis/api-gateway
-      tag: 4.13.19
-      profiles: prod,redis,docker,kubernetes,metrics
+      dockerImage: api-gateway
+      tag: 4.17.0
+      profiles: prod,redis,kubernetes,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       port: 7450
       requests:
         memory: "512Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     audit:
-      dockerRegistry: docker.yuuvis.org/yuuvis/audit
-      tag: 4.13.19
-      profiles: prod,jpapostgres,dbs,docker,kubernetes,metrics
+      dockerImage: audit
+      tag: 4.17.0
+      profiles: prod,jpapostgres,dbs,kubernetes,redis,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7251
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
+      # service may perform db updates, with possible long duration
+      # service uses liquibase, if killed during startup db lock possibly never released
+      # as a precaution disable livenessProbe during first of a new version 
+      # once the update is complete enable livenessProbe
+      livenessProbe:
+        # values true/false
+        enable: false
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     authentication:
       # create services with type nodport for authentication
       nodeport:
         use: true
         value: 30080
-      dockerRegistry: docker.yuuvis.org/yuuvis/authentication
-      tag: 4.13.19
-      profiles: prod,oauth2,docker,kubernetes,metrics
+      dockerImage: authentication
+      tag: 4.17.0
+      profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 8080
       # for the manage endpoints a dedicated port is used
       managePort: 9091
@@ -366,10 +502,28 @@ yuuvis:
       volumeMounts: |
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     config:
-      dockerRegistry: docker.yuuvis.org/yuuvis/config
-      tag: 4.13.19
+      initContainer:
+        image: alpine/git
+        tag: 2.40.1
+        dockerRegistry: docker.io
+        imagePullPolicy: IfNotPresent
+      dockerImage: config
+      tag: 4.17.0
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7282
       java:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
@@ -378,34 +532,70 @@ yuuvis:
       storage:
         request: 100Mi
         class:
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     contentanalyzer:
-      dockerRegistry: docker.yuuvis.org/yuuvis/contentanalyzer
-      tag: 4.13.19
-      profiles: prod,docker,kubernetes,metrics
+      dockerImage: contentanalyzer
+      tag: 4.17.0
+      profiles: prod,kubernetes,metrics
       instances: 2
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: true
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7430
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     index:
-      dockerRegistry: docker.yuuvis.org/yuuvis/index
-      profiles: prod,es,docker,kubernetes,redis,metrics
-      tag: 4.13.19
+      dockerImage: index
+      profiles: prod,es,kubernetes,redis,metrics
+      tag: 4.17.0
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7291
-      dependencyCheck:
-        enable: true
-        url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     organization:
-      dockerRegistry: docker.yuuvis.org/yuuvis/organization
-      tag: 4.13.19
-      profiles: prod,oauth2,keycloak,docker,kubernetes,metrics
+      dockerImage: organization
+      tag: 4.17.0
+      profiles: prod,oauth2,keycloak,kubernetes,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7440
       requests:
         memory: "256Mi"
@@ -419,77 +609,164 @@ yuuvis:
       volumeMounts: |
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     registry:
-      dockerRegistry: docker.yuuvis.org/yuuvis/registry
-      tag: 4.13.19
-      profiles: prod,docker,jpapostgres,dbs,redis,kubernetes,metrics
+      dockerImage: registry
+      tag: 4.17.0
+      profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7510
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      # service may perform db updates, with possible long duration
+      # service uses liquibase, if killed during startup db lock possibly never released
+      # as a precaution disable livenessProbe during first of a new version 
+      # once the update is complete enable livenessProbe
+      livenessProbe:
+        # values true/false
+        enable: false
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     repository:
-      dockerRegistry: docker.yuuvis.org/yuuvis/repository
-      tag: 4.13.19
-      profiles: prod,storage,docker,kubernetes,redis,metrics
+      dockerImage: repository
+      tag: 4.17.0
+      profiles: prod,storage,kubernetes,redis,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7500
       maxRequests: 100
-      dependencyCheck:
-        enable: true
-        url: http://minio.infrastructure.svc.cluster.local:9000
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      # optional: mount certificates at /etc/yuuvis/certs via configmap
+      #volumes: |
+      #  - name: 
+      #    secret:
+      #      defaultMode: 420
+      #      secretName: 
+      #volumeMounts: |
+      #  - mountPath: /etc/yuuvis/certs
+      #    name: 
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     search:
-      dockerRegistry: docker.yuuvis.org/yuuvis/search
-      tag: 4.13.19
-      profiles: prod,es,docker,kubernetes,metrics
+      dockerImage: search
+      tag: 4.17.0
+      profiles: prod,es,redis,kubernetes,metrics
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7221
-      dependencyCheck:
-        enable: true
-        url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     system:
-      dockerRegistry: docker.yuuvis.org/yuuvis/system
-      profiles: prod,docker,redis,kubernetes,metrics
-      tag: 4.13.19
+      dockerImage: system
+      profiles: prod,redis,kubernetes,metrics
+      tag: 4.17.0
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       port: 7400
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     commander:
-      dockerRegistry: docker.yuuvis.org/yuuvis/commander
-      profiles: prod,docker,kubernetes,dbs,es
-      tag: 4.13.19
+      dockerImage: commander
+      profiles: prod,kubernetes,dbs,es
+      tag: 4.17.0
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     archive:
       deploy: false
-      dockerRegistry: docker.yuuvis.org/yuuvis/archiveservice
-      tag: 4.13.19
-      profiles: prod,docker,storage
+      dockerImage: archiveservice
+      tag: 4.17.0
+      profiles: prod,storage
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
       port: 7530
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     controller:
-      dockerRegistry: docker.yuuvis.org/yuuvis/controller
-      tag: 4.13.0
-      profiles: prod,docker,es,oauth2,lc,mq,kubernetes
+      dockerImage: controller
+      tag: 4.17.0
+      profiles: prod,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
       java:
@@ -504,18 +781,31 @@ yuuvis:
       volumeMounts: |
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     textextractor:
-      dockerRegistry: docker.yuuvis.org/yuuvis/textextractor
-      tag: 4.13.0
-      profiles: prod,docker,es,lc,mq,kubernetes
+      dockerImage: textextractor
+      tag: 4.17.0
+      profiles: prod,es,lc,mq,kubernetes
       instances: 1
       port: 7420
-      dependencyCheck:
-        enable: true
-        url: http://elasticsearch.infrastructure.svc.cluster.local:9200
       java:
         maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "1024Mi"
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
 initContainer:
-  command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://configservice/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
+  image: busybox
+  tag: 1.36
+  dockerRegistry: docker.io
+  imagePullPolicy: IfNotPresent

@@ -19,6 +19,18 @@ spec:
         name: elasticsearch
         app: {{.Values.yuuvis.labels.app}}
     spec:
+      {{- if or .Values.elasticsearch.nodeAffinity .Values.elasticsearch.podAffinity .Values.elasticsearch.podAntiAffinity }}
+      affinity:
+        {{- with .Values.elasticsearch.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.elasticsearch.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.elasticsearch.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       securityContext:
         fsGroup: 1000
       initContainers:
@@ -59,6 +71,15 @@ spec:
           mountPath: /usr/share/elasticsearch/data
       imagePullSecrets:
       - name: {{.Values.elasticsearch.imagePullSecret}}
+      {{- with .Values.elasticsearch.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elasticsearch.priorityClassName }}
+      priorityClassName: {{ .Values.elasticsearch.priorityClassName }}
+      {{- end }}
+      {{- with .Values.elasticsearch.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: es-data

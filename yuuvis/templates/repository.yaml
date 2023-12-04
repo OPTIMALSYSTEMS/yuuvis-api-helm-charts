@@ -15,23 +15,26 @@ spec:
       labels:
         name: repository
     spec:
+      {{- if or .Values.yuuvis.services.repository.nodeAffinity .Values.yuuvis.services.repository.podAffinity .Values.yuuvis.services.repository.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.repository.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.repository.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.repository.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
-      {{- if .Values.yuuvis.services.repository.dependencyCheck.enable }}
-      - name: dependency-check
-        image: radial/busyboxplus:curl
-        imagePullPolicy: IfNotPresent
-        command: 
-          - "sh" 
-          - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.repository.dependencyCheck.url}})" != "403" ]]; do sleep 11; done'      
-      {{- end}}
       - name: init-repository
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: repository
-        image: "{{.Values.yuuvis.services.repository.dockerRegistry}}:{{ .Values.yuuvis.services.repository.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.repository.dockerImage}}:{{ .Values.yuuvis.services.repository.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -68,7 +71,24 @@ spec:
               key: CONFIGSERVICEURL
         ports:
         - containerPort: {{.Values.yuuvis.services.repository.port}}
+        {{- if .Values.yuuvis.services.repository.volumeMounts }}
+        volumeMounts:
+{{ tpl .Values.yuuvis.services.repository.volumeMounts . | indent 8 }}
+        {{- end }}
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.repository.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.repository.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.repository.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.repository.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}
+      {{- if .Values.yuuvis.services.repository.volumes }}
+      volumes:
+{{ tpl .Values.yuuvis.services.repository.volumes . | indent 6 }}
+      {{- end}}

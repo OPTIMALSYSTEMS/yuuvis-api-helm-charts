@@ -15,6 +15,18 @@ spec:
       labels:
         name: bpm-engine
     spec:
+      {{- if or .Values.yuuvis.bpm.engine.nodeAffinity .Values.yuuvis.bpm.engine.podAffinity .Values.yuuvis.bpm.engine.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.bpm.engine.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.engine.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.engine.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - env:
         - name: JAVA_OPTS
@@ -23,6 +35,10 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.bpm.engine.profiles}}
+        - name: SPRING_DATASOURCE_HIKARI_MINIMUM-IDLE
+          value: "{{.Values.yuuvis.bpm.engine.spring.datasource.hikari.minimumIdle}}"
+        - name: SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE
+          value: "{{.Values.yuuvis.bpm.engine.spring.datasource.hikari.maximumPoolSize}}"
         - name: db.user
           valueFrom:
             secretKeyRef:
@@ -39,7 +55,7 @@ spec:
           value: {{.Values.yuuvis.bpm.engine.database.port | quote }}
         - name: db.name
           value: {{.Values.yuuvis.bpm.engine.database.name}}
-        image: {{.Values.yuuvis.bpm.engine.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.engine.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: bpm
         ports:
@@ -75,13 +91,22 @@ spec:
               name: bpm-dbsecret
         - name: DBNAME
           value: {{.Values.yuuvis.bpm.engine.database.name}}
-        image: {{.Values.yuuvis.bpm.engine.initContainerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.engine.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
         volumeMounts:
         - mountPath: /yuuvis/script/initdb.sh
           name: initscript
           subPath: initdb.sh
+      {{- with .Values.yuuvis.bpm.engine.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.bpm.engine.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.bpm.engine.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
       - configMap:
           name: initbpmdbconfigmap

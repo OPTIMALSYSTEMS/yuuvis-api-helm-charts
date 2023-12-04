@@ -26,25 +26,21 @@ yuuvis:
     password: changeme
   keycloak:
     nodePort: 30111
-    realm:
-      yuuvistest:
-        user:
-          name: root
-          password: changeme
-      testyuuvis:
-        user:
-          name: root
-          password: changeme
+    createSelfSignedCert:
+      docker:
+        image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert
+        tag: jre11
+        secret: dockeryuuvisorg
   git:
     user: yuuvis
     password: changeme
     initcontainer:
-      image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      image: docker.yuuvis.org/yuuvis/helper/init-helper:2023-12-03
       secret: dockeryuuvisorg
 
 
 elasticsearch:
-  image: docker.yuuvis.org/yuuvis/elasticsearch:2023-08-02
+  image: docker.yuuvis.org/yuuvis/elasticsearch:2023-08-07
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 100Gi
@@ -53,6 +49,23 @@ elasticsearch:
   targetPort: 9300
   port2: 9200
   targetPort2: 9200
+  # Default values if high availability is disabled. Nodes function as both data and master nodes simultaneously.
+  nodes: 1
+  initial_master_nodes: elasticsearch-0  
+  memory: -Xms1024m -Xmx1024m
+  pdb:    
+    # pdb requires instances > 1 and minAvailable < instances,
+    # otherwise draining nodes will deadlock!
+    enabled: false
+
+    # set `minAvailable: null` if you want to use maxUnavailable instead
+    minAvailable: 1
+  nodeSelector: {}
+  priorityClassName: ""
+  tolerations: []
+  nodeAffinity: {}
+  podAffinity: {}
+  podAntiAffinity: {}
   highAvailability:
     enabled: false
     # Combined memory of all elasticsearch nodes should not exceed 50% of total memory available on k8s node.
@@ -60,15 +73,38 @@ elasticsearch:
       nodes: 2
       storage: 200Gi
       memory: -Xms4096m -Xmx4096m
+      pdb:    
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+      
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     master:
       nodes: 3
       storage: 50Gi
       memory: -Xms1024m -Xmx1024m
       initial_master_nodes: elasticsearch-master-0, elasticsearch-master-1, elasticsearch-master-2
-  # Default values if high availability is disabled. Nodes function as both data and master nodes simultaneously.
-  nodes: 1
-  initial_master_nodes: elasticsearch-0  
-  memory: -Xms1024m -Xmx1024m
+      pdb:    
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+        
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+      minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+  
 
 postgresql:
   enabled: true
@@ -100,8 +136,6 @@ postgresql:
 rabbitmq:
   enabled: true
   fullnameOverride: rabbitmq
-  image:
-    tag: 3.10.25
   auth:
     username: rodger
     password: changeme
@@ -125,15 +159,21 @@ gitea:
     config:
       database: 
         DB_TYPE: sqlite3
-        ## https://gitea.com/gitea/helm-chart/issues/95#issuecomment-122875
-        ## Note that the intit script checks to see if the IP & port of the database service is accessible, so make sure you set those to something that resolves as successful (since sqlite uses files on disk setting the port & ip won't affect the running of gitea).
-        HOST: example.com
-        PORT: 80
       service:
-        DISABLE_REGISTRATION: true  
-  memcached:
+        DISABLE_REGISTRATION: true
+      queue:
+        TYPE: level
+      session:
+        PROVIDER: memory
+        PROVIDER_CONFIG: data/sessions
+      cache:
+        ENABLED: true
+        ADAPTER: memory
+  redis-cluster:
     enabled: false
   postgresql:
+    enabled: false
+  postgresql-ha:
     enabled: false
   persistence:
     enabled: true
@@ -165,7 +205,7 @@ keycloak:
   fullnameOverride: "keycloak"
   image:
     repository: docker.yuuvis.org/yuuvis/keycloak
-    tag: "19.0.3-stable1"
+    tag: "22.0.1-stable1"
     pullPolicy: IfNotPresent
   imagePullSecrets: 
    - name: dockeryuuvisorg
@@ -185,16 +225,10 @@ keycloak:
         user: keycloak
         password: changeme
   extraVolumes: |
-    - name: realm-config
-      configMap:
-        name: realmconfigmap
     - name: tls-secret
       secret:
         secretName: keycloak-selfsigned-tls-secret
   extraVolumeMounts: |
-    - name: realm-config
-      mountPath: "/opt/keycloak/data/import"
-      readOnly: true
     - name: tls-secret
       mountPath: "/opt/keycloak/conf/tls"
       readOnly: true
@@ -207,7 +241,6 @@ keycloak:
     - --hostname-strict-https=false
     - --spi-events-listener-jboss-logging-success-level=info
     - --spi-events-listener-jboss-logging-error-level=warn
-    - --import-realm
   extraEnv: |
     - name: KEYCLOAK_ADMIN
       valueFrom:
@@ -240,6 +273,6 @@ redis:
     livenessProbe:
       initialDelaySeconds: 600
     persistence:
-      enabled: false
+      enabled: true
       storageClass: standard
       size: 1Gi

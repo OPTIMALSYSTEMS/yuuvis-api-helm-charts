@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: keycloak-create-selfsigned-cert
-        image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:jre11
+        image: {{.Values.yuuvis.keycloak.createSelfSignedCert.docker.image}}:{{.Values.yuuvis.keycloak.createSelfSignedCert.docker.tag}}
         imagePullPolicy: IfNotPresent
         command: ["/bin/bash"]
         args: ["/yuuvis/script/keycloakCreateSelfsignedCert.bash"]
@@ -18,7 +18,7 @@ spec:
           name: createscript
           subPath: keycloakCreateSelfsignedCert.bash
       imagePullSecrets:
-      - name: {{.Values.elasticsearch.imagePullSecret}}
+      - name: {{.Values.yuuvis.keycloak.createSelfSignedCert.docker.secret}}
       volumes:
       - configMap:
           name: keycloakcreateselfsignedcert

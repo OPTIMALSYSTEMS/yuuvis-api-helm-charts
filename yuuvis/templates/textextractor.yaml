@@ -15,23 +15,26 @@ spec:
       labels:
         name: textextractor
     spec:
+      {{- if or .Values.yuuvis.services.textextractor.nodeAffinity .Values.yuuvis.services.textextractor.podAffinity .Values.yuuvis.services.textextractor.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.textextractor.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.textextractor.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.textextractor.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
-      {{- if .Values.yuuvis.services.textextractor.dependencyCheck.enable }}
-      - name: dependency-check
-        image: radial/busyboxplus:curl
-        imagePullPolicy: IfNotPresent
-        command: 
-          - "sh" 
-          - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.textextractor.dependencyCheck.url}})" != "200" ]]; do sleep 11; done'      
-      {{- end}}
       - name: init-textextractor
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: textextractor
-        image: "{{.Values.yuuvis.services.textextractor.dockerRegistry}}:{{ .Values.yuuvis.services.textextractor.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.textextractor.dockerImage}}:{{ .Values.yuuvis.services.textextractor.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -68,5 +71,14 @@ spec:
         - containerPort: {{.Values.yuuvis.services.textextractor.port}}
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.textextractor.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.textextractor.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.textextractor.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.textextractor.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}

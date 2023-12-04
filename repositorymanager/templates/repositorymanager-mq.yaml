@@ -21,7 +21,7 @@ spec:
           value: {{.Values.yuuvis.repositorymanager.mq.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
-        image: "{{.Values.yuuvis.repositorymanager.mq.dockerRegistry}}:{{.Values.yuuvis.repositorymanager.mq.tag}}"
+        image: "{{.Values.yuuvis.image.registry}}/{{.Values.yuuvis.repositorymanager.mq.dockerImage}}:{{.Values.yuuvis.repositorymanager.mq.tag}}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: repositorymanager-mq
       imagePullSecrets:

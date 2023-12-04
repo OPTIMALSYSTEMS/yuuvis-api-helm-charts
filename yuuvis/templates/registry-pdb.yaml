@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.services.registry.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: registry-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: registry
+spec:
+  selector:
+    matchLabels:
+      name: registry
+  {{- if kindIs "int" .Values.yuuvis.services.registry.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.services.registry.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.services.registry.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.services.registry.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.tenantmanagement.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: tenant-management-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: tenant-management
+spec:
+  selector:
+    matchLabels:
+      name: tenant-management
+  {{- if kindIs "int" .Values.yuuvis.client.tenantmanagement.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.tenantmanagement.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.tenantmanagement.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.tenantmanagement.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

@@ -2,6 +2,9 @@ yuuvis:
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
+    dockerRegistry: docker.yuuvis.org/yuuvis
+  labels:
+    app: yuuvis
   configservice:
     url: http://configservice/config
   git:
@@ -14,6 +17,9 @@ yuuvis:
     user: yuuvis
     password: changeme
     branch: master
+    initjob:
+      docker:
+        image: helper/init-helper:2023-12-03
   amqp:
     user: rodger
     password: changeme
@@ -31,17 +37,42 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: docker.yuuvis.org/yuuvis/api-web:1.13.3
-      initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
-      profiles: prod,docker,kubernetes
+      dockerImage: api-web:1.17.0
+      profiles: prod,kubernetes
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
       java:
         maxHeap: -Xmx512m
     userservice:
-      dockerImage: docker.yuuvis.org/yuuvis/userservice:1.10.3
-      initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
-      profiles: postgres
+      dockerImage: userservice:1.13.0
+      initContainerImage: helper/init-helper:2023-12-03
+      profiles: dbspostgres
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
       java:
         maxHeap: -Xmx128m
       database:
@@ -63,26 +94,110 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.12
-    instances: 1
+      dockerImage: client:5.3.0
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     custom:
-      dockerImage: docker.yuuvis.org/yuuvis/client:4.1.12
+      dockerImage: client:5.3.0
       instances: 0
     viewer:
-      dockerImage: docker.yuuvis.org/yuuvis/viewerservice:3.0.1
+      dockerImage: viewerservice:3.0.8
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
     architect:
-      dockerImage: docker.yuuvis.org/yuuvis/architect:1.8.2
+      dockerImage: architect:2.2.0
       instances: 1
     sothook:
-      dockerImage: docker.yuuvis.org/yuuvis/sandbox/sothook:4.13.6
+      dockerImage: sandbox/sothook:4.17.0
       instances: 1
-      profiles: prod,cloud,kubernetes
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+      profiles: prod,cloud,redis,kubernetes
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
+    tenantmanagement:
+      dockerImage: tenant-management:1.14.0
+      profiles: prod,kubernetes,oauth2
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+      java:
+        maxHeap: -Xmx128m
+      client:
+        rooturl: https://changeme
+      # if e.g. the keycloak has been deployed with a self signed cert 
+      # the certs mounted at /etc/yuuvis/certs will be added to the used java truststore 
+      # at the start of the container
+      volumes: |
+        - name: keycloak-tls-selfsigned
+          secret:
+            defaultMode: 420
+            secretName: keycloak-selfsigned-cert-secret
+      volumeMounts: |
+        - mountPath: /etc/yuuvis/certs
+          name: keycloak-tls-selfsigned
     office365:
-      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-provider-client:1.0.2
-      instances: 1  
+      dockerImage: office-for-the-web/yuuvis-momentum-provider-client:1.0.2
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
       profiles: prod,docker,kubernetes
       user: changeme
       password: changeme
@@ -94,8 +209,21 @@ yuuvis:
       java:
         maxHeap: -Xmx128m    
     dashlet:
-      dockerImage: docker.yuuvis.org/yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:1.0.3
-      instances: 1  
+      dockerImage: office-for-the-web/yuuvis-momentum-dashlet-microservice:1.0.3
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
       profiles: prod,docker,kubernetes
       java:
         maxHeap: -Xmx128m    
@@ -103,7 +231,11 @@ yuuvis:
         url: http://configservice/config  
       
 initContainer:
-  command: "until wget -q --spider http://configservice/api/resources/application-docker.yml; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://configservice/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
+  image: busybox
+  tag: 1.36
+  dockerRegistry: docker.io
+  imagePullPolicy: IfNotPresent
 
 configfiles:
   appclientschema: |

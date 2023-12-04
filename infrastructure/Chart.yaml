@@ -5,10 +5,10 @@ description: umbrella chart with examples for infrastructure components of an yu
              this chart is for demo use only 
              do not use this chart for production
 name: infrastructure
-version: 0.12.0
+version: 0.13.0
 dependencies:
 - name: minio
-  version: ^4.0.7
+  version: ^5.0.14
   repository: https://charts.min.io/
   condition: minio.enabled
 - name: keycloakx
@@ -17,18 +17,18 @@ dependencies:
   condition: keycloak.enabled
   alias: keycloak
 - name: redis
-  version: ^17.0.1
+  version: ^18.4.0
   repository: https://charts.bitnami.com/bitnami
   condition: redis.enabled
 - name: postgresql
-  version: ^11.6.16
+  version: ^13.2.21
   repository: https://charts.bitnami.com/bitnami
   condition: postgresql.enabled
 - name: rabbitmq
-  version: ^10.1.14
+  version: ^12.5.4
   repository: https://charts.bitnami.com/bitnami 
   condition: rabbitmq.enabled
 - name: gitea
-  version: ^5.0.9
+  version: ^9.6.1
   repository: https://dl.gitea.io/charts/
   condition: gitea.enabled

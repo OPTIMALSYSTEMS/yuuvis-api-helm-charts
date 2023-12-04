@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.office365.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: office365-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: office365
+spec:
+  selector:
+    matchLabels:
+      name: office365
+  {{- if kindIs "int" .Values.yuuvis.client.office365.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.office365.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.office365.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.office365.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.dashlet.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: dashlet365-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: dashlet365
+spec:
+  selector:
+    matchLabels:
+      name: dashlet365
+  {{- if kindIs "int" .Values.yuuvis.client.dashlet.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.dashlet.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.dashlet.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.dashlet.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

@@ -8,13 +8,21 @@ yuuvis:
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
+    dockerRegistry: docker.yuuvis.org/yuuvis
   configservice:
     url: http://configservice.yuuvis/config
   repositorymanager:
-    initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+    initContainerImage: helper/init-helper:2023-12-03
     instances: 1
+    pdb:
+      # pdb requires instances > 1 and minAvailable < instances,
+      # otherwise draining nodes will deadlock!
+      enabled: false
+
+      # set `minAvailable: null` if you want to use maxUnavailable instead
+      minAvailable: 1
     profile: prod # With every instance of rm this should be changed
-    dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager
+    dockerImage: repositorymanager
     tag: 4.3.1
     core:
       workingdir: /working-dir
@@ -26,9 +34,16 @@ yuuvis:
     java:
       maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
     mq:
-      dockerRegistry: docker.yuuvis.org/yuuvis/repositorymanager-mq
+      dockerImage: repositorymanager-mq
       tag: 1.2.0
       instances: 1
+      pdb:
+      # pdb requires instances > 1 and minAvailable < instances,
+      # otherwise draining nodes will deadlock!
+      enabled: false
+
+      # set `minAvailable: null` if you want to use maxUnavailable instead
+      minAvailable: 1
       java:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
        

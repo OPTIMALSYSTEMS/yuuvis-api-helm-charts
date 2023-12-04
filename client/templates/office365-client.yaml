@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: office365
   name: office365
 spec:
@@ -17,9 +17,21 @@ spec:
         yuuvislog: "true"
         release: {{ .Release.Name }}
     spec:
+      {{- if or .Values.yuuvis.client.office365.nodeAffinity .Values.yuuvis.client.office365.podAffinity .Values.yuuvis.client.office365.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.office365.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.office365.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.office365.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: office365
-          image: {{.Values.yuuvis.client.office365.dockerImage}}
+          image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.office365.dockerImage}}
           imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
           env: 
           - name: JAVA_OPTS
@@ -53,3 +65,12 @@ spec:
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.office365.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.office365.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.office365.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

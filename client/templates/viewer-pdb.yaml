@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.viewer.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: viewer-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: viewer
+spec:
+  selector:
+    matchLabels:
+      name: viewer
+  {{- if kindIs "int" .Values.yuuvis.client.viewer.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.viewer.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.viewer.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.viewer.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

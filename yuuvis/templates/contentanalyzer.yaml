@@ -15,14 +15,26 @@ spec:
       labels:
         name: contentanalyzer
     spec:
+      {{- if or .Values.yuuvis.services.contentanalyzer.nodeAffinity .Values.yuuvis.services.contentanalyzer.podAffinity .Values.yuuvis.services.contentanalyzer.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.contentanalyzer.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.contentanalyzer.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.contentanalyzer.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-contentanalyzer
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: contentanalyzer
-        image: "{{.Values.yuuvis.services.contentanalyzer.dockerRegistry}}:{{ .Values.yuuvis.services.contentanalyzer.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.contentanalyzer.dockerImage}}:{{ .Values.yuuvis.services.contentanalyzer.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -59,5 +71,14 @@ spec:
         - containerPort: {{.Values.yuuvis.services.contentanalyzer.port}}
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.contentanalyzer.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.contentanalyzer.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.contentanalyzer.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.contentanalyzer.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}

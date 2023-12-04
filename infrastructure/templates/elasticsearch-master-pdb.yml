@@ -1,0 +1,19 @@
+{{- if .Values.elasticsearch.highAvailability.master.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: elasticsearch-master-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: elasticsearch-master
+spec:
+  selector:
+    matchLabels:
+      name: elasticsearch-master
+  {{- if kindIs "int" .Values.elasticsearch.highAvailability.master.pdbmin.Available }}
+  minAvailable: {{ .Values.elasticsearch.highAvailability.master.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.elasticsearch.highAvailability.master.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.elasticsearch.highAvailability.master.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

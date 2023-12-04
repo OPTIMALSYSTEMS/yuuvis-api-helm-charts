@@ -2,6 +2,7 @@ yuuvis:
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
+    dockerRegistry: docker.yuuvis.org/yuuvis
   configservice:
     url: http://configservice/config
   livenessProbe:
@@ -16,12 +17,30 @@ yuuvis:
     timeoutSeconds: 5
   bpm:
     engine:
-      dockerImage: docker.yuuvis.org/yuuvis/bpm-engine:0.9.1
-      initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      dockerImage: bpm-engine:0.13.0
+      initContainerImage: helper/init-helper:2023-12-03
       profiles: postgres,swagger,oauth2
       instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
       java:
         maxHeap: -Xmx128m
+      spring:
+        datasource:
+          hikari:
+            minimumIdle: 10
+            maximumPoolSize: 100
       database:
         # user and password used by the bpm service to access the desired database
         name: themis
@@ -42,7 +61,7 @@ yuuvis:
           user: postgres
           password: changeme
     admin:
-      dockerImage: docker.yuuvis.org/yuuvis/bpm-admin:0.9.1
+      dockerImage: bpm-admin:0.9.1
       profiles: 
       instances: 1
       java:
@@ -52,7 +71,13 @@ yuuvis:
       serverConfigDmnServerAddress: http://bpm-engine
       serverConfigFormServerAddress: http://bpm-engine
       serverConfigContentServerAddress: http://bpm-engine
-      serverConfigAppServerAddress: http://bpm-engine  
+      serverConfigAppServerAddress: http://bpm-engine
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
        
 initContainer:
   command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: userservice
   name: userservice
 spec:
@@ -15,6 +15,18 @@ spec:
       labels:
         name: userservice
     spec:
+      {{- if or .Values.yuuvis.client.userservice.nodeAffinity .Values.yuuvis.client.userservice.podAffinity .Values.yuuvis.client.userservice.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.userservice.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.userservice.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.userservice.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - env:
         - name: JAVA_OPTS
@@ -39,7 +51,7 @@ spec:
           value: {{.Values.yuuvis.client.userservice.database.port | quote }}
         - name: DB_NAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
-        image: {{.Values.yuuvis.client.userservice.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: userservice
         ports:
@@ -75,7 +87,7 @@ spec:
               name: userservice-dbsecret
         - name: DBNAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
-        image: {{.Values.yuuvis.client.userservice.initContainerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
         volumeMounts:
@@ -84,10 +96,19 @@ spec:
           subPath: initdb.sh
       {{- end}}
       - name: init-config
-        image: busybox
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.userservice.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.userservice.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.userservice.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
       {{- if .Values.yuuvis.client.userservice.database.createdb }}
       - configMap:

@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.userservice.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: userservice-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: userservice
+spec:
+  selector:
+    matchLabels:
+      name: userservice
+  {{- if kindIs "int" .Values.yuuvis.client.userservice.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.userservice.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.userservice.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.userservice.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

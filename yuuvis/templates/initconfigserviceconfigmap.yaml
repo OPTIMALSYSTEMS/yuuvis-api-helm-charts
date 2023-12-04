@@ -6,14 +6,14 @@ data:
     git config --global user.name yuuvis-init
 
     echo git clone
-    if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} \
+    if git clone  {{.Values.yuuvis.git.protocol}}://$GITUSER:$GITPWD@{{.Values.yuuvis.git.url}} \
         --branch {{.Values.yuuvis.git.branch}}; 
     then
         echo git branch {{.Values.yuuvis.git.branch}} exists
         cd {{.Values.yuuvis.git.name}}
-        if [ -f application-docker.yml ]; 
+        if [ -f application-prod.yml ]; 
         then 
-            echo application-docker.yml exists 
+            echo application-prod.yml exists 
             exit 0
         fi
     fi

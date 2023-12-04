@@ -15,14 +15,26 @@ spec:
       labels:
         name: controller
     spec:
+      {{- if or .Values.yuuvis.services.controller.nodeAffinity .Values.yuuvis.services.controller.podAffinity .Values.yuuvis.services.controller.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.controller.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.controller.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.controller.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-controller
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: controller
-        image: "{{.Values.yuuvis.services.controller.dockerRegistry}}:{{ .Values.yuuvis.services.controller.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.controller.dockerImage}}:{{ .Values.yuuvis.services.controller.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -63,8 +75,17 @@ spec:
         {{- end }}
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.organization.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.organization.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.organization.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.organization.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}
       {{- if .Values.yuuvis.services.organization.volumes }}
       volumes:
 {{ tpl .Values.yuuvis.services.organization.volumes . | indent 6 }}

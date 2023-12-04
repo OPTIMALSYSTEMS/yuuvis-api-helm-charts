@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: sothook
   name: sothook
 spec:
@@ -16,14 +16,26 @@ spec:
         app: yuuvis
         name: sothook
     spec:
+      {{- if or .Values.yuuvis.client.sothook.nodeAffinity .Values.yuuvis.client.sothook.podAffinity .Values.yuuvis.client.sothook.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.sothook.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.sothook.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.sothook.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-sothook
-        image: busybox
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
         imagePullPolicy: IfNotPresent
       containers:
       - name: sothook
-        image: {{.Values.yuuvis.client.sothook.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.sothook.dockerImage}}
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.client.sothook.java.maxHeap}}
@@ -55,3 +67,12 @@ spec:
       restartPolicy: Always
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret }}
+      {{- with .Values.yuuvis.client.sothook.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.sothook.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.sothook.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

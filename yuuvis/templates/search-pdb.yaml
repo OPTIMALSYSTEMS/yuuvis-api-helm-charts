@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.services.search.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: search-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: search
+spec:
+  selector:
+    matchLabels:
+      name: search
+  {{- if kindIs "int" .Values.yuuvis.services.search.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.services.search.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.services.search.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.services.search.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

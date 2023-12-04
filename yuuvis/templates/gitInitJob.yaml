@@ -1,23 +1,60 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: config-git-init-commit
+  name: config-init
 spec:
   template:
     spec:
       containers:
-      - name: config-git-init-commit
-        image: alpine/git:latest
+      - name: config-init
+        image: {{.Values.yuuvis.initjob.docker.registry}}/{{.Values.yuuvis.initjob.docker.image}}:{{.Values.yuuvis.initjob.docker.tag}}
         imagePullPolicy: IfNotPresent
-        command: ['sh', '/yuuvis/script/initgit.sh']
+        env:
+        - name: KEYCLOAKURL
+          value: {{.Values.yuuvis.initjob.keycloak.url}}
+        - name: KEYCLOAKADMIN
+          value: {{.Values.yuuvis.initjob.keycloak.admin}}
+        - name: KEYCLOAKPASSOWRD
+          value: {{.Values.yuuvis.initjob.keycloak.password}}
+        - name: KEYCLOAKINITREALMNAME
+          value: {{.Values.yuuvis.initjob.keycloak.realm.name}}
+        - name: KEYCLOAKINITREALMUSER
+          value: {{.Values.yuuvis.initjob.keycloak.realm.user}}
+        - name: KEYCLOAKINITREALMPASSWORD
+          value: {{.Values.yuuvis.initjob.keycloak.realm.password}}
+        - name: YUUVISAUTHURL
+          value: {{.Values.yuuvis.initjob.authurl}}
+        - name: CREATEREALM
+          value: "{{.Values.yuuvis.initjob.createrealm}}"
+        - name: GITSERVER
+          value: {{.Values.yuuvis.git.server}}
+        - name: GITURL
+          value: {{.Values.yuuvis.git.url}}
+        - name: GITBRANCH
+          value: {{.Values.yuuvis.git.branch}}
+        - name: GITNAME
+          value: {{.Values.yuuvis.git.name}}
+        - name: GITUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: gitsecret
+        - name: GITPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: gitsecret
+        command: ['sh', '/tmp/script/initgit.sh']
         volumeMounts:
         - mountPath: /yuuvis/data
           name: configyml
         - mountPath: /yuuvis/data/system
           name: systemconfig
-        - mountPath: /yuuvis/script/initgit.sh
+        - mountPath: /tmp/script/initgit.sh
           name: initscript
           subPath: initgit.sh
+      imagePullSecrets:
+      - name: yuuvisorg
       volumes:
       - configMap:
           name: initcommitconfigmap

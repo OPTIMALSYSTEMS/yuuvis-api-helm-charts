@@ -15,23 +15,26 @@ spec:
       labels:
         name: search
     spec:
+      {{- if or .Values.yuuvis.services.search.nodeAffinity .Values.yuuvis.services.search.podAffinity .Values.yuuvis.services.search.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.search.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.search.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.search.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
-      {{- if .Values.yuuvis.services.search.dependencyCheck.enable }}
-      - name: dependency-check
-        image: radial/busyboxplus:curl
-        imagePullPolicy: IfNotPresent
-        command: 
-          - "sh" 
-          - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.search.dependencyCheck.url}})" != "200" ]]; do sleep 11; done'      
-      {{- end}}
       - name: init-search
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: search
-        image: "{{.Values.yuuvis.services.search.dockerRegistry}}:{{ .Values.yuuvis.services.search.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.search.dockerImage}}:{{ .Values.yuuvis.services.search.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -68,5 +71,14 @@ spec:
         - containerPort: {{.Values.yuuvis.services.search.port}}
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.search.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.search.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.search.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.search.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}

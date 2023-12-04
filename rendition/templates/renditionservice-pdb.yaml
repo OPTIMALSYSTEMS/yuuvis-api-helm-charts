@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.renditionservice.pdb.enabled -}}
+kind: PodDisruptionBudget
+renditionVersion: policy/v1
+metadata:
+  name: rendition-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: rendition
+spec:
+  selector:
+    matchLabels:
+      name: rendition
+  {{- if kindIs "int" .Values.yuuvis.renditionservice.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.renditionservice.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.renditionservice.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.renditionservice.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

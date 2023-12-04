@@ -15,6 +15,18 @@ spec:
       labels:
         name: rendition
     spec:
+      {{- if or .Values.yuuvis.renditionservice.nodeAffinity .Values.yuuvis.renditionservice.podAffinity .Values.yuuvis.renditionservice.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.renditionservice.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.renditionservice.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.renditionservice.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - env:
         - name: JAVA_OPTS
@@ -23,7 +35,7 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.renditionservice.profiles}}
-        image: {{.Values.yuuvis.renditionservice.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.renditionservice.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: rendition
         ports:
@@ -33,6 +45,15 @@ spec:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
       initContainers:
       - name: init-rendition
-        image: busybox
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      {{- with .Values.yuuvis.renditionservice.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.renditionservice.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.renditionservice.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

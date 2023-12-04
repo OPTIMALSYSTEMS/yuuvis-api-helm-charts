@@ -1,3 +1,4 @@
+{{- if .Values.postgresql.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,6 +8,11 @@ data:
     CREATE DATABASE {{.Values.yuuvis.db.name}};
     CREATE USER {{.Values.yuuvis.db.user}} WITH ENCRYPTED PASSWORD '{{.Values.yuuvis.db.password}}';
     GRANT ALL PRIVILEGES ON DATABASE yuuvis TO {{.Values.yuuvis.db.user}};
+    ALTER DATABASE yuuvis OWNER TO {{.Values.yuuvis.db.user}};
+{{- if .Values.keycloak.enabled }}
     CREATE DATABASE {{.Values.keycloak.database.database}};
     CREATE USER {{.Values.keycloak.database.username}} WITH ENCRYPTED PASSWORD '{{.Values.keycloak.database.password}}';
     GRANT ALL PRIVILEGES ON DATABASE keycloak TO {{.Values.keycloak.database.username}};
+    ALTER DATABASE keycloak OWNER TO {{.Values.keycloak.database.username}};
+{{- end}}
+{{- end}}

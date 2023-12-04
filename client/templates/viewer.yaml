@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: viewer
   name: viewer
 spec:
@@ -15,8 +15,20 @@ spec:
       labels:
         name: viewer
     spec:
+      {{- if or .Values.yuuvis.client.viewer.nodeAffinity .Values.yuuvis.client.viewer.podAffinity .Values.yuuvis.client.viewer.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.viewer.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.viewer.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.viewer.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
-      - image: {{.Values.yuuvis.client.viewer.dockerImage}}
+      - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.viewer.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -43,3 +55,12 @@ spec:
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.viewer.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.viewer.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.viewer.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,21 @@
+{{- if .Values.yuuvis.services.archive.enabled -}}
+{{- if .Values.yuuvis.services.archive.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: archive-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: archive
+spec:
+  selector:
+    matchLabels:
+      name: archive
+  {{- if kindIs "int" .Values.yuuvis.services.archive.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.services.archive.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.services.archive.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.services.archive.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}
+{{- end -}}

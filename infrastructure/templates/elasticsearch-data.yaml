@@ -12,14 +12,26 @@ spec:
   replicas: {{.Values.elasticsearch.highAvailability.data.nodes}}
   selector:
     matchLabels:
-      name: elasticsearch
+      name: elasticsearch-data
       app: {{.Values.yuuvis.labels.app}}
   template:
     metadata:
       labels:
-        name: elasticsearch
+        name: elasticsearch-data
         app: {{.Values.yuuvis.labels.app}}
     spec:
+      {{- if or .Values.elasticsearch.highAvailability.highAvailability.data.nodeAffinity .Values.elasticsearch.highAvailability.data.podAffinity .Values.elasticsearch.highAvailability.data.podAntiAffinity }}
+      affinity:
+        {{- with .Values.elasticsearch.highAvailability.data.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.elasticsearch.highAvailability.data.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.elasticsearch.highAvailability.data.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       securityContext:
         fsGroup: 1000
       initContainers:
@@ -60,6 +72,15 @@ spec:
           mountPath: /usr/share/elasticsearch/data
       imagePullSecrets:
       - name: {{.Values.elasticsearch.imagePullSecret}}
+      {{- with .Values.elasticsearch.highAvailability.data.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elasticsearch.highAvailability.data.priorityClassName }}
+      priorityClassName: {{ .Values.elasticsearch.highAvailability.data.priorityClassName }}
+      {{- end }}
+      {{- with .Values.elasticsearch.highAvailability.data.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: es-data

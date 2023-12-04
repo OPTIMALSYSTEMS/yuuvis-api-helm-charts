@@ -15,14 +15,26 @@ spec:
       labels:
         name: commander
     spec:
+      {{- if or .Values.yuuvis.services.commander.nodeAffinity .Values.yuuvis.services.commander.podAffinity .Values.yuuvis.services.commander.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.commander.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.commander.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.commander.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-commander
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: commander
-        image: "{{.Values.yuuvis.services.commander.dockerRegistry}}:{{ .Values.yuuvis.services.commander.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.commander.dockerImage}}:{{ .Values.yuuvis.services.commander.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         resources:
           requests:
@@ -40,5 +52,14 @@ spec:
         ports:
         - containerPort: 8022
       restartPolicy: Always
+      {{- with .Values.yuuvis.services.commander.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.commander.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.commander.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.commander.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}

@@ -15,23 +15,26 @@ spec:
       labels:
         name: index
     spec:
+      {{- if or .Values.yuuvis.services.index.nodeAffinity .Values.yuuvis.services.index.podAffinity .Values.yuuvis.services.index.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.index.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.index.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.index.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
-      {{- if .Values.yuuvis.services.index.dependencyCheck.enable }}
-      - name: dependency-check
-        image: radial/busyboxplus:curl
-        imagePullPolicy: IfNotPresent
-        command: 
-          - "sh" 
-          - "-c" 
-          - 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' {{.Values.yuuvis.services.index.dependencyCheck.url}})" != "200" ]]; do sleep 11; done'      
-      {{- end}}
       - name: init-index
-        image: busybox
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
       containers:
       - name: index
-        image: "{{.Values.yuuvis.services.index.dockerRegistry}}:{{ .Values.yuuvis.services.index.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.index.dockerImage}}:{{ .Values.yuuvis.services.index.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -66,5 +69,14 @@ spec:
               key: CONFIGSERVICEURL
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.index.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.index.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.index.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.index.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}

@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: tenant-management
+  name: tenant-management
+spec:
+  replicas: {{.Values.yuuvis.client.tenantmanagement.instances}}
+  selector:
+    matchLabels:
+      name: tenant-management
+  template:
+    metadata:
+      labels:
+        name: tenant-management
+    spec:
+      {{- if or .Values.yuuvis.client.tenantmanagement.nodeAffinity .Values.yuuvis.client.tenantmanagement.podAffinity .Values.yuuvis.client.tenantmanagement.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.tenantmanagement.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.tenantmanagement.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.tenantmanagement.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+      - name: init-api-tm
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        imagePullPolicy: IfNotPresent
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.client.tenantmanagement.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.client.tenantmanagement.profiles}}
+        - name: CLIENT_ROOTURL
+          value: {{.Values.yuuvis.client.tenantmanagement.client.rooturl}}
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.tenantmanagement.dockerImage }}"
+        imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 7560
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: /manage/health
+            port: 7560
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        name: tenant-management
+        ports:
+        - containerPort: 7560
+          protocol: TCP
+        {{- if .Values.yuuvis.client.tenantmanagement.volumeMounts }}
+        volumeMounts:
+{{ tpl .Values.yuuvis.client.tenantmanagement.volumeMounts . | indent 8 }}
+        {{- end }}
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      {{- with .Values.yuuvis.client.tenantmanagement.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.tenantmanagement.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.tenantmanagement.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.tenantmanagement.volumes }}
+      volumes:
+{{ tpl .Values.yuuvis.client.tenantmanagement.volumes . | indent 6 }}
+      {{- end}}

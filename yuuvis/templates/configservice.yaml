@@ -17,18 +17,41 @@ spec:
       labels:
         name: configservice
     spec:
+      {{- if or .Values.yuuvis.services.config.nodeAffinity .Values.yuuvis.services.config.podAffinity .Values.yuuvis.services.config.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.config.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.config.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.config.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-config
-        image: alpine/git:latest
-        imagePullPolicy: IfNotPresent
+        image: "{{.Values.yuuvis.services.config.initContainer.dockerRegistry}}/{{.Values.yuuvis.services.config.initContainer.image}}:{{ .Values.yuuvis.services.config.initContainer.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.services.config.imagePullPolicy }}
         command: ['sh', '/yuuvis/script/checkgit.sh']
         volumeMounts:
         - mountPath: /yuuvis/script/checkgit.sh
           name: initscript
           subPath: checkgit.sh
+        env:
+        - name: GITUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: gitsecret
+        - name: GITPWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: gitsecret
       containers:
       - name: configservice
-        image: "{{.Values.yuuvis.services.config.dockerRegistry}}:{{ .Values.yuuvis.services.config.tag }}"
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.config.dockerImage}}:{{ .Values.yuuvis.services.config.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
@@ -83,8 +106,17 @@ spec:
           name: configservice-local
       restartPolicy: Always
       automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.config.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.config.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.config.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.config.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}
       volumes:
       - configMap:
           name: initconfigserviceconfigmap

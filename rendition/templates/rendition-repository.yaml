@@ -15,9 +15,21 @@ spec:
       labels:
         name: renditionrepository
     spec:
+      {{- if or .Values.yuuvis.renditionrepository.nodeAffinity .Values.yuuvis.renditionrepository.podAffinity .Values.yuuvis.renditionrepository.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.renditionrepository.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.renditionrepository.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.renditionrepository.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: renditionrepository
-        image: {{.Values.yuuvis.renditionrepository.dockerImage}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.renditionrepository.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         livenessProbe:
           httpGet:
@@ -48,6 +60,15 @@ spec:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
       initContainers:
       - name: init-renditionrepository
-        image: busybox
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      {{- with .Values.yuuvis.renditionrepository.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.renditionrepository.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.renditionrepository.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
