@@ -15,6 +15,7 @@ Solutions build using Yuuvis Api Helm Charts are highly scalable, run either clo
     + [Install the yuuvis rendition Helm chart](#install-the-yuuvis-rendition-helm-chart)
     + [Install the yuuvis repositorymanager Helm chart](#install-the-yuuvis-repositorymanager-helm-chart)
   * [Version upgrades](#version-upgrades)
+    + [2023 winter](#2023-winter)
     + [2023 autumn](#2023-autumn)
     + [2023 summer](#2023-summer)
     + [2023 spring](#2023-spring)
@@ -92,7 +93,16 @@ keycloak-create-selfsigned-cert   1/1           8m4s       8m4s
 
 Starting with version *0.12.0* of the infrastructure helm chart the codecentric keycloakx helm chart is used.  
 Thus the configuration paramters for the keycloak changed.  
-The yuuvis api version *2022 winter* uses keycloak1 version 19.  
+The yuuvis api version *2022 winter* uses keycloak version 19.  
+
+#### Changes with version 0.13
+
+The default configuration of keycloak is changed.  
+In previous versions two test realms were imported *testyuuvis* and *yuuvistest*.  
+Since version *0.13.0* no realms will be imported by default.  
+In the yuuvis chart starting with version *0.17.0* an init job can be configured to create a realm.  
+
+The versions of the chart dependencies have been updated.  
 
 ### Install the yuuvis Helm chart
 

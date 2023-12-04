@@ -15,6 +15,18 @@ spec:
       labels:
         name: system
     spec:
+      {{- if or .Values.yuuvis.services.system.nodeAffinity .Values.yuuvis.services.system.podAffinity .Values.yuuvis.services.system.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.system.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.system.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.system.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       initContainers:
       - name: init-system
         image: busybox
@@ -59,5 +71,14 @@ spec:
         - containerPort: {{.Values.yuuvis.services.system.port}}
       restartPolicy: Always
       serviceAccount: systemserviceaccount
+      {{- with .Values.yuuvis.services.system.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.system.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.system.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.system.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
       - name: yuuvisorg
