@@ -11,9 +11,9 @@ data:
     then
         echo git branch {{.Values.yuuvis.git.branch}} exists
         cd {{.Values.yuuvis.git.name}}
-        if [ -f application-prod.yml ]; 
+        if [ -f application-es.yml ]; 
         then 
-            echo application-prod.yml exists 
+            echo application-es.yml exists 
             exit 0
         fi
     fi
