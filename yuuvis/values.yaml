@@ -406,7 +406,7 @@ yuuvis:
     dockerRegistry: docker.yuuvis.org/yuuvis
     imagePullSecret: yuuvisorg
   livenessProbe:
-    enable: false
+    enable: true
     initialDelaySeconds: 300
     periodSeconds: 30
     timeoutSeconds: 10
