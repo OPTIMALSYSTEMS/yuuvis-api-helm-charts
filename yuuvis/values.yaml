@@ -26,7 +26,7 @@ yuuvis:
     docker:
       registry: docker.yuuvis.org/yuuvis
       image: helper/init-realm
-      tag: 19
+      tag: 19_v2
     # if enabled the config-init job will create a realm in keycloak with the 
     # name from yuuvis.initjob.keycloak.realm.name 
     # and an user with all yuuvis roles 
