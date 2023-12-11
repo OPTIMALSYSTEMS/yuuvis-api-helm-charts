@@ -43,6 +43,14 @@ helm repo add gitea-charts https://dl.gitea.io/charts/
 helm repo add codecentric https://codecentric.github.io/helm-charts/
 ```
 
+### test realm init change
+
+With the infrastructure chart version *0.12.1* and yuuvis chart version *0.15.4* the initialization of the test realm is changed.  
+The infrastructure chart will not import/create *testyuuvis* and *yuuvistest* realms anymore.  
+Existing realms are not changed.  
+The yuuvis config init job is changed and will now optionally create a test realm with the name and user from the yuuvis values yaml.  
+This job is only run once.  
+
 ### Install the infrastructure Helm chart
 
 **Update infrastructure dependencies**
