@@ -1,10 +1,8 @@
 apiVersion: v1
 data:
   initgit.sh: |
-    git config --global user.email yuuvis-init@yuuvis.org
-    git config --global user.name yuuvis-init
-
-    until wget -q --spider {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.server}}
+    cd /tmp
+    until wget -q --spider  {{.Values.yuuvis.git.protocol}}://$GITSERVER
     do 
         echo waiting for git
         sleep 11
@@ -12,17 +10,16 @@ data:
     
     echo git clone
     
-    if git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}} \
-        --branch {{.Values.yuuvis.git.branch}}; 
+    if git clone  {{.Values.yuuvis.git.protocol}}://$GITUSER:$GITPASSWORD@$GITURL --branch $GITBRANCH; 
     then
-        echo git branch {{.Values.yuuvis.git.branch}} already exists
-        cd {{.Values.yuuvis.git.name}}
+        echo "git branch ${GITBRANCH} already exists"
+        cd $GITNAME
     else
-        git clone {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.user}}:{{.Values.yuuvis.git.password}}@{{.Values.yuuvis.git.url}}
-        cd {{.Values.yuuvis.git.name}}
-        echo creating new {{.Values.yuuvis.git.branch}}
+        git clone  {{.Values.yuuvis.git.protocol}}://$GITUSER:$GITPASSWORD@$GITURL
+        cd $GITNAME
+        echo "creating new ${GITBRANCH}"
         echo git checkout -b
-        git checkout -b {{.Values.yuuvis.git.branch}}
+        git checkout -b  $GITBRANCH
     fi
     
     if [ -f application-docker.yml ]; 
@@ -30,15 +27,22 @@ data:
         echo application-docker.yml exists 
         exit 0
     fi
-
-    cp /yuuvis/data/*.yml . 
+    
+    cp /yuuvis/data/*.yml .
+    
+    echo "create realm"
+    eval export OAUTH2PATH=$(pwd)/application-oauth2.yml
+    java -jar /yuuvis/init.jar
+    
     mkdir system
-
+    
     cd system
     cp /yuuvis/data/system/*.xml .
     cp /yuuvis/data/system/*.json .
     cd ..
-
+    
+    git config --local user.email yuuvis-init@yuuvis.org
+    git config --local user.name yuuvis-init
     git add .
     git commit -m "init config"
     

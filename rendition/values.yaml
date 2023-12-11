@@ -2,18 +2,10 @@ yuuvis:
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
-  livenessProbe:
-    initialDelaySeconds: 300
-    periodSeconds: 30
-    timeoutSeconds: 10
-  readinessProbe:
-    initialDelaySeconds: 0
-    periodSeconds: 30
-    timeoutSeconds: 5
   configservice:
     url: http://configservice/config
   livenessProbe:
-    enable: false
+    enable: true
     initialDelaySeconds: 300
     periodSeconds: 30
     timeoutSeconds: 10
