@@ -26,15 +26,6 @@ yuuvis:
     password: changeme
   keycloak:
     nodePort: 30111
-    realm:
-      yuuvistest:
-        user:
-          name: root
-          password: changeme
-      testyuuvis:
-        user:
-          name: root
-          password: changeme
   git:
     user: yuuvis
     password: changeme
@@ -185,16 +176,10 @@ keycloak:
         user: keycloak
         password: changeme
   extraVolumes: |
-    - name: realm-config
-      configMap:
-        name: realmconfigmap
     - name: tls-secret
       secret:
         secretName: keycloak-selfsigned-tls-secret
   extraVolumeMounts: |
-    - name: realm-config
-      mountPath: "/opt/keycloak/data/import"
-      readOnly: true
     - name: tls-secret
       mountPath: "/opt/keycloak/conf/tls"
       readOnly: true
@@ -207,7 +192,6 @@ keycloak:
     - --hostname-strict-https=false
     - --spi-events-listener-jboss-logging-success-level=info
     - --spi-events-listener-jboss-logging-error-level=warn
-    - --import-realm
   extraEnv: |
     - name: KEYCLOAK_ADMIN
       valueFrom:

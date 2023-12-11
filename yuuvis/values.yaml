@@ -22,6 +22,27 @@ yuuvis:
     user: yuuvis
     password: changeme
     branch: master
+  initjob:
+    docker:
+      registry: docker.yuuvis.org/yuuvis
+      image: helper/init-realm
+      tag: 19_v2
+    # if enabled the config-init job will create a realm in keycloak with the 
+    # name from yuuvis.initjob.keycloak.realm.name 
+    # and an user with all yuuvis roles 
+    createrealm: "true"
+    keycloak: 
+      url: "http://keycloak-http.infrastructure/auth"
+      admin: "keycloak"
+      password: "changeme"
+      realm:
+        name: "myfirsttenant"
+        user: "root"
+        password: "changeme"
+    # !!! Change before  running
+    # this variable must contain the "public" ip of the authentication service
+    # this variable will be used by keycloak e.g. checked if it matches the redirect uri during login
+    authurl: "http://192.168.99.100:30080"
   amqp:
     user: rodger
     password: changeme
@@ -198,29 +219,20 @@ yuuvis:
     authentication.provider: oauth2
     authentication.exposed.endpoints: ''
     authentication.oauth2.tenants:
-    - name: yuuvistest
-      clientId: yuuvis-authentication-service
-      clientSecret: dbdf4856-3c86-4e5f-aca7-96f3d93d35b4
-      userAuthorizationUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/auth
-      accessTokenUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/token
-      userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout
-      userNameExtractionPattern: $.sub
-      scope: openid
-    - name: testyuuvis
-      clientId: yuuvis-authentication-service
-      clientSecret: 61048b73-8cd7-4682-b78c-786c5dc8a2a1
-      userAuthorizationUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/auth
-      accessTokenUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/token
-      userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout
-      userNameExtractionPattern: $.sub 
-      scope: openid
-
+    # example
+    #- name: example
+    #  clientId: yuuvis-authentication-service
+    #  clientSecret: <my-secret>
+    #  userAuthorizationUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/auth
+    #  accessTokenUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/token
+    #  userInfoUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/userinfo
+    #  endSessionUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/logout
+    #  userNameExtractionPattern: $.sub
+    #  scope: openid
     # configuration for the yuuvis organization service
     keycloak.server: https://keycloak-https.infrastructure/auth
-    keycloak.admin.username: keycloak
-    keycloak.admin.password: changeme
+    keycloak.admin.username: {{.Values.yuuvis.initjob.keycloak.admin}}
+    keycloak.admin.password: {{.Values.yuuvis.initjob.keycloak.password}}
   systemschema: |
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
