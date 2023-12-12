@@ -37,7 +37,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.17.0
+      dockerImage: api-web:1.17.1
       profiles: prod,kubernetes
       instances: 1
       pdb:
