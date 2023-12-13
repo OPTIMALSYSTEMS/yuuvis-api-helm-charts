@@ -30,15 +30,6 @@ yuuvis:
       user: keycloak
       password: changeme
     nodePort: 30111
-    realm:
-      yuuvistest:
-        user:
-          name: root
-          password: changeme
-      testyuuvis:
-        user:
-          name: root
-          password: changeme
   git:
     user: yuuvis
     password: changeme
@@ -188,12 +179,7 @@ keycloak:
       value: /secrets/db-creds/user
     - name: DB_PASSWORD_FILE
       value: /secrets/db-creds/password
-    - name: KEYCLOAK_IMPORT
-      value: "/realm/yuuvistest.json,/realm/testyuuvis.json -Dkeycloak.profile.feature.upload_scripts=enabled"
   extraVolumes: |
-    - name: realm-config
-      configMap:
-        name: realmconfigmap
     - name: keycloak-tls-localhost
       secret:
         defaultMode: 420
@@ -205,9 +191,6 @@ keycloak:
       secret:
         secretName: keycloakuser
   extraVolumeMounts: |
-    - name: realm-config
-      mountPath: "/realm/"
-      readOnly: true
     - name: keycloak-tls-localhost
       mountPath: "/etc/x509/https/"
     - name: db-creds
