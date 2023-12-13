@@ -147,23 +147,15 @@ yuuvis:
     authentication.provider: oauth2
     authentication.exposed.endpoints: ''
     authentication.oauth2.tenants:
-    - name: yuuvistest
-      clientId: yuuvis-authentication-service
-      clientSecret: dbdf4856-3c86-4e5f-aca7-96f3d93d35b4
-      userAuthorizationUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/auth
-      accessTokenUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/token
-      userInfoUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/yuuvistest/protocol/openid-connect/logout?redirect_uri=${redir}
-      userNameExtractionPattern: $.sub
-    - name: testyuuvis
-      clientId: yuuvis-authentication-service
-      clientSecret: 61048b73-8cd7-4682-b78c-786c5dc8a2a1
-      userAuthorizationUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/auth
-      accessTokenUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/token
-      userInfoUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/userinfo
-      endSessionUri: https://${keycloak.host}/auth/realms/testyuuvis/protocol/openid-connect/logout?redirect_uri=${redir}
-      userNameExtractionPattern: $.sub 
-
+    # example
+    #- name: example
+    #  clientId: yuuvis-authentication-service
+    #  clientSecret: <my-secret>
+    #  userAuthorizationUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/auth
+    #  accessTokenUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/token
+    #  userInfoUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/userinfo
+    #  endSessionUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/logout
+    #  userNameExtractionPattern: $.sub
     # configuration for the yuuvis organization service
     keycloak.server: https://keycloak-https.infrastructure/auth
     keycloak.admin.username: keycloak
