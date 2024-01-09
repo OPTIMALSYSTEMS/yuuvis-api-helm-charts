@@ -37,7 +37,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.17.1
+      dockerImage: api-web:1.17.2
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -151,7 +151,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
     tenantmanagement:
-      dockerImage: tenant-management:1.14.0
+      dockerImage: tenant-management:1.14.1
       profiles: prod,kubernetes,oauth2
       instances: 1
       pdb:
