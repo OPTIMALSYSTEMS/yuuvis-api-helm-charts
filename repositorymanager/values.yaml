@@ -38,12 +38,12 @@ yuuvis:
       tag: 1.2.0
       instances: 1
       pdb:
-      # pdb requires instances > 1 and minAvailable < instances,
-      # otherwise draining nodes will deadlock!
-      enabled: false
-
-      # set `minAvailable: null` if you want to use maxUnavailable instead
-      minAvailable: 1
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+        
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
       java:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
        
