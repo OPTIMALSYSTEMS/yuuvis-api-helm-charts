@@ -69,24 +69,24 @@ spec:
               key: CONFIGSERVICEURL
         ports:
         - containerPort: {{.Values.yuuvis.services.controller.port}}
-        {{- if .Values.yuuvis.services.organization.volumeMounts }}
+        {{- if .Values.yuuvis.services.controller.volumeMounts }}
         volumeMounts:
-{{ tpl .Values.yuuvis.services.organization.volumeMounts . | indent 8 }}
+{{ tpl .Values.yuuvis.services.controller.volumeMounts . | indent 8 }}
         {{- end }}
       restartPolicy: Always
       automountServiceAccountToken: false
-      {{- with .Values.yuuvis.services.organization.nodeSelector }}
+      {{- with .Values.yuuvis.services.controller.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.yuuvis.services.organization.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.organization.priorityClassName }}
+      {{- if .Values.yuuvis.services.controller.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.controller.priorityClassName }}
       {{- end }}
-      {{- with .Values.yuuvis.services.organization.tolerations }}
+      {{- with .Values.yuuvis.services.controller.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}
       {{- end }}
       imagePullSecrets:
       - name: {{ .Values.yuuvis.image.imagePullSecret }}
-      {{- if .Values.yuuvis.services.organization.volumes }}
+      {{- if .Values.yuuvis.services.controller.volumes }}
       volumes:
-{{ tpl .Values.yuuvis.services.organization.volumes . | indent 6 }}
+{{ tpl .Values.yuuvis.services.controller.volumes . | indent 6 }}
       {{- end}}
