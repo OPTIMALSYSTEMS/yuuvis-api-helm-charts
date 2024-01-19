@@ -129,7 +129,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     architect:
-      dockerImage: architect:2.2.0
+      dockerImage: architect:2.2.1
       instances: 1
     sothook:
       dockerImage: sandbox/sothook:4.17.0
