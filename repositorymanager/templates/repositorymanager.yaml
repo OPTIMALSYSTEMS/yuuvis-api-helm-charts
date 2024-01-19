@@ -27,6 +27,18 @@ spec:
       labels:
         name: repositorymanager
     spec:
+      {{- if or .Values.yuuvis.repositorymanager.core.nodeAffinity .Values.yuuvis.repositorymanager.core.podAffinity .Values.yuuvis.repositorymanager.core.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.repositorymanager.core.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanager.core.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanager.core.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       securityContext:
         fsGroup: 2000
         runAsGroup: 3000
@@ -34,7 +46,7 @@ spec:
       containers:
       - env:
         - name: JAVA_OPTS
-          value: {{.Values.yuuvis.repositorymanager.java.maxHeap}}
+          value: {{.Values.yuuvis.repositorymanager.core.java.maxHeap}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{.Values.yuuvis.configservice.url}}
         - name: SPRING_PROFILES_ACTIVE
@@ -59,3 +71,12 @@ spec:
         image: busybox
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      {{- with .Values.yuuvis.repositorymanager.core.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.repositorymanager.core.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.repositorymanager.core.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.repositorymanager.core.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

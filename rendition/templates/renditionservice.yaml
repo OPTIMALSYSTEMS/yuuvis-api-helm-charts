@@ -52,7 +52,7 @@ spec:
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.yuuvis.renditionservice.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.renditionservice.priorityClassName }}
       {{- end }}
       {{- with .Values.yuuvis.renditionservice.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}

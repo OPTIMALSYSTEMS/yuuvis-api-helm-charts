@@ -39,10 +39,17 @@ yuuvis:
         name: "myfirsttenant"
         user: "root"
         password: "changeme"
-    # !!! Change before  running
+    # !!! Change before running
     # this variable must contain the "public" ip of the authentication service
     # this variable will be used by keycloak e.g. checked if it matches the redirect uri during login
     authurl: "http://192.168.99.100:30080"
+    # k8s job config
+    nodeSelector: {}
+    priorityClassName: ""
+    tolerations: []
+    nodeAffinity: {}
+    podAffinity: {}
+    podAntiAffinity: {}
   amqp:
     user: rodger
     password: changeme
@@ -84,6 +91,13 @@ yuuvis:
       # try to map the old entries to the new format
       # disable with false
       es: true
+      # k8s job config
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
 

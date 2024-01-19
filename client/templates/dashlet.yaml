@@ -49,7 +49,7 @@ spec:
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.yuuvis.client.dashlet.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.dashlet.priorityClassName }}
       {{- end }}
       {{- with .Values.yuuvis.client.dashlet.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}

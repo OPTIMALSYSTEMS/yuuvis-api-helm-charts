@@ -69,7 +69,7 @@ spec:
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.yuuvis.client.office365.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.office365.priorityClassName }}
       {{- end }}
       {{- with .Values.yuuvis.client.office365.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}

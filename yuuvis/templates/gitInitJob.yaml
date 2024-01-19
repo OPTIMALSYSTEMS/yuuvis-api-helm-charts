@@ -5,6 +5,18 @@ metadata:
 spec:
   template:
     spec:
+      {{- if or .Values.yuuvis.initjob.nodeAffinity .Values.yuuvis.initjob.podAffinity .Values.yuuvis.initjob.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.initjob.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.initjob.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.initjob.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: config-init
         image: {{.Values.yuuvis.initjob.docker.registry}}/{{.Values.yuuvis.initjob.docker.image}}:{{.Values.yuuvis.initjob.docker.tag}}
@@ -66,3 +78,12 @@ spec:
           name: systemconfigmap
         name: systemconfig
       restartPolicy: OnFailure
+      {{- with .Values.yuuvis.initjob.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.initjob.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.initjob.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.initjob.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

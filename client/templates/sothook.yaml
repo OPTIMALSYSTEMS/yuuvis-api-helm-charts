@@ -71,7 +71,7 @@ spec:
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.yuuvis.client.sothook.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.sothook.priorityClassName }}
       {{- end }}
       {{- with .Values.yuuvis.client.sothook.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}

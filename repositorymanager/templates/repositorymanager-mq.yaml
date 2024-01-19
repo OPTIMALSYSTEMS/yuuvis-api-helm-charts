@@ -15,6 +15,18 @@ spec:
       labels:
         name: repositorymanager-mq
     spec:
+      {{- if or .Values.yuuvis.repositorymanager.mq.nodeAffinity .Values.yuuvis.repositorymanager.mq.podAffinity .Values.yuuvis.repositorymanager.mq.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.repositorymanager.mq.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanager.mq.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanager.mq.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - env:
         - name: JAVA_OPTS
@@ -31,3 +43,12 @@ spec:
         image: busybox
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      {{- with .Values.yuuvis.repositorymanager.mq.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.repositorymanager.mq.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.repositorymanager.mq.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.repositorymanager.mq.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

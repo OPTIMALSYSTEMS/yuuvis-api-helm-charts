@@ -31,12 +31,24 @@ yuuvis:
         image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert
         tag: jre11
         secret: dockeryuuvisorg
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
   git:
     user: yuuvis
     password: changeme
     initcontainer:
       image: docker.yuuvis.org/yuuvis/helper/init-helper:2023-12-03
       secret: dockeryuuvisorg
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
 
 
 elasticsearch:

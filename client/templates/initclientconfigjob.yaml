@@ -8,6 +8,18 @@ spec:
   backoffLimit: 3
   template:
     spec:
+      {{- if or .Values.yuuvis.git.initjob.nodeAffinity .Values.yuuvis.git.initjob.podAffinity .Values.yuuvis.git.initjob.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.git.initjob.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.git.initjob.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.git.initjob.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: initclientconfig
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.git.initjob.docker.image}}
@@ -29,3 +41,12 @@ spec:
           name: clientinit
         name: initscript
       restartPolicy: OnFailure
+      {{- with .Values.yuuvis.git.initjob.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.git.initjob.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.git.initjob.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.git.initjob.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

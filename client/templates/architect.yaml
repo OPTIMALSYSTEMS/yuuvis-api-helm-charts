@@ -15,6 +15,18 @@ spec:
       labels:
         name: architect
     spec:
+      {{- if or .Values.yuuvis.client.architect.nodeAffinity .Values.yuuvis.client.architect.podAffinity .Values.yuuvis.client.architect.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.architect.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.architect.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.architect.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.architect.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
@@ -25,3 +37,12 @@ spec:
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.architect.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.architect.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.architect.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.architect.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

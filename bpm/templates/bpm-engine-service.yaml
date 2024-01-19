@@ -102,7 +102,7 @@ spec:
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.yuuvis.bpm.engine.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.bpm.engine.priorityClassName }}
       {{- end }}
       {{- with .Values.yuuvis.bpm.engine.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}

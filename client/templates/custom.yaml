@@ -15,6 +15,18 @@ spec:
       labels:
         name: custom
     spec:
+      {{- if or .Values.yuuvis.client.custom.nodeAffinity .Values.yuuvis.client.custom.podAffinity .Values.yuuvis.client.custom.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.custom.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.custom.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.custom.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.custom.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
@@ -25,3 +37,12 @@ spec:
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret }}
       restartPolicy: Always
+      {{- with .Values.yuuvis.client.custom.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.custom.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.custom.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.custom.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

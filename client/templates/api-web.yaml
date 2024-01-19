@@ -73,7 +73,7 @@ spec:
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.yuuvis.client.apiweb.priorityClassName }}
-      priorityClassName: {{ .Values.yuuvis.services.api.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.apiweb.priorityClassName }}
       {{- end }}
       {{- with .Values.yuuvis.client.apiweb.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}

@@ -7,6 +7,18 @@ metadata:
 spec:
   template:
     spec:
+      {{- if or .Values.yuuvis.keycloak.createSelfSignedCert.nodeAffinity .Values.yuuvis.keycloak.createSelfSignedCert.podAffinity .Values.yuuvis.keycloak.createSelfSignedCert.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.keycloak.createSelfSignedCert.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.keycloak.createSelfSignedCert.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.keycloak.createSelfSignedCert.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: keycloak-create-selfsigned-cert
         image: {{.Values.yuuvis.keycloak.createSelfSignedCert.docker.image}}:{{.Values.yuuvis.keycloak.createSelfSignedCert.docker.tag}}
@@ -25,3 +37,12 @@ spec:
         name: createscript
       serviceAccount: create-selfsigned-cert
       restartPolicy: OnFailure
+      {{- with .Values.yuuvis.keycloak.createSelfSignedCert.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.keycloak.createSelfSignedCert.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.keycloak.createSelfSignedCert.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.keycloak.createSelfSignedCert.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
