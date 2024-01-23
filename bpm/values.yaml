@@ -4,7 +4,7 @@ yuuvis:
     imagePullSecret: yuuvisorg
     dockerRegistry: docker.yuuvis.org/yuuvis
   configservice:
-    url: http://configservice/config
+    url: http://system/config
   livenessProbe:
     enable: false
     initialDelaySeconds: 300
@@ -17,7 +17,7 @@ yuuvis:
     timeoutSeconds: 5
   bpm:
     engine:
-      dockerImage: bpm-engine:0.13.0
+      dockerImage: bpm-engine:0.14.0-RC01
       initContainerImage: helper/init-helper:2023-12-03
       profiles: postgres,swagger,oauth2
       instances: 1
@@ -80,4 +80,4 @@ yuuvis:
       podAntiAffinity: {}
        
 initContainer:
-  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/manage/health; do echo waiting for configservice; sleep 11; done;"

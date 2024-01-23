@@ -1,12 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
     name: system
   name: system
 spec:
-  replicas: {{.Values.yuuvis.services.system.instances}}
+  serviceName: system-sts
+  replicas: {{.Values.yuuvis.services.system.instances}} 
   selector:
     matchLabels:
       name: system
@@ -29,9 +30,24 @@ spec:
       {{- end }}
       initContainers:
       - name: init-system
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        image: "{{.Values.yuuvis.services.system.initContainer.dockerRegistry}}/{{.Values.yuuvis.services.system.initContainer.image}}:{{ .Values.yuuvis.services.system.initContainer.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.services.system.imagePullPolicy }}
+        command: ['sh', '/yuuvis/script/checkgit.sh']
+        volumeMounts:
+        - mountPath: /yuuvis/script/checkgit.sh
+          name: initscript
+          subPath: checkgit.sh
+        env:
+        - name: GITUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: gitsecret
+        - name: GITPWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: gitsecret
       containers:
       - name: system
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.system.dockerImage}}:{{ .Values.yuuvis.services.system.tag }}"
@@ -62,13 +78,34 @@ spec:
           value: {{.Values.yuuvis.services.system.java.maxHeap}}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.services.system.profiles}}
-        - name: SPRING_CLOUD_CONFIG_URI
+        - name: SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS
+          value: file:/tmp/configservice/resource-git
+        - name: SPRING_CLOUD_CONFIG_LABEL
+          value: {{.Values.yuuvis.git.branch}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT-LABEL
+          value: {{.Values.yuuvis.git.branch}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
           valueFrom:
-            configMapKeyRef:
-              name: yuuvis-common-env
-              key: CONFIGSERVICEURL
+            secretKeyRef:
+              key: password
+              name: gitsecret
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+          value: {{.Values.yuuvis.git.protocol}}://{{.Values.yuuvis.git.url}}
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: gitsecret
+        - name: SPRING_CLOUD_CONFIG_SERVER_PREFIX
+          value: /config/
         ports:
         - containerPort: {{.Values.yuuvis.services.system.port}}
+        volumeMounts:
+        - mountPath: /tmp/configservice
+          name: system-local
+        {{- if .Values.yuuvis.services.system.volumeMounts }}
+{{ tpl .Values.yuuvis.services.system.volumeMounts . | indent 8 }}
+        {{- end }}
       restartPolicy: Always
       serviceAccount: systemserviceaccount
       {{- with .Values.yuuvis.services.system.nodeSelector }}
@@ -81,4 +118,41 @@ spec:
       tolerations: {{- toYaml . | nindent 8 }}
       {{- end }}
       imagePullSecrets:
-      - name: yuuvisorg
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}
+      volumes:
+      - configMap:
+          name: initconfigserviceconfigmap
+        name: initscript
+      {{- if .Values.yuuvis.services.system.volumes }}
+{{ tpl .Values.yuuvis.services.system.volumes . | indent 6 }}
+      {{- end}}
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: system-local
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{.Values.yuuvis.services.system.storage.request}}
+{{- if .Values.yuuvis.services.system.storage.class }}
+      storageClassName: {{.Values.yuuvis.services.system.storage.class}}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: system-sts
+  labels:
+    name: system-sts
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: {{.Values.yuuvis.services.system.port}}
+  selector:
+    name: system
+  clusterIP: None
