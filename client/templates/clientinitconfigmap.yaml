@@ -10,6 +10,10 @@ data:
         if [ ! -f apps/client/system/schema.xml ];
         then   
             mkdir -p apps/client/system/
+        else
+            echo apps/client/system/schema.xml exists
+            echo client git init job ran before
+            exit 0
         fi
 
         if [ ! -f apps/clientsystem/system/schema.xml ];

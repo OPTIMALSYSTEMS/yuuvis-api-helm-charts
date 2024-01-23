@@ -12,12 +12,12 @@ spec:
   replicas: {{.Values.elasticsearch.highAvailability.data.nodes}}
   selector:
     matchLabels:
-      name: elasticsearch-data
+      name: elasticsearch
       app: {{.Values.yuuvis.labels.app}}
   template:
     metadata:
       labels:
-        name: elasticsearch-data
+        name: elasticsearch
         app: {{.Values.yuuvis.labels.app}}
     spec:
       {{- if or .Values.elasticsearch.highAvailability.highAvailability.data.nodeAffinity .Values.elasticsearch.highAvailability.data.podAffinity .Values.elasticsearch.highAvailability.data.podAntiAffinity }}
