@@ -141,7 +141,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     architect:
-      dockerImage: architect:2.3.0-rc1
+      dockerImage: architect:2.3.0-rc2
       instances: 1
       nodeSelector: {}
       priorityClassName: ""
@@ -201,7 +201,7 @@ yuuvis:
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
     office365:
-      dockerImage: office-for-the-web/yuuvis-momentum-provider-client:1.0.2
+      dockerImage: office-for-the-web/yuuvis-momentum-provider-client:2.0.0-RC1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -227,7 +227,7 @@ yuuvis:
       java:
         maxHeap: -Xmx128m    
     dashlet:
-      dockerImage: office-for-the-web/yuuvis-momentum-dashlet-microservice:1.0.3
+      dockerImage: office-for-the-web/yuuvis-momentum-dashlet-microservice:2.0.0-RC1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,

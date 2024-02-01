@@ -410,7 +410,7 @@ yuuvis:
   services:
     api:
       dockerImage: api-gateway
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -431,43 +431,13 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-    audit:
-      dockerImage: audit
-      tag: 4.18.0-RC02
-      profiles: prod,jpapostgres,dbs,kubernetes,redis,metrics
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      port: 7251
-      java:
-        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "512Mi"
-      # service may perform db updates, with possible long duration
-      # service uses liquibase, if killed during startup db lock possibly never released
-      # as a precaution disable livenessProbe during first of a new version 
-      # once the update is complete enable livenessProbe
-      livenessProbe:
-        # values true/false
-        enable: false
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
     authentication:
       # create services with type nodport for authentication
       nodeport:
         use: true
         value: 30080
       dockerImage: authentication
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -501,7 +471,7 @@ yuuvis:
       podAntiAffinity: {}
     contentanalyzer:
       dockerImage: contentanalyzer
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,kubernetes,metrics
       instances: 2
       pdb:
@@ -525,7 +495,7 @@ yuuvis:
     index:
       dockerImage: index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -547,7 +517,7 @@ yuuvis:
       podAntiAffinity: {}
     registry:
       dockerImage: registry
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -577,7 +547,7 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: repository
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,storage,kubernetes,redis,metrics
       instances: 1
       pdb:
@@ -610,7 +580,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: search
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -639,7 +609,7 @@ yuuvis:
         imagePullPolicy: IfNotPresent
       dockerImage: system
       profiles: prod,git,resourcegit,oauth2,redis,kubernetes,metrics
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -673,7 +643,7 @@ yuuvis:
     commander:
       dockerImage: commander
       profiles: prod,kubernetes,dbs,es
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -688,7 +658,7 @@ yuuvis:
     archive:
       deploy: false
       dockerImage: archiveservice
-      tag: 4.18.0-RC02
+      tag: 4.18.0-RC03
       profiles: prod,storage
       instances: 1
       pdb:
