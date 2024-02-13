@@ -1,0 +1,10 @@
+mas-smtp:
+  mode: {{.Values.yuuvis.mailarchiving.smtp.profiles.mas-smtp.mode}}
+  base-auth:
+    username: {{.Values.yuuvis.mailarchiving.smtp.profiles.mas-smtp.base-auth.username}}
+    password: {{.Values.yuuvis.mailarchiving.smtp.profiles.mas-smtp.base-auth.password}}
+  restrictions:
+    allowed-senders: {{.Values.yuuvis.mailarchiving.smtp.profiles.mas-smtp.restrictions.allowed-senders}}
+    allowed-recipients: {{.Values.yuuvis.mailarchiving.smtp.profiles.mas-smtp.restrictions.allowed-recipients}}
+mas-storage:
+  uri: {{.Values.yuuvis.mailarchiving.smtp.profiles.mas-storage.uri}}

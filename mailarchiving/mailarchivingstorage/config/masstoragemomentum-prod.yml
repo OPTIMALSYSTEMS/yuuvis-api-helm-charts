@@ -1,0 +1,7 @@
+mas-storage-momentum:
+  user-info: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.user-info}}
+  dms:
+    url: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.url}}
+    username: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.username}}
+    password: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.password}}
+    tenant: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.tenant}}

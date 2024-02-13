@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mailarchiving-smtp-create-selfsigned-cert
+  labels:
+    app: mailarchiving-smtp-create-selfsigned-cert
+spec:
+  template:
+    spec:
+      containers:
+        - name: mailarchiving-smtp-tls
+          image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:jre11
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash" ]
+          args: [ "/mailarchiving/script/createSelfsignedCert.bash" ]
+          volumeMounts:
+            - mountPath: /mailarchiving/script/createSelfsignedCert.bash
+              name: createscript
+              subPath: createSelfsignedCert.bash
+      imagePullSecrets:
+        - name: {{.Values.yuuvis.image.imagePullSecret}}
+      volumes:
+        - configMap:
+            name: mailarchivingcreateselfsignedcert
+          name: createscript
+      restartPolicy: OnFailure
+      serviceAccountName: create-selfsigned-cert

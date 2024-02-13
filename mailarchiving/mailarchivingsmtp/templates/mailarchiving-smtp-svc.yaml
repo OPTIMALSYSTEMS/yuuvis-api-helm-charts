@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: yuuvis
+    name: mailarchiving-smtp
+  name: mailarchiving-smtp
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8120
+    - name: smtp
+      port: 25
+      targetPort: 25000
+  selector:
+    name: mailarchiving-smtp
+  type: ClusterIP
