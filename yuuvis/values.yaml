@@ -436,7 +436,7 @@ yuuvis:
   services:
     api:
       dockerImage: api-gateway
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -459,7 +459,7 @@ yuuvis:
       podAntiAffinity: {}
     audit:
       dockerImage: audit
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,jpapostgres,dbs,kubernetes,redis,metrics
       instances: 1
       pdb:
@@ -493,7 +493,7 @@ yuuvis:
         use: true
         value: 30080
       dockerImage: authentication
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -532,7 +532,7 @@ yuuvis:
         dockerRegistry: docker.io
         imagePullPolicy: IfNotPresent
       dockerImage: config
-      tag: 4.17.4
+      tag: 4.17.5
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -557,7 +557,7 @@ yuuvis:
       podAntiAffinity: {}
     contentanalyzer:
       dockerImage: contentanalyzer
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,kubernetes,metrics
       instances: 2
       pdb:
@@ -581,7 +581,7 @@ yuuvis:
     index:
       dockerImage: index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 4.17.4
+      tag: 4.17.5
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -603,7 +603,7 @@ yuuvis:
       podAntiAffinity: {}
     organization:
       dockerImage: organization
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,oauth2,keycloak,kubernetes,metrics
       instances: 1
       pdb:
@@ -634,7 +634,7 @@ yuuvis:
       podAntiAffinity: {}
     registry:
       dockerImage: registry
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -664,7 +664,7 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: repository
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,storage,kubernetes,redis,metrics
       instances: 1
       pdb:
@@ -697,7 +697,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: search
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -721,7 +721,7 @@ yuuvis:
     system:
       dockerImage: system
       profiles: prod,redis,kubernetes,metrics
-      tag: 4.17.4
+      tag: 4.17.5
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -744,7 +744,7 @@ yuuvis:
     commander:
       dockerImage: commander
       profiles: prod,kubernetes,dbs,es
-      tag: 4.17.4
+      tag: 4.17.5
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -759,7 +759,7 @@ yuuvis:
     archive:
       deploy: false
       dockerImage: archiveservice
-      tag: 4.17.4
+      tag: 4.17.5
       profiles: prod,storage
       instances: 1
       pdb:
