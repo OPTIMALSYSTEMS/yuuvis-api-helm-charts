@@ -14,7 +14,7 @@ yuuvis:
   configservice:
     url: http://system/config
   renditionservice:
-    dockerImage: renditionservice:2.8.0
+    dockerImage: renditionservice:2.9.0-RC01
     profiles: prod
     instances: 1
     java:

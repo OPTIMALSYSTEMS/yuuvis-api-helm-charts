@@ -43,7 +43,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.18.0-rc1
+      dockerImage: api-web:1.18.0-rc2
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -100,7 +100,7 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.4.0-rc1
+      dockerImage: client:5.4.0-rc2
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -116,7 +116,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     custom:
-      dockerImage: 5.4.0-rc1
+      dockerImage: 5.4.0-rc2
       instances: 0
       nodeSelector: {}
       priorityClassName: ""
@@ -141,7 +141,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     architect:
-      dockerImage: architect:2.3.0-rc2
+      dockerImage: architect:2.3.0-rc3
       instances: 1
       nodeSelector: {}
       priorityClassName: ""
@@ -169,7 +169,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
     tenantmanagement:
-      dockerImage: tenant-management:1.15.0-rc1
+      dockerImage: tenant-management:1.15.0-rc2
       profiles: prod,kubernetes,oauth2
       instances: 1
       pdb:
