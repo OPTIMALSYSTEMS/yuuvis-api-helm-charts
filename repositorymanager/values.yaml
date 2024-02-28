@@ -17,7 +17,7 @@ yuuvis:
       minAvailable: 1
     profile: prod # With every instance of rm this should be changed
     dockerImage: repositorymanager
-    tag: 4.3.1
+    tag: 4.3.2
     core:
       workingdir: /working-dir
       api:
