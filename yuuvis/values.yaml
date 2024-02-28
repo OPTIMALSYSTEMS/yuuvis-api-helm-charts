@@ -782,7 +782,7 @@ yuuvis:
       podAntiAffinity: {}
     controller:
       dockerImage: controller
-      tag: 4.17.0
+      tag: 4.17.1
       profiles: prod,es,oauth2,lc,mq,kubernetes
       instances: 1
       port: 7332
@@ -806,7 +806,7 @@ yuuvis:
       podAntiAffinity: {}
     textextractor:
       dockerImage: textextractor
-      tag: 4.17.0
+      tag: 4.17.1
       profiles: prod,es,lc,mq,kubernetes
       instances: 1
       port: 7420
