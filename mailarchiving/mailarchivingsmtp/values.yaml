@@ -15,7 +15,7 @@ yuuvis:
     smtp:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-smtp
-      tag: 2.1.4
+      tag: 2.1.5
       java:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
       profiles:
