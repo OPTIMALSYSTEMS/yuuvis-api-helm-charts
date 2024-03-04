@@ -43,7 +43,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.18.0-rc2
+      dockerImage: api-web:1.18.0-rc3
       profiles: prod,kubernetes
       instances: 1
       pdb:
