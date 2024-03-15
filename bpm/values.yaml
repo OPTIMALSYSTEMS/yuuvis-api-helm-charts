@@ -19,7 +19,7 @@ yuuvis:
     engine:
       dockerImage: bpm-engine:0.13.0
       initContainerImage: helper/init-helper:2023-12-03
-      profiles: postgres,swagger,oauth2
+      profiles: dbspostgres,swagger,oauth2
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
