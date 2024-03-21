@@ -1,0 +1,11 @@
+mas-storage:
+  uri: {{.Values.yuuvis.mailarchiving.mailbox.profiles.prod.mas-storage.uri}}
+mas-mailbox:
+  categories:
+    archived:
+    error:
+  journaling:
+    mailboxes:
+  archiving:
+    mailboxes:
+    whitelist:

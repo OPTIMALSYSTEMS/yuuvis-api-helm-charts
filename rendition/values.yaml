@@ -12,9 +12,9 @@ yuuvis:
     periodSeconds: 30
     timeoutSeconds: 5
   configservice:
-    url: http://configservice/config
+    url: http://system/config
   renditionservice:
-    dockerImage: renditionservice:2.8.0
+    dockerImage: renditionservice:2.9.0
     profiles: prod
     instances: 1
     java:
@@ -33,7 +33,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditionrepository:
-    dockerImage: rendition-repository:2.0.0
+    dockerImage: rendition-repository:2.0.1
     profiles: prod,storage,dbs
     instances: 1
     java:
@@ -53,7 +53,7 @@ yuuvis:
     podAntiAffinity: {}
 
 initContainer:
-  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/manage/health; do echo waiting for configservice; sleep 11; done;"
   image: busybox
   tag: 1.36
   dockerRegistry: docker.io
