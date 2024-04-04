@@ -100,7 +100,7 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.4.1
+      dockerImage: client:5.4.2
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -116,7 +116,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     custom:
-      dockerImage: 5.4.1
+      dockerImage: 5.4.2
       instances: 0
       nodeSelector: {}
       priorityClassName: ""
