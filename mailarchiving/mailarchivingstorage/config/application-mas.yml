@@ -1,0 +1,10 @@
+mas:
+  exchange-online:
+    access:
+      client-id: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchange-online.access.client-id}}
+      tenant-id: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchange-online.access.tenant-id}}
+      secret: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchange-online.access.secret}}
+  mailbox-related-storage:
+    folder-name-config:
+      domains: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.mailbox-related-storage.folder-name-config.domains}}
+      property: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.mailbox-related-storage.folder-name-config.property}}

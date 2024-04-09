@@ -3,9 +3,9 @@ appVersion: "1.0"
 description: umbrella chart with examples for infrastructure components of an yuuvis API installation
              infrastructure components include a database, an identity provider, storage etc.
              this chart is for demo use only 
-             do not use this chart for production
+             do not use this chart for production 
 name: infrastructure
-version: 0.13.2
+version: 0.14.0
 dependencies:
 - name: minio
   version: ^5.0.14

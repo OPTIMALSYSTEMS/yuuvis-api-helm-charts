@@ -1,0 +1,39 @@
+apiVersion: v1
+data:
+  mailarchivingmailboxinit.bash: |
+    until wget -q --spider {{.Values.yuuvis.configservice.url}}/api/resources/schema.xml/path/system;
+    do 
+      echo 'waiting for configservice'; 
+      sleep 11; 
+    done;
+    
+    echo 'test if masmailbox config exists'
+    getmasmailboxyml=$(curl -s -o /dev/null -w "%{http_code}" {{.Values.yuuvis.configservice.url}}/api/resources/masmailbox-prod.yml)
+    
+    echo "config result $getmasmailboxyml"
+    
+    if [ "$getmasmailboxyml" = 200 ]
+      then
+        echo 'masmailbox-prod.yml properties already exists.'
+    exit 0
+    fi
+    
+    if [ "$getmasmailboxyml" = 404 ]
+    then
+      echo 'Must create masmailbox-prod.yml'
+      postmasmailboxyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/masmailbox-prod.yml" {{.Values.yuuvis.configservice.url}}/api/resources/masmailbox-prod.yml)
+    
+      if [ "$postmasmailboxyml" != 200 ]
+      then
+        echo 'Post masmailbox-prod.yml failed.'
+        exit 1
+      else
+        echo 'masmailbox-prod.yml is created.'
+        exit 0
+      fi
+    fi
+
+    exit 1
+kind: ConfigMap
+metadata:
+  name: initmailarchivingmailboxconfigmap

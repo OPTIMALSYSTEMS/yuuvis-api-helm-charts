@@ -1,0 +1,9 @@
+apiVersion: v1
+appVersion: "1.0"
+description: yuuvis mailarchiving storage components
+name: yuuvis-mailarchiving-storage
+version: 0.1.1
+keywords:
+  - yuuvis
+  - mailarchivingstorage
+home: https://yuuvis.com/scalable-content-services

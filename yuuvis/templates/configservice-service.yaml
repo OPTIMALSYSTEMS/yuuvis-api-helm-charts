@@ -5,11 +5,13 @@ metadata:
     app: {{.Values.yuuvis.labels.app}}
     name: configservice
     yuuvis: "true"
+    reason: "backwards_compatibility"
+    target: system
   name: configservice
 spec:
   ports:
   - name: "http"
     port: 80
-    targetPort: {{.Values.yuuvis.services.config.port}}
+    targetPort: {{.Values.yuuvis.services.system.port}}
   selector:
-    name: configservice
+    name: system

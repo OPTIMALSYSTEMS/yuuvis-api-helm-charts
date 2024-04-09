@@ -5,12 +5,14 @@ metadata:
     app: {{.Values.yuuvis.labels.app}}
     name: audit
     yuuvis: "true"
+    reason: "backwards_compatibility"
+    target: registry
   name: audit
 spec:
   ports:
   - name: "http"
     port: 80
-    targetPort: {{.Values.yuuvis.services.audit.port}}
+    targetPort: {{.Values.yuuvis.services.registry.port}}
   selector:
-    name: audit
+    name: registry
   type: ClusterIP

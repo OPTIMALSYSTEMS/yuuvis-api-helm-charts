@@ -5,12 +5,14 @@ metadata:
     app: {{.Values.yuuvis.labels.app}}
     name: organization
     yuuvis: "true"
+    reason: "backwards_compatibility"
+    target: system
   name: organization
 spec:
   ports:
   - name: "http"
     port: 80
-    targetPort: {{.Values.yuuvis.services.organization.port}}
+    targetPort: {{.Values.yuuvis.services.system.port}}
   selector:
-    name: organization
+    name: system
   type: ClusterIP

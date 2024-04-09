@@ -169,6 +169,7 @@ helm install rendition ./rendition --namespace yuuvis
 
 **Edit the repositorymanager values.yaml and docker registry credentials**
 
+This helm chart is only required for an SAP integration.  
 The repositorymanager is connector that provides solution for **ArchiveLink** and **ILM** protocols of SAP.
 
 _It is possible to have **more than one instance** of repositorymanager.
