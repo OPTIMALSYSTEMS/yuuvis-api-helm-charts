@@ -20,7 +20,7 @@ spec:
         name: elasticsearch
         app: {{.Values.yuuvis.labels.app}}
     spec:
-      {{- if or .Values.elasticsearch.highAvailability.highAvailability.data.nodeAffinity .Values.elasticsearch.highAvailability.data.podAffinity .Values.elasticsearch.highAvailability.data.podAntiAffinity }}
+      {{- if or .Values.elasticsearch.highAvailability.data.nodeAffinity .Values.elasticsearch.highAvailability.data.podAffinity .Values.elasticsearch.highAvailability.data.podAntiAffinity }}
       affinity:
         {{- with .Values.elasticsearch.highAvailability.data.nodeAffinity }}
         nodeAffinity: {{- toYaml . | nindent 10 }}
