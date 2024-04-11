@@ -65,6 +65,8 @@ elasticsearch:
   nodes: 1
   initial_master_nodes: elasticsearch-0  
   memory: -Xms1024m -Xmx1024m
+  requests:
+    memory: 2Gi # always double of JVM memory setting
   pdb:    
     # pdb requires instances > 1 and minAvailable < instances,
     # otherwise draining nodes will deadlock!
@@ -85,6 +87,8 @@ elasticsearch:
       nodes: 2
       storage: 200Gi
       memory: -Xms4096m -Xmx4096m
+      requests:
+        memory: 8Gi # always double of JVM memory setting
       pdb:    
         # pdb requires instances > 1 and minAvailable < instances,
         # otherwise draining nodes will deadlock!
@@ -102,6 +106,8 @@ elasticsearch:
       nodes: 3
       storage: 50Gi
       memory: -Xms1024m -Xmx1024m
+      requests:
+        memory: 2Gi # always double of JVM memory setting
       initial_master_nodes: elasticsearch-master-0, elasticsearch-master-1, elasticsearch-master-2
       pdb:    
         # pdb requires instances > 1 and minAvailable < instances,

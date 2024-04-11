@@ -66,7 +66,12 @@ spec:
           protocol: TCP
         env:
         - name: "ES_JAVA_OPTS"
-          value: {{.Values.elasticsearch.highAvailability.data.memory}}  
+          value: {{.Values.elasticsearch.highAvailability.data.memory}}
+        {{- if .Values.elasticsearch.highAvailability.data.requests.memory }}
+        resources:
+          requests:
+            memory: {{.Values.elasticsearch.highAvailability.data.requests.memory}}
+        {{- end }}
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data
