@@ -43,7 +43,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.17.11
+      dockerImage: api-web:1.17.12
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -62,7 +62,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m
     userservice:
-      dockerImage: userservice:1.13.0
+      dockerImage: userservice:1.13.2
       initContainerImage: helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
