@@ -178,10 +178,9 @@ To use that possibility repositorymanager will not be part of yuuvis namespace a
 > **_NOTE: CORS Ingress_**
 In Ingress controller because of communication with SAP protocols, please disable CORS e.g.  nginx.ingress.kubernetes.io/enable-cors: "false", or if you use cloud provider you should disable there.
 
-Install the yuuvis repositorymanager chart:
+**First (initial) installation of the yuuvis repositorymanager chart:**
 
 ```shell
-
 # Check if yuuvis core services running
 kubectl get po -n yuuvis
 
@@ -191,7 +190,20 @@ kubectl create namespace xxxxx
 # Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
 helm install repositorymanager ./repositorymanager --namespace xxxxx 
 ```
+**Update (upgrade) of the yuuvis repositorymanager chart:**
+> **_NOTE:_** 
+> Check whether this step is advised through the RELEASE NOTES 
 
+```shell
+# Delete existing repositorymanager namespace e.g. xxxxx
+kubectl delete namespace xxxxx
+
+# Recreate repositorymanager namespace with same name e.g. xxxxx
+kubectl create namespace xxxxx
+
+# Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
+helm install repositorymanager ./repositorymanager --namespace xxxxx 
+```
 ## Version upgrades
 
 The upgrade of the infrastructure chart is not supported at the moment.
