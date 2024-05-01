@@ -14,6 +14,7 @@ Solutions build using Yuuvis Api Helm Charts are highly scalable, run either clo
     + [Install the yuuvis bpm Helm chart](#install-the-yuuvis-bpm-helm-chart)
     + [Install the yuuvis rendition Helm chart](#install-the-yuuvis-rendition-helm-chart)
     + [Install the yuuvis repositorymanager Helm chart](#install-the-yuuvis-repositorymanager-helm-chart)
+    + [Install the yuuvis repositorymanager ILM Helm chart](#install-the-yuuvis-repositorymanager-ilm-helm-chart)
   * [Version upgrades](#version-upgrades)
     + [2023 winter](#2023-winter)
     + [2023 autumn](#2023-autumn)
@@ -205,7 +206,18 @@ kubectl create namespace xxxxx
 # Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
 helm install repositorymanager ./repositorymanager --namespace xxxxx  
 ```
+### Install the yuuvis repositorymanager ILM Helm chart
 
+```shell
+# Check if yuuvis core services running (namespace for core yuuvis services can have another name e.g. 2023winter)
+kubectl get po -n yuuvis
+  
+# Create namespace for repositorymanager ILM service e.g. yyyyy
+kubectl create namespace yyyyy
+  
+# Before running please make sure that correct values are set in values.yml
+helm install repositorymanagerilm ./repositorymanagerilm --namespace yyyyy
+```
 ## Version upgrades
 
 The upgrade of the infrastructure chart is not supported at the moment.
@@ -225,6 +237,7 @@ helm upgrade client ./client --namespace yuuvis
 helm upgrade bpm ./bpm --namespace yuuvis
 helm upgrade monitoring ./monitoring --namespace monitoring 
 helm upgrade repositorymanager ./repositorymanager --namespace xxxxx
+helm upgrade repositorymanagerilm ./repositorymanagerilm --namespace yyyyy
 ```
 Check version of upgraded helm chart
 
