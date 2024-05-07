@@ -12,9 +12,11 @@ Solutions build using Yuuvis Api Helm Charts are highly scalable, run either clo
     + [Install the yuuvis Helm chart](#install-the-yuuvis-helm-chart)
     + [Install the yuuvis client Helm chart](#install-the-yuuvis-client-helm-chart)
     + [Install the yuuvis bpm Helm chart](#install-the-yuuvis-bpm-helm-chart)
+    + [Install the yuuvis mailarchiving Helm chart](#install-the-yuuvis-mailarchiving-helm-chart)
     + [Install the yuuvis rendition Helm chart](#install-the-yuuvis-rendition-helm-chart)
     + [Install the yuuvis repositorymanager Helm chart](#install-the-yuuvis-repositorymanager-helm-chart)
     + [Install the yuuvis repositorymanager ILM Helm chart](#install-the-yuuvis-repositorymanager-ilm-helm-chart)
+    + [Install the yuuvis repositorymanager CMIS Helm chart](#install-the-yuuvis-repositorymanager-cmis-helm-chart)
   * [Version upgrades](#version-upgrades)
     + [2023 winter](#2023-winter)
     + [2023 autumn](#2023-autumn)
@@ -157,6 +159,9 @@ install bpm services with:
 kubectl get po -n yuuvis
 helm install bpm ./bpm --namespace yuuvis
 ```
+### Install the yuuvis mailarchiving Helm chart
+
+Installation of the mailarchiving services described in README.md in mailarchiving folder.
 
 ### Install the yuuvis rendition Helm chart
 
@@ -185,11 +190,11 @@ In Ingress controller because of communication with SAP protocols, please disabl
 # Check if yuuvis core services running
 kubectl get po -n yuuvis
 
-# For every instance create new namespace e.g. xxxxx
-kubectl create namespace xxxxx
+# For every instance create new namespace e.g. repositorymanager
+kubectl create namespace repositorymanager
 
 # Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
-helm install repositorymanager ./repositorymanager --namespace xxxxx 
+helm install repositorymanager ./repositorymanager --namespace repositorymanager 
 ```
 **Update (upgrade) of the yuuvis repositorymanager chart:**
 
@@ -197,14 +202,14 @@ helm install repositorymanager ./repositorymanager --namespace xxxxx
 Check whether this step is advised through the RELEASE NOTES
 
 ```shell
-# Delete existing repositorymanager namespace e.g. xxxxx
-kubectl delete namespace xxxxx
+# Delete existing repositorymanager namespace e.g. repositorymanager
+kubectl delete namespace repositorymanager
 
-# Recreate repositorymanager namespace with same name e.g. xxxxx
-kubectl create namespace xxxxx
+# Recreate repositorymanager namespace with same name e.g. repositorymanager
+kubectl create namespace repositorymanager
 
 # Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
-helm install repositorymanager ./repositorymanager --namespace xxxxx  
+helm install repositorymanager ./repositorymanager --namespace repositorymanager 
 ```
 ### Install the yuuvis repositorymanager ILM Helm chart
 
@@ -212,12 +217,25 @@ helm install repositorymanager ./repositorymanager --namespace xxxxx
 # Check if yuuvis core services running (namespace for core yuuvis services can have another name e.g. 2023winter)
 kubectl get po -n yuuvis
   
-# Create namespace for repositorymanager ILM service e.g. yyyyy
-kubectl create namespace yyyyy
+# Create namespace for repositorymanager ILM service e.g. repositorymanagerilm
+kubectl create namespace repositorymanagerilm
   
 # Before running please make sure that correct values are set in values.yml
-helm install repositorymanagerilm ./repositorymanagerilm --namespace yyyyy
+helm install repositorymanagerilm ./repositorymanagerilm --namespace repositorymanagerilm
 ```
+### Install the yuuvis repositorymanager CMIS Helm chart
+
+```shell
+# Check if yuuvis core services running (namespace for core yuuvis services can have another name e.g. 2023winter)
+kubectl get po -n yuuvis
+  
+# Create namespace for repositorymanager CMIS service e.g. repositorymanagercmis
+kubectl create namespace repositorymanagercmis
+  
+# Before running please make sure that correct values are set in values.yml
+helm install repositorymanagercmis ./repositorymanagercmis --namespace repositorymanagercmis
+```
+
 ## Version upgrades
 
 The upgrade of the infrastructure chart is not supported at the moment.
@@ -236,8 +254,9 @@ helm upgrade yuuvis ./yuuvis --namespace yuuvis
 helm upgrade client ./client --namespace yuuvis 
 helm upgrade bpm ./bpm --namespace yuuvis
 helm upgrade monitoring ./monitoring --namespace monitoring 
-helm upgrade repositorymanager ./repositorymanager --namespace xxxxx
-helm upgrade repositorymanagerilm ./repositorymanagerilm --namespace yyyyy
+helm upgrade repositorymanager ./repositorymanager --namespace repositorymanager
+helm upgrade repositorymanagerilm ./repositorymanagerilm --namespace repositorymanagerilm
+helm upgrade repositorymanagercmis ./repositorymanagercmis --namespace repositorymanagercmis
 ```
 Check version of upgraded helm chart
 
