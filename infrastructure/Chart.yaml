@@ -5,7 +5,7 @@ description: umbrella chart with examples for infrastructure components of an yu
              this chart is for demo use only 
              do not use this chart for production 
 name: infrastructure
-version: 0.15.0
+version: 0.15.1
 dependencies:
 - name: minio
   version: ^5.0.14
