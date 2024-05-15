@@ -9,12 +9,13 @@ yuuvis:
     imagePullSecret: yuuvisorg
     dockerRegistry: docker.yuuvis.org/yuuvis
   configserviceUrl: http://system.yuuvis
-  repositorymanagerilm:
+  apiUrl: https://api.yuuvis
+  repositorymanagercmis:
     initContainerImage: helper/init-helper:2023-12-03
     profile: prod,kubernetes,yuuvis
-    dockerImage: repositorymanager-ilm
+    dockerImage: repositorymanager-cmis
     tag: 5.0.0
-    apiUrl: http://api.yuuvis
+    instances: 1
     pdb:
       # pdb requires instances > 1 and  minAvailable < instances,
       # otherwise draining nodes will deadlock!
@@ -28,7 +29,12 @@ yuuvis:
     nodeAffinity: { }
     podAffinity: { }
     podAntiAffinity: { }
+    technical:
+      gateway:
+      tenant:
+      username:
+      password:
     java:
       maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
 initContainer:
-  command: "until wget -q --spider http://system.yuuvis/manage/health; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system.yuuvis/manage/health; do echo waiting for config; sleep 11; done;"

@@ -1,3 +1,8 @@
+imageCredentials:
+  yuuvisorg:
+    registry: docker.yuuvis.org
+    username:
+    password:
 yuuvis:
   image:
     imagePullPolicy: Always

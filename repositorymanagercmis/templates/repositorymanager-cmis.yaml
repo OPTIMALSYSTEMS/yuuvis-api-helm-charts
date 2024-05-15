@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: repositorymanager-cmis
+  name: repositorymanager-cmis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: repositorymanager-cmis
+  template:
+    metadata:
+      labels:
+        name: repositorymanager-cmis
+    spec:
+      {{- if or .Values.yuuvis.repositorymanagercmis.nodeAffinity .Values.yuuvis.repositorymanagercmis.podAffinity .Values.yuuvis.repositorymanagercmis.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.repositorymanagercmis.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanagercmis.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanagercmis.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.repositorymanagercmis.java.maxHeap}}
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: "{{.Values.yuuvis.configserviceUrl}}/config"
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{.Values.yuuvis.repositorymanagercmis.profile}}
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanagercmis.dockerImage}}:{{.Values.yuuvis.repositorymanagercmis.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+          name: repositorymanager-cmis
+          ports:
+            - containerPort: 8090
+              protocol: TCP
+      imagePullSecrets:
+        - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+        - name: init-repositorymanager
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanagercmis.initContainerImage}}"
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+
