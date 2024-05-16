@@ -248,7 +248,6 @@ keycloak:
     - /opt/keycloak/bin/kc.sh
     - --verbose
     - start
-    - --auto-build
     - --hostname-strict=false
     - --hostname-strict-https=false
     - --spi-events-listener-jboss-logging-success-level=info
