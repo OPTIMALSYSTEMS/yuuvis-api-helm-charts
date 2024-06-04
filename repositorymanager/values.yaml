@@ -17,7 +17,7 @@ yuuvis:
       minAvailable: 1
     profile: prod # With every instance of rm this should be changed
     dockerImage: repositorymanager
-    tag: 4.3.2
+    tag: 4.3.3
     core:
       workingdir: /working-dir
       api:
@@ -35,7 +35,7 @@ yuuvis:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
     mq:
       dockerImage: repositorymanager-mq
-      tag: 1.2.0
+      tag: 1.2.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
