@@ -43,7 +43,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.17.13
+      dockerImage: api-web:1.17.14
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -100,7 +100,7 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.3.6
+      dockerImage: client:5.3.8
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -116,7 +116,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     custom:
-      dockerImage: client:5.3.6
+      dockerImage: client:5.3.8
       instances: 0
       nodeSelector: {}
       priorityClassName: ""
