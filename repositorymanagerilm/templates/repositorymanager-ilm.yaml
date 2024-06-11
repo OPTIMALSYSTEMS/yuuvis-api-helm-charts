@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: repositorymanager-ilm
+  name: repositorymanager-ilm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: repositorymanager-ilm
+  template:
+    metadata:
+      labels:
+        name: repositorymanager-ilm
+    spec:
+      {{- if or .Values.yuuvis.repositorymanagerilm.nodeAffinity .Values.yuuvis.repositorymanagerilm.podAffinity .Values.yuuvis.repositorymanagerilm.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.repositorymanagerilm.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanagerilm.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanagerilm.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.repositorymanagerilm.java.maxHeap}}
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: "{{.Values.yuuvis.configserviceUrl}}/config"
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{.Values.yuuvis.repositorymanagerilm.profile}}
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanagerilm.dockerImage}}:{{.Values.yuuvis.repositorymanagerilm.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+          name: repositorymanager-ilm
+          ports:
+            - containerPort: 8091
+              protocol: TCP
+      imagePullSecrets:
+        - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+        - name: init-repositorymanager
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanagerilm.initContainerImage}}"
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+

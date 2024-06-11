@@ -12,9 +12,9 @@ yuuvis:
     periodSeconds: 30
     timeoutSeconds: 5
   configservice:
-    url: http://configservice/config
+    url: http://system/config
   renditionservice:
-    dockerImage: renditionservice:2.8.0
+    dockerImage: renditionservice:2.10.1
     profiles: prod
     instances: 1
     java:
@@ -33,7 +33,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditionrepository:
-    dockerImage: rendition-repository:2.0.0
+    dockerImage: rendition-repository:2.1.0
     profiles: prod,storage,dbs
     instances: 1
     java:
@@ -51,9 +51,42 @@ yuuvis:
     nodeAffinity: {}
     podAffinity: {}
     podAntiAffinity: {}
+  renditiontextworker:
+    dockerImage: textextraction-worker-service:2.10.1
+    instances: 1
+    profiles: prod
+    java:
+      options: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+    yuuvis:
+      url: http://authentication-internal
+      renditionrepository:
+        url: http://renditionrepository
+      user:
+      # if createnewsecret is  set, the values from
+      # user and password will be used to create a secret with
+      # the name secretname
+      # keys in the secret are 'tenant', 'user' and 'password'
+        createnewsecret: true
+        secretname: textextractionworker
+        tenant: changeme
+        username: changeme
+        password: changeme
+    pdb:
+      # pdb requires instances > 1 and minAvailable < instances,
+      # otherwise draining nodes will deadlock!
+      enabled: false
+
+      # set `minAvailable: null` if you want to use maxUnavailable instead
+      minAvailable: 1
+    nodeSelector: {}
+    priorityClassName: ""
+    tolerations: []
+    nodeAffinity: {}
+    podAffinity: {}
+    podAntiAffinity: {}
 
 initContainer:
-  command: "until wget -q --spider http://configservice/manage/health; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/manage/health; do echo waiting for configservice; sleep 11; done;"
   image: busybox
   tag: 1.36
   dockerRegistry: docker.io

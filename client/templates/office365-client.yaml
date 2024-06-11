@@ -55,7 +55,11 @@ spec:
           - name: HOST_URL
             value:  {{.Values.yuuvis.client.office365.hostUrl }}  
           - name: DMS_URL
-            value:  {{.Values.yuuvis.client.office365.dmsUrl }}    
+            value:  {{.Values.yuuvis.client.office365.dmsUrl }}   
+          - name: HISTORY_URL
+            value: {{.Values.yuuvis.client.office365.historyUrl }}
+          - name: USER_INFO_URL
+            value: {{.Values.yuuvis.client.office365.userInfoUrl }} 
           - name: WORKING_DIR
             value:  {{.Values.yuuvis.client.office365.workDir }}  
           - name: ENABLE_RECOVERY

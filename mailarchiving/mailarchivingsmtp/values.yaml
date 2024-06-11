@@ -1,0 +1,26 @@
+imageCredentials:
+  yuuvisorg:
+    registry: docker.yuuvis.org
+    username:
+    password:
+yuuvis:
+  image:
+    imagePullPolicy: Always
+    imagePullSecret: yuuvisorgsmtp
+  configservice:
+    url: http://configservice.yuuvis #change value if configservice is in another namespace not yuuvis e.g. http://configservice.2021winter
+  mailarchiving:
+    initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+    smtp:
+      instances: 1
+      dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-smtp
+      tag: 2.1.6
+      java:
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+      profiles:
+        masstorage:
+          uri: #add value
+
+# please change value of config service namespace e.g. http://configservice.2021winter
+initContainer:
+  command: "until wget -q --spider http://configservice.yuuvis/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"

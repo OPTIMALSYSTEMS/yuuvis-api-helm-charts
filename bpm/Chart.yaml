@@ -1,8 +1,8 @@
 apiVersion: v1
-appVersion: "2023winter"
+appVersion: "2024summer"
 description: yuuvis bpm components
 name: yuuvis-bpm
-version: 0.4.3
+version: 0.6.2
 keywords:
 - yuuvis
 - bpm 

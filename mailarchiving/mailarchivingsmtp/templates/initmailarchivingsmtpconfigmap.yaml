@@ -1,0 +1,39 @@
+apiVersion: v1
+data:
+  mailarchivingsmtpinit.bash: |
+    until wget -q --spider {{.Values.yuuvis.configservice.url}}/api/resources/schema.xml/path/system;
+    do 
+      echo 'waiting for configservice'; 
+      sleep 11; 
+    done;
+    
+    echo 'test if mailarchivingsmtp config exists'
+    getmailarchivingsmtpyml=$(curl -s -o /dev/null -w "%{http_code}" {{.Values.yuuvis.configservice.url}}/api/resources/massmtp-prod.yml)
+    
+    echo "config result $getmailarchivingsmtpyml"
+    
+    if [ "$getmailarchivingsmtpyml" = 200 ]
+      then
+        echo 'mailarchivingsmtp properties already exists.'
+    exit 0
+    fi
+    
+    if [ "$getmailarchivingsmtpyml" = 404 ]
+    then
+      echo 'Must create massmtp-prod.yml.'
+      postsmtpyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/massmtp-prod.yml" {{.Values.yuuvis.configservice.url}}/api/resources/massmtp-prod.yml)
+    
+      if [ "$postsmtpyml" != 200 ]
+      then
+        echo 'Post massmtp-prod.yml failed.'
+        exit 1
+      else
+        echo 'massmtp-prod.yml is created.'
+        exit 0
+      fi
+    fi
+    
+    exit 1
+kind: ConfigMap
+metadata:
+  name: initmailarchivingsmtpconfigmap
