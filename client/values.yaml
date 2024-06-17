@@ -169,7 +169,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
     tenantmanagement:
-      dockerImage: tenant-management:1.14.4
+      dockerImage: tenant-management:1.14.5
       profiles: prod,kubernetes,oauth2
       instances: 1
       pdb:
