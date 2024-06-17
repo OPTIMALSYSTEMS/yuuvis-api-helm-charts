@@ -175,17 +175,6 @@ helm install rendition ./rendition --namespace yuuvis
 
 **Edit the repositorymanager values.yaml and docker registry credentials**
 
-This helm chart is only required for an SAP integration.  
-The repositorymanager is connector that provides solution for **ArchiveLink** and **ILM** protocols of SAP.
-
-_It is possible to have **more than one instance** of repositorymanager.
-To use that possibility repositorymanager will not be part of yuuvis namespace and for **every instance** it is needed to be created **new namespace**._
-
-> **_NOTE: CORS Ingress_**
-In Ingress controller because of communication with SAP protocols, please disable CORS e.g.  nginx.ingress.kubernetes.io/enable-cors: "false", or if you use cloud provider you should disable there.
-
-**First (initial) installation of the yuuvis repositorymanager chart:**
-
 ```shell
 # Check if yuuvis core services running
 kubectl get po -n yuuvis
@@ -196,21 +185,19 @@ kubectl create namespace repositorymanager
 # Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
 helm install repositorymanager ./repositorymanager --namespace repositorymanager 
 ```
-**Update (upgrade) of the yuuvis repositorymanager chart:**
 
-> **_NOTE:_**
-Check whether this step is advised through the RELEASE NOTES
+_It is possible to have **more than one instance** of repositorymanager.
+To use that possibility repositorymanager will not be part of yuuvis namespace and for **every instance** it is needed to be created **new namespace**._
 
-```shell
-# Delete existing repositorymanager namespace e.g. repositorymanager
-kubectl delete namespace repositorymanager
+> **_NOTE: CORS Ingress_**
+In Ingress controller because of communication with SAP protocols, please disable CORS e.g.  nginx.ingress.kubernetes.io/enable-cors: "false", or if you use cloud provider you should disable there.
 
-# Recreate repositorymanager namespace with same name e.g. repositorymanager
-kubectl create namespace repositorymanager
+> **NOTE : Update/Upgrade Repository Manager from artifact (docker image tag) 4.3.3**
+> If, in the webapps/cs folder, one of the default folders is missing (e.g., conf, META-INF, and/or WEB-INF), the missing ones will be extracted during the installation/upgrades of the repository manager.
+Please check whether this step is advised through the **RELEASE NOTES**; for example:
+If the KGS version is not compatible with an old version, then delete the WEB-INF folder before upgrading to a new version of the repository manager (old configuration will remain).
 
-# Make sure correct values are set in values.yml (credentials, ports, profile, tenant...)
-helm install repositorymanager ./repositorymanager --namespace repositorymanager 
-```
+
 ### Install the yuuvis repositorymanager ILM Helm chart
 
 ```shell
