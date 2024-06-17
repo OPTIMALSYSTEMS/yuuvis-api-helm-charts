@@ -43,7 +43,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.19.0
+      dockerImage: api-web:1.19.1
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -100,7 +100,7 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.5.0
+      dockerImage: client:5.5.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
