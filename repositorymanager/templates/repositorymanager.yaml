@@ -8,7 +8,8 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: {{.Values.yuuvis.repositorymanager.pvc.storageSize}}
+  storageClassName: {{.Values.yuuvis.repositorymanager.pvc.storageClassName}}
 ---
 apiVersion: apps/v1
 kind: Deployment

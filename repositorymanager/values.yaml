@@ -13,6 +13,9 @@ yuuvis:
   repositorymanager:
     initContainerImage: helper/init-helper:2023-12-03
     instances: 1
+    pvc:
+      storageClassName: default
+      storageSize: 1Gi
     pdb:
       # pdb requires instances > 1 and  minAvailable < instances,
       # otherwise draining nodes will deadlock!
