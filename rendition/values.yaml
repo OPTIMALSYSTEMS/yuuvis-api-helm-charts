@@ -14,7 +14,7 @@ yuuvis:
   configservice:
     url: http://configservice/config
   renditionservice:
-    dockerImage: renditionservice:2.8.0
+    dockerImage: renditionservice:2.8.1
     profiles: prod
     instances: 1
     java:
@@ -33,7 +33,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditionrepository:
-    dockerImage: rendition-repository:2.0.0
+    dockerImage: rendition-repository:2.0.3
     profiles: prod,storage,dbs
     instances: 1
     java:
