@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.repositorymanagerilm.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: repositorymanager-ilm-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: repositorymanager-ilm
+spec:
+  selector:
+    matchLabels:
+      name: repositorymanager-ilm
+  {{- if kindIs "int" .Values.yuuvis.repositorymanagerilm.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.repositorymanagerilm.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.repositorymanagerilm.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.repositorymanagerilm.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

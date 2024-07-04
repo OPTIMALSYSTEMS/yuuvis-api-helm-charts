@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  createSelfsignedCert.bash: |-
+    echo "keytool -genkey"
+    keytool -genkey -alias mailarchiving-smtp-tls -keyalg RSA -keystore mailarchivingsmtp.jks -validity 36500 -storepass optimal1! -dname "CN=mailarchiving-smtp-tls, OU=mailarchiving, O=mailarchiving, L=Berlin, ST=Berlin, C=de" -keypass optimal1!
+
+    echo "keytool convert pkcs"
+    keytool -importkeystore -srckeystore mailarchivingsmtp.jks -destkeystore mailarchivingsmtp.p12 -deststoretype PKCS12 -storepass "optimal1!" -srcstorepass "optimal1!" 
+
+    echo "k8s create mailarchiving-smtp-selfsigned-tls-secret"
+    kubectl create secret generic mailarchiving-smtp-selfsigned-tls-secret --from-file=mailarchivingsmtp.p12 --from-literal=password=optimal1! 
+
+kind: ConfigMap
+metadata:
+  name: mailarchivingcreateselfsignedcert

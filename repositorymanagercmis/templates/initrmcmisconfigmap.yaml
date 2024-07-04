@@ -1,0 +1,37 @@
+apiVersion: v1
+data:
+  rmcmisinit.bash: |
+    until wget -q --spider "{{.Values.yuuvis.configserviceUrl}}/manage/health";
+    do 
+      echo 'waiting for configservice'; 
+      sleep 11; 
+    done;
+    
+    echo 'test if config exists'
+    getrmyml=$(curl -s -o /dev/null -w "%{http_code}" "{{.Values.yuuvis.configserviceUrl}}/api/resources/rmcmis-prod.yml")
+    
+    echo "config result $getrmyml"
+    
+    if [ "$getrmyml" = 200 ]
+      then
+        echo 'rmcmis-prod.yml already exists'
+        exit 0
+    elif [ "$getrmyml" = 404 ]
+    then
+      echo 'must create rmcmis-prod.yml'
+      postyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/rmcmis-prod.yml" {{.Values.yuuvis.configserviceUrl}}/api/resources/rmcmis-prod.yml)
+    
+      if [ "$postyml" != 200 ]
+      then
+        echo 'post rmcmis-prod.yml failed'
+        exit 1
+      else
+        echo 'rmcmis-prod.yml already exists'
+        exit 0
+      fi
+    fi
+    
+    exit 1
+kind: ConfigMap
+metadata:
+  name: rmcmisinitscript

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mailarchivingstorageconfigmap
+data:
+  application-mas.yml: |
+    mas:
+      exchange-online:
+        access:
+          client-id: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchangeonline.access.clientid}}
+          tenant-id: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchangeonline.access.tenantid}}
+          secret: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchangeonline.access.secret}}
+      mailbox-related-storage:
+        folder-name-config:
+          domains: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.mailboxrelatedstorage.foldernameconfig.domains}}
+  masstoragemomentum-prod.yml: |
+    mas-storage-momentum:
+      dms:
+        url: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.url}}
+        username: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.username}}
+        password: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.password}}
+        tenant: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.tenant}}

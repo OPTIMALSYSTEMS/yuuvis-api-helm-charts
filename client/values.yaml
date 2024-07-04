@@ -6,7 +6,7 @@ yuuvis:
   labels:
     app: yuuvis
   configservice:
-    url: http://configservice/config
+    url: http://system/config
   git:
     protocol: http
     # please not that since infrastructure helm chart 0.9.0 gitea is used 
@@ -43,7 +43,7 @@ yuuvis:
     timeoutSeconds: 5
   client:
     apiweb:
-      dockerImage: api-web:1.17.14
+      dockerImage: api-web:1.19.1
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -100,7 +100,7 @@ yuuvis:
           user: postgres
           password: changeme
     client:
-      dockerImage: client:5.3.8
+      dockerImage: client:5.5.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -116,7 +116,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     custom:
-      dockerImage: client:5.3.8
+      dockerImage: client:5.5.1
       instances: 0
       nodeSelector: {}
       priorityClassName: ""
@@ -141,7 +141,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     architect:
-      dockerImage: architect:2.2.1
+      dockerImage: architect:2.4.0
       instances: 1
       nodeSelector: {}
       priorityClassName: ""
@@ -150,7 +150,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     sothook:
-      dockerImage: sandbox/sothook:4.17.0
+      dockerImage: sandbox/sothook:4.19.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -169,7 +169,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
     tenantmanagement:
-      dockerImage: tenant-management:1.14.5
+      dockerImage: tenant-management:1.17.0-rc1
       profiles: prod,kubernetes,oauth2
       instances: 1
       pdb:
@@ -221,7 +221,9 @@ yuuvis:
       password: changeme
       providerUrl: https://provider-staging.prod.enaio.io/
       hostUrl: https://host-staging.prod.enaio.io/
-      dmsUrl: http://authentication/api/dms/  
+      dmsUrl: http://authentication/api/dms/ 
+      historyUrl: http://audit/api/dms/objects/custom
+      userInfoUrl: http://tenant-management/api/idm/me 
       workDir: /tmp
       enableRecovery: "false"
       java:
@@ -249,7 +251,7 @@ yuuvis:
         url: http://configservice/config  
       
 initContainer:
-  command: "until wget -q --spider http://configservice/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
   image: busybox
   tag: 1.36
   dockerRegistry: docker.io
@@ -319,7 +321,7 @@ configfiles:
          },
          {
            "enable" : true,
-           "predicate" : "spel:T(java.util.List).of(300).contains(options['action']) && properties['system:secondaryObjectTypeIds'] != null && properties['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
+           "predicate" : "spel:T(java.util.List).of(300,302).contains(options['action']) && properties['system:secondaryObjectTypeIds'] != null && properties['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
            "type" : "dms.request.objects.upsert.database-before",
            "url" : "http://sothook/api/dms/request/updatemetadata/databasebefore",
            "useDiscovery" : true

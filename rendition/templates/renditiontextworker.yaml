@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rendition
+    name: renditiontextworker 
+  name: renditiontextworker
+spec:
+  replicas: {{.Values.yuuvis.renditiontextworker.instances}}
+  selector:
+    matchLabels:
+      name: renditiontextworker
+  template:
+    metadata:
+      labels:
+        name: renditiontextworker
+    spec:
+      {{- if or .Values.yuuvis.renditiontextworker.nodeAffinity .Values.yuuvis.renditiontextworker.podAffinity .Values.yuuvis.renditiontextworker.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.renditiontextworker.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.renditiontextworker.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.renditiontextworker.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+      - name: renditiontextworker
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.renditiontextworker.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 8080
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        readinessProbe:
+          httpGet:
+            path: /manage/info
+            port: 8080
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.renditiontextworker.java.options}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.renditiontextworker.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: YUUVIS_URL
+          value: {{.Values.yuuvis.renditiontextworker.yuuvis.url}}
+        - name: YUUVIS_RENDITION_REPOSITORY
+          value: {{.Values.yuuvis.renditiontextworker.yuuvis.renditionrepository.url}}
+        - name: YUUVIS_TENANT
+          valueFrom:
+            secretKeyRef:
+              key: tenant 
+              name: {{.Values.yuuvis.renditiontextworker.yuuvis.user.secretname}}
+        - name: YUUVIS_USER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: {{.Values.yuuvis.renditiontextworker.yuuvis.user.secretname}}
+        - name: YUUVIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{.Values.yuuvis.renditiontextworker.yuuvis.user.secretname}}
+        ports:
+        - containerPort: 8080 
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      - name: init-renditiontextworker
+        image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+      {{- with .Values.yuuvis.renditiontextworker.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.renditiontextworker.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.renditiontextworker.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.renditiontextworker.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
