@@ -271,6 +271,13 @@ keycloak:
       value: /opt/keycloak/conf/tls/tls.key
   cache:
     stack: custom
+  resources:
+    requests:
+      cpu: "1"
+      memory: "512Mi"
+    limits:
+      cpu: "3"
+      memory: "1536Mi"
 
 redis:
   enabled: true
