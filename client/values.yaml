@@ -221,7 +221,9 @@ yuuvis:
       password: changeme
       providerUrl: https://provider-staging.prod.enaio.io/
       hostUrl: https://host-staging.prod.enaio.io/
-      dmsUrl: http://authentication/api/dms/  
+      dmsUrl: http://authentication/api/dms/ 
+      historyUrl: http://audit/api/dms/objects/custom
+      userInfoUrl: http://tenant-management/api/idm/me 
       workDir: /tmp
       enableRecovery: "false"
       java:
