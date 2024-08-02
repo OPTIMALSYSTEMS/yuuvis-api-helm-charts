@@ -201,7 +201,7 @@ yuuvis:
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
     office365:
-      dockerImage: office-for-the-web/yuuvis-momentum-provider-client:2.0.2
+      dockerImage: office-for-the-web/yuuvis-momentum-provider-client:2.0.3
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
