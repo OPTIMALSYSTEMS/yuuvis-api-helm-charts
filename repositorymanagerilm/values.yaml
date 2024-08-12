@@ -13,7 +13,7 @@ yuuvis:
     initContainerImage: helper/init-helper:2023-12-03
     profile: prod,kubernetes,yuuvis
     dockerImage: repositorymanager-ilm
-    tag: 5.0.0
+    tag: 5.0.1
     apiUrl: http://api.yuuvis
     pdb:
       # pdb requires instances > 1 and  minAvailable < instances,
