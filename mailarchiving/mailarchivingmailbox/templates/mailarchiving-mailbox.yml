@@ -15,6 +15,18 @@ spec:
       labels:
         name: mailarchiving-mailbox
     spec:
+      {{- if or .Values.yuuvis.mailarchiving.mailbox.nodeAffinity .Values.yuuvis.mailarchiving.mailbox.podAffinity .Values.yuuvis.mailarchiving.mailbox.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.mailarchiving.mailbox.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.mailbox.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.mailbox.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       securityContext:
         fsGroup: 2000
         runAsGroup: 3000

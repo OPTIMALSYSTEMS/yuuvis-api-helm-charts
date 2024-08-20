@@ -21,6 +21,19 @@ yuuvis:
         prod:
           masstorage:
             uri:  #add value
+      pdb:
+        # pdb requires instances > 1 and  minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: { }
+      priorityClassName: ""
+      tolerations: [ ]
+      nodeAffinity: { }
+      podAffinity: { }
+      podAntiAffinity: { }
 # please change value of config service namespace e.g. http://configservice.2021winter
 initContainer:
   command: "until wget -q --spider http://configservice.yuuvis/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"

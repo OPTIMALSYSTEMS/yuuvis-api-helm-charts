@@ -20,7 +20,7 @@ data:
     
     echo "config masstoragemomentum-prod.yml result $getmailarchivingstorageyml"
     
-    if [ "$getapplicationmasyml" = 200 ] && ["$getmailarchivingstorageyml" = 200 ]
+    if [ "$getapplicationmasyml" = 200 ] && [ "$getmailarchivingstorageyml" = 200 ]
       then
         echo 'mailarchivingstorage properties already exists.'
     exit 0
