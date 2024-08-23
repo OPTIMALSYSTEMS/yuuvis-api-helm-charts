@@ -66,6 +66,11 @@ spec:
         env:
         - name: "ES_JAVA_OPTS"
           value: {{.Values.elasticsearch.memory}}
+        {{- if .Values.elasticsearch.requests.memory }}
+        resources:
+          requests:
+            memory: {{.Values.elasticsearch.requests.memory}}
+        {{- end }}
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data
