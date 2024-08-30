@@ -30,8 +30,6 @@ data:
 {{ tpl .Values.yuuvis.redisconfig . | indent 4 }}  
   registry-prod.yml: |
     indexing.sync: true
-  application-lc.yml: |
-{{ tpl .Values.yuuvis.lcconfig . | indent 4 }}
   application-oauth2.yml: |
 {{ tpl .Values.yuuvis.oauth2 . | indent 4 }}
   application-metrics.yml: |

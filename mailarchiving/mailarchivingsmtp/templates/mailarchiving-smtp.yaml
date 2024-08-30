@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: mailarchiving-smtp
+  name: mailarchiving-smtp
+spec:
+  replicas: {{.Values.yuuvis.mailarchiving.smtp.instances}}
+  selector:
+    matchLabels:
+      name: mailarchiving-smtp
+  template:
+    metadata:
+      labels:
+        name: mailarchiving-smtp
+    spec:
+      {{- if or .Values.yuuvis.mailarchiving.smtp.nodeAffinity .Values.yuuvis.mailarchiving.smtp.podAffinity .Values.yuuvis.mailarchiving.smtp.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.mailarchiving.smtp.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.smtp.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.smtp.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+      initContainers:
+        - name: init-mailarchiving-smtp
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]
+      containers:
+        - name: mailarchiving-smtp
+          image: "{{.Values.yuuvis.mailarchiving.smtp.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.smtp.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+          env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.mailarchiving.smtp.java.maxHeap}}
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,docker,kubernetes
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: {{.Values.yuuvis.configservice.url}}/config
+          ports:
+            - name: http
+              containerPort: 8120
+            - name: smtp
+              containerPort: 25000
+          volumeMounts:
+            - name: tls
+              mountPath: /mailarchiving-tls
+      volumes:
+        - name: tls
+          secret:
+            secretName: mailarchiving-smtp-selfsigned-tls-secret
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}

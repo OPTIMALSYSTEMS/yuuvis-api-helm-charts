@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: repositorymanager-cmis-init-config
+spec:
+  template:
+    spec:
+      containers:
+      - name: repositorymanager-cmis-init-config
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanagercmis.initContainerImage}}"
+        imagePullPolicy: IfNotPresent
+        command: ['bash', '/yuuvis/script/rmcmisinit.bash']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: rmcmis
+        - mountPath: /yuuvis/script/rmcmisinit.bash
+          name: rmcmisinitscript
+          subPath: rmcmisinit.bash
+      volumes:
+      - configMap:
+          name: rmcmisinitscript
+        name: rmcmisinitscript
+      - configMap:
+          name: rmcmis
+        name: rmcmis
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      restartPolicy: OnFailure

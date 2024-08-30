@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  rmcmis-prod.yml: |
+    repositorymanager-cmis:
+      yuuvis:
+        api-url: {{.Values.yuuvis.apiUrl}}
+        config-url: {{.Values.yuuvis.configserviceUrl}}
+        technical:
+          gateway: {{.Values.yuuvis.repositorymanagercmis.technical.gateway}}
+          tenant: {{.Values.yuuvis.repositorymanagercmis.technical.tenant}}
+          username: {{.Values.yuuvis.repositorymanagercmis.technical.username}}
+          password: {{.Values.yuuvis.repositorymanagercmis.technical.password}}
+kind: ConfigMap
+metadata:
+  name: rmcmis
