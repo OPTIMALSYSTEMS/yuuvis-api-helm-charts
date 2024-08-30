@@ -137,9 +137,6 @@ yuuvis:
       - endpoints: /search/**,/viewer/**,/architect/**
       - endpoints: /client/**
         expose: true
-    ### Viewer Service
-      - endpoints: /viewer/view/**,/viewer/assets/**,/viewer/download/**
-        expose: true
     ### Userservice
       - endpoints: /userservice/**
     ### bpm-engine
