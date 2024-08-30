@@ -10,8 +10,12 @@ yuuvis:
     # this variable must contain the "public" ip of keycloak
     # this ip will be sent to the user from the authentication service
     address: 192.168.99.100:30111
+    # this realm will be used in the authentication-prod yml to limit the access to 
+    # endpoints to a dedicated system tenant
+    # before running change the value to an existing realm
+    # TODO: changeme
     system:
-      realm: {{.Values.yuuvis.initjob.keycloak.realm.name}}
+      realm: myfirsttennant
   git:
     protocol: http
     url: gitea-http.infrastructure:3000/yuuvis/yuuvis-config.git
