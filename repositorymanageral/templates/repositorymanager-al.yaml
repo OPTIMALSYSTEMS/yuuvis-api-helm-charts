@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-repositorymanager-al
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{.Values.yuuvis.repositorymanageral.pvc.storageSize}}
+  storageClassName: {{.Values.yuuvis.repositorymanageral.pvc.storageClassName}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: repositorymanager-al
+  name: repositorymanager-al
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: repositorymanager-al
+  template:
+    metadata:
+      labels:
+        name: repositorymanager-al
+    spec:
+      {{- if or .Values.yuuvis.repositorymanageral.nodeAffinity .Values.yuuvis.repositorymanageral.podAffinity .Values.yuuvis.repositorymanageral.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.repositorymanageral.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanageral.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.repositorymanageral.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.repositorymanageral.java.maxHeap}}
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: "{{.Values.yuuvis.systemServiceUrl}}/config"
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{.Values.yuuvis.repositorymanageral.profile}}
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanageral.dockerImage}}:{{.Values.yuuvis.repositorymanageral.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+          name: repositorymanager-al
+          ports:
+            - containerPort: 8092
+              protocol: TCP
+          volumeMounts:
+            - name: storage
+              mountPath: /workingdir
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: data-repositorymanager-al
+      imagePullSecrets:
+        - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+        - name: init-repositorymanager-al
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanageral.initContainerImage}}"
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+

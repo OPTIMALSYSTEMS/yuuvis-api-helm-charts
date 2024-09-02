@@ -15,6 +15,7 @@ Solutions build using Yuuvis Api Helm Charts are highly scalable, run either clo
     + [Install the yuuvis mailarchiving Helm chart](#install-the-yuuvis-mailarchiving-helm-chart)
     + [Install the yuuvis rendition Helm chart](#install-the-yuuvis-rendition-helm-chart)
     + [Install the yuuvis repositorymanager Helm chart](#install-the-yuuvis-repositorymanager-helm-chart)
+    + [Install the yuuvis repositorymanager AL Helm chart](#install-the-yuuvis-repositorymanager-al-helm-chart)
     + [Install the yuuvis repositorymanager ILM Helm chart](#install-the-yuuvis-repositorymanager-ilm-helm-chart)
     + [Install the yuuvis repositorymanager CMIS Helm chart](#install-the-yuuvis-repositorymanager-cmis-helm-chart)
   * [Version upgrades](#version-upgrades)
@@ -197,7 +198,18 @@ In Ingress controller because of communication with SAP protocols, please disabl
 Please check whether this step is advised through the **RELEASE NOTES**; for example:
 If the KGS version is not compatible with an old version, then delete the WEB-INF folder before upgrading to a new version of the repository manager (old configuration will remain).
 
+### Install the yuuvis repositorymanager AL Helm chart
 
+```shell
+# Check if yuuvis core services running (namespace for core yuuvis services can have another name e.g. 2023winter)
+kubectl get po -n yuuvis
+  
+# Create namespace for repositorymanager AL service e.g. repositorymanageral
+kubectl create namespace repositorymanageral
+  
+# Before running please make sure that correct values are set in values.yml
+helm install repositorymanageral ./repositorymanageral --namespace repositorymanageral
+```
 ### Install the yuuvis repositorymanager ILM Helm chart
 
 ```shell

@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: repositorymanager-al-init-config
+spec:
+  template:
+    spec:
+      containers:
+      - name: repositorymanager-al-init-config
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanageral.initContainerImage}}"
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '/yuuvis/script/rmalinkinit.sh']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: rmalink
+        - mountPath: /yuuvis/script/rmalinkinit.sh
+          name: rmalinkinitscript
+          subPath: rmalinkinit.sh
+      volumes:
+      - configMap:
+          name: rmalinkinitscript
+        name: rmalinkinitscript
+      - configMap:
+          name: rmalink
+        name: rmalink
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      restartPolicy: OnFailure
