@@ -124,13 +124,11 @@ yuuvis:
       - 'authentication'
       - 'api'
       - 'search'
-      - 'userservice'
       - 'api-web'
       - 'client'
       - 'tenant-management'
       - 'viewer'
       - 'architect'
-      - 'metricsservice'
       - 'bpm-engine'
       - 'dashlet365'
       - 'office365'
@@ -159,19 +157,10 @@ yuuvis:
       - endpoints: /search/**,/viewer/**,/architect/**
       - endpoints: /client/**
         expose: true
-    ### Viewer Service
-      - endpoints: /viewer/view/**,/viewer/assets/**,/viewer/download/**
-        expose: true
-      - endpoints: /viewer/**    
-    ### Userservice
-      - endpoints: /userservice/**
     ### bpm-engine
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
       - endpoints: /bpm-engine/internal/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
-    ### Metricsservice
-      - endpoints: /metricsservice/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
