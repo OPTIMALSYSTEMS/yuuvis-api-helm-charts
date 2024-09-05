@@ -6,7 +6,7 @@ imageCredentials:
 
 yuuvis:
   keycloak:
-    # !!! Change before  running
+    # !!! Change before  running 
     # this variable must contain the "public" ip of keycloak
     # this ip will be sent to the user from the authentication service
     address: 192.168.99.100:30111
@@ -403,7 +403,7 @@ yuuvis:
   services:
     api:
       dockerImage: api-gateway
-      tag: 4.20.0
+      tag: 4.20.1
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -430,7 +430,7 @@ yuuvis:
         use: true
         value: 30080
       dockerImage: authentication
-      tag: 4.20.0
+      tag: 4.20.1
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -465,7 +465,7 @@ yuuvis:
     index:
       dockerImage: index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 4.20.0
+      tag: 4.20.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -487,7 +487,7 @@ yuuvis:
       podAntiAffinity: {}
     registry:
       dockerImage: registry
-      tag: 4.20.0
+      tag: 4.20.1
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -517,7 +517,7 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: repository
-      tag: 4.20.0
+      tag: 4.20.1
       profiles: prod,storage,kubernetes,redis,metrics
       instances: 2
       pdb:
@@ -550,7 +550,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: search
-      tag: 4.20.0
+      tag: 4.20.1
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -579,7 +579,7 @@ yuuvis:
         imagePullPolicy: IfNotPresent
       dockerImage: system
       profiles: prod,git,resourcegit,oauth2,redis,kubernetes,metrics
-      tag: 4.20.0
+      tag: 4.20.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -613,7 +613,7 @@ yuuvis:
     commander:
       dockerImage: commander
       profiles: prod,kubernetes,dbs,es
-      tag: 4.20.0
+      tag: 4.20.1
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -628,7 +628,7 @@ yuuvis:
     archive:
       deploy: false
       dockerImage: archiveservice
-      tag: 4.20.0
+      tag: 4.20.1
       profiles: prod,storage
       instances: 1
       pdb:
