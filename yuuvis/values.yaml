@@ -102,13 +102,11 @@ yuuvis:
       - 'authentication'
       - 'api'
       - 'search'
-      - 'userservice'
       - 'api-web'
       - 'client'
       - 'tenant-management'
       - 'viewer'
       - 'architect'
-      - 'metricsservice'
       - 'bpm-engine'
       - 'dashlet365'
       - 'office365'
@@ -137,8 +135,6 @@ yuuvis:
       - endpoints: /search/**,/viewer/**,/architect/**
       - endpoints: /client/**
         expose: true
-    ### Userservice
-      - endpoints: /userservice/**
     ### bpm-engine
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
