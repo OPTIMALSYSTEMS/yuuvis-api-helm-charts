@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: mailarchiving-storage
+  name: mailarchiving-storage
+spec:
+  replicas: {{.Values.yuuvis.mailarchiving.storage.instances}}
+  selector:
+    matchLabels:
+      name: mailarchiving-storage
+  template:
+    metadata:
+      labels:
+        name: mailarchiving-storage
+    spec:
+      {{- if or .Values.yuuvis.mailarchiving.storage.nodeAffinity .Values.yuuvis.mailarchiving.storage.podAffinity .Values.yuuvis.mailarchiving.storage.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.mailarchiving.storage.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.storage.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.storage.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+      initContainers:
+        - name: init-mailarchiving-storage
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.mailarchiving.storage.java.maxHeap}}
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: {{.Values.yuuvis.configservice.url}}/config
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,mas,docker,kubernetes
+          image: "{{.Values.yuuvis.mailarchiving.storage.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.storage.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+          name: mailarchiving-storage
+          ports:
+            - containerPort: 8130
+              protocol: TCP
+      imagePullSecrets:
+        - name: {{.Values.yuuvis.image.imagePullSecret}}

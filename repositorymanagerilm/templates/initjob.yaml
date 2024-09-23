@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: repositorymanager-ilm-init-config
+spec:
+  template:
+    spec:
+      containers:
+      - name: repositorymanager-ilm-init-config
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.repositorymanagerilm.initContainerImage}}"
+        imagePullPolicy: IfNotPresent
+        command: ['bash', '/yuuvis/script/rmilminit.bash']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: rmilm
+        - mountPath: /yuuvis/script/rmilminit.bash
+          name: rmilminitscript
+          subPath: rmilminit.bash
+      volumes:
+      - configMap:
+          name: rmilminitscript
+        name: rmilminitscript
+      - configMap:
+          name: rmilm
+        name: rmilm
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      restartPolicy: OnFailure

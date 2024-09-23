@@ -1,10 +1,15 @@
+imageCredentials:
+  yuuvisorg:
+    registry: docker.yuuvis.org
+    username:
+    password:
 yuuvis:
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
     dockerRegistry: docker.yuuvis.org/yuuvis
   configservice:
-    url: http://configservice.yuuvis/config
+    url: http://system.yuuvis/config
   repositorymanager:
     initContainerImage: helper/init-helper:2023-12-03
     instances: 1
@@ -12,7 +17,7 @@ yuuvis:
       storageClassName: default
       storageSize: 1Gi
     pdb:
-      # pdb requires instances > 1 and minAvailable < instances,
+      # pdb requires instances > 1 and  minAvailable < instances,
       # otherwise draining nodes will deadlock!
       enabled: false
 
@@ -57,4 +62,4 @@ yuuvis:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
        
 initContainer:
-  command: "until wget -q --spider http://configservice.yuuvis/manage/health; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system.yuuvis/manage/health; do echo waiting for configservice; sleep 11; done;"

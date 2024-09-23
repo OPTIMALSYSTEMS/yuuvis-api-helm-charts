@@ -1,0 +1,18 @@
+{{- if .Values.yuuvis.mailarchiving.storage.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: mailarchiving-storage-pdb
+  labels:
+    name: mailarchiving-storage
+spec:
+  selector:
+    matchLabels:
+      name: mailarchiving-storage
+  {{- if kindIs "int" .Values.yuuvis.mailarchiving.storage.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.mailarchiving.storage.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.mailarchiving.storage.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.mailarchiving.storage.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

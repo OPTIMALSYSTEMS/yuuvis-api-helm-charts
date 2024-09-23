@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  masmailbox-prod.yml: |
+    mas-storage:
+        uri: {{.Values.yuuvis.mailarchiving.mailbox.profiles.prod.masstorage.uri}}
+kind: ConfigMap
+metadata:
+  name: mailarchivingmailboxconfigmap

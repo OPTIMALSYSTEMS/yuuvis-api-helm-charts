@@ -6,10 +6,16 @@ imageCredentials:
 
 yuuvis:
   keycloak:
-    # !!! Change before  running
+    # !!! Change before  running 
     # this variable must contain the "public" ip of keycloak
     # this ip will be sent to the user from the authentication service
     address: 192.168.99.100:30111
+    # this realm will be used in the authentication-prod yml to limit the access to 
+    # endpoints to a dedicated system tenant
+    # before running change the value to an existing realm
+    # TODO: changeme
+    system:
+      realm: myfirsttennant
   git:
     protocol: http
     url: gitea-http.infrastructure:3000/yuuvis/yuuvis-config.git
@@ -55,8 +61,6 @@ yuuvis:
     password: changeme
     url: rabbitmq.infrastructure
     port: 5672
-    queues:
-      textextraction: lc.textextraction
   db:
     name: yuuvis
     server: postgresql.infrastructure:5432
@@ -72,32 +76,6 @@ yuuvis:
   redis:
     host: redis-master.infrastructure
     port: 6379
-  # if enable true a helm hook 
-  # is used to run a job to try to change the config yaml files to the new format
-  # required with the momentum version
-  # set enable: false to disable the upgrade hook
-  update:
-    autumn2023:
-      enable: true
-      dockerImage: update
-      tag: 2023autumn_v2
-      # if oauth2 value is true the update job will change the application-oauth2 yml in the configservice and
-      # add 'scope: openid' to every tenant entry
-      # this is required by the newer keycloak version used with 2023autumn
-      # disable with false
-      oauth2: true
-      # the elasticsearch connection config is changed with 2023autumn
-      # if true, the update job will change the application-es yml in the configservice and
-      # try to map the old entries to the new format
-      # disable with false
-      es: true
-      # k8s job config
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
   authconfig: |
     routing.defaultEntryPoint: '/client/index.html'
 
@@ -138,10 +116,10 @@ yuuvis:
       - endpoints: /manage/**
         expose: true
       - endpoints: /*/manage/**,/session/invalidateAll/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
     ### API-Endpunkte
       - endpoints: /api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/dms/**
@@ -149,7 +127,7 @@ yuuvis:
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
       - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
       - endpoints: /api/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/api/dms/**
@@ -161,18 +139,18 @@ yuuvis:
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
       - endpoints: /bpm-engine/internal/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
       - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**,/api-web/api/idm/**
       - endpoints: /api-web/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api-web/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN') 
     ### tenant-management
       - endpoints: /tenant-management/swagger-ui.html,/tenant-management/swagger-ui/**,/tenant-management/**/v3/api-docs/**
       - endpoints: /tenant-management/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR')
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /tenant-management/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /tenant-management/api/admin/users/**
@@ -290,7 +268,7 @@ yuuvis:
             <name>YUUVIS_TENANT_ADMIN</name>
             <permission>
               <action>create</action>
-              <action>read</action>
+      <action>read</action>
               <action>write</action>
               <action>delete</action>
             </permission>
@@ -307,23 +285,22 @@ yuuvis:
         </roleSet>      
   systemHookConfiguration: |
     {"systemhooks" :
-      {"amqp" : [
-        {"enable" : true,
-         "predicate" : "spel:(contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null && contentStreams[0]['range'].length() > 0) ? true : false",
-         "type" : "object.insert.document",
-         "url" : "{{.Values.yuuvis.amqp.url}}:{{.Values.yuuvis.amqp.port}}",
-         "user" : "{{.Values.yuuvis.amqp.user}}",
-         "password" : "{{.Values.yuuvis.amqp.password}}",
-         "queue" : "{{.Values.yuuvis.amqp.queues.textextraction}}",
-         "bulkSize" : 1
-        }
-      ],
+      {"amqp" : [],
+       "lifecycle" : [ 
+         {
+           "type" : "dms.request.objects.upsert.database-before",
+           "enable" : true,
+           "predicate" : "spel:T(java.util.List).of(100,101).contains(options['action']) && contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null",
+           "tagname" : "system:ren:text",
+           "tagstate" : 1
+         }
+       ],
        "webhooks": [
          {
            "enable": true,
            "predicate": "spel:true",
            "type": "user.info",
-           "url": "http://organization/api/userinfo/${tenant}/${userId}"
+           "url": "http://system/api/userinfo/${tenant}/${userId}"
          }
        ]
      }
@@ -365,9 +342,6 @@ yuuvis:
           username: ${yuuvis.db.username}
           password: ${yuuvis.db.password}
           driver-class-name: org.postgresql.Driver
-  lcconfig: |
-    textextraction.in-queue: {{.Values.yuuvis.amqp.queues.textextraction}}
-    textextraction.job-queue: {{.Values.yuuvis.amqp.queues.textextraction}}.job
   mqconfig: |
     # amqp
     amqp:
@@ -425,7 +399,7 @@ yuuvis:
   services:
     api:
       dockerImage: api-gateway
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -446,43 +420,13 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-    audit:
-      dockerImage: audit
-      tag: 4.17.18
-      profiles: prod,jpapostgres,dbs,kubernetes,redis,metrics
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      port: 7251
-      java:
-        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "512Mi"
-      # service may perform db updates, with possible long duration
-      # service uses liquibase, if killed during startup db lock possibly never released
-      # as a precaution disable livenessProbe during first of a new version 
-      # once the update is complete enable livenessProbe
-      livenessProbe:
-        # values true/false
-        enable: false
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
     authentication:
       # create services with type nodport for authentication
       nodeport:
         use: true
         value: 30080
       dockerImage: authentication
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -514,63 +458,10 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-    config:
-      initContainer:
-        image: alpine/git
-        tag: 2.40.1
-        dockerRegistry: docker.io
-        imagePullPolicy: IfNotPresent
-      dockerImage: config
-      tag: 4.17.18
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      port: 7282
-      java:
-        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "256Mi"
-      storage:
-        request: 100Mi
-        class:
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
-    contentanalyzer:
-      dockerImage: contentanalyzer
-      tag: 4.17.18
-      profiles: prod,kubernetes,metrics
-      instances: 2
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: true
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      port: 7430
-      java:
-        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "1024Mi"
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
     index:
       dockerImage: index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -590,40 +481,9 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-    organization:
-      dockerImage: organization
-      tag: 4.17.18
-      profiles: prod,oauth2,keycloak,kubernetes,metrics
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      port: 7440
-      requests:
-        memory: "256Mi"
-      java:
-        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
-      volumes: |
-        - name: keycloak-tls-selfsigned
-          secret:
-            defaultMode: 420
-            secretName: keycloak-selfsigned-cert-secret
-      volumeMounts: |
-        - mountPath: /etc/yuuvis/certs
-          name: keycloak-tls-selfsigned
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
     registry:
       dockerImage: registry
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -653,9 +513,9 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: repository
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       profiles: prod,storage,kubernetes,redis,metrics
-      instances: 1
+      instances: 2
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
         # otherwise draining nodes will deadlock!
@@ -686,7 +546,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: search
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -708,9 +568,14 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     system:
+      initContainer:
+        image: alpine/git
+        tag: 2.43.0
+        dockerRegistry: docker.io
+        imagePullPolicy: IfNotPresent
       dockerImage: system
-      profiles: prod,redis,kubernetes,metrics
-      tag: 4.17.18
+      profiles: prod,git,resourcegit,oauth2,redis,kubernetes,metrics
+      tag: 4.21.0-RC01
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -724,6 +589,17 @@ yuuvis:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
       requests:
         memory: "512Mi"
+      storage:
+        request: 100Mi
+        class:
+      volumes: |
+        - name: keycloak-tls-selfsigned
+          secret:
+            defaultMode: 420
+            secretName: keycloak-selfsigned-cert-secret
+      volumeMounts: |
+        - mountPath: /etc/yuuvis/certs
+          name: keycloak-tls-selfsigned
       nodeSelector: {}
       priorityClassName: ""
       tolerations: []
@@ -733,7 +609,7 @@ yuuvis:
     commander:
       dockerImage: commander
       profiles: prod,kubernetes,dbs,es
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -748,7 +624,7 @@ yuuvis:
     archive:
       deploy: false
       dockerImage: archiveservice
-      tag: 4.17.18
+      tag: 4.21.0-RC01
       profiles: prod,storage
       instances: 1
       pdb:
@@ -769,48 +645,8 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-    controller:
-      dockerImage: controller
-      tag: 4.17.2
-      profiles: prod,es,oauth2,lc,mq,kubernetes
-      instances: 1
-      port: 7332
-      java:
-        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "512Mi"
-      volumes: |
-        - name: keycloak-tls-selfsigned
-          secret:
-            defaultMode: 420
-            secretName: keycloak-selfsigned-cert-secret
-      volumeMounts: |
-        - mountPath: /etc/yuuvis/certs
-          name: keycloak-tls-selfsigned
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
-    textextractor:
-      dockerImage: textextractor
-      tag: 4.17.2
-      profiles: prod,es,lc,mq,kubernetes
-      instances: 1
-      port: 7420
-      java:
-        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
-      requests:
-        memory: "1024Mi"
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
 initContainer:
-  command: "until wget -q --spider http://configservice/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
   image: busybox
   tag: 1.36
   dockerRegistry: docker.io

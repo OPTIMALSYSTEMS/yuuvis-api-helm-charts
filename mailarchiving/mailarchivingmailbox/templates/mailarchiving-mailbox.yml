@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: yuuvis
+    name: mailarchiving-mailbox
+  name: mailarchiving-mailbox
+spec:
+  replicas: {{.Values.yuuvis.mailarchiving.mailbox.instances}}
+  selector:
+    matchLabels:
+      name: mailarchiving-mailbox
+  template:
+    metadata:
+      labels:
+        name: mailarchiving-mailbox
+    spec:
+      {{- if or .Values.yuuvis.mailarchiving.mailbox.nodeAffinity .Values.yuuvis.mailarchiving.mailbox.podAffinity .Values.yuuvis.mailarchiving.mailbox.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.mailarchiving.mailbox.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.mailbox.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.mailarchiving.mailbox.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: {{.Values.yuuvis.mailarchiving.mailbox.java.maxHeap}}
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: {{.Values.yuuvis.configservice.url}}/config
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,mas,docker,kubernetes
+          image: "{{.Values.yuuvis.mailarchiving.mailbox.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.mailbox.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+          name: mailarchiving-mailbox
+          ports:
+            - containerPort: 8110
+              protocol: TCP
+      imagePullSecrets:
+        - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+        - name: init-mailarchiving-mailbox
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]

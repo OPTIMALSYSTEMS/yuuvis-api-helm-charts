@@ -1,0 +1,44 @@
+apiVersion: v1
+data:
+  rmalinkinit.sh: |
+
+    system_run_healty="{{.Values.yuuvis.systemServiceUrl}}/manage/health"
+    url_property="{{.Values.yuuvis.systemServiceUrl}}/api/resources/rmalink-prod.yml"
+    file="/yuuvis/data/rmalink-prod.yml"
+
+    get_http_status() {
+    wget -q --spider "$system_run_healty"
+    }
+
+    get_rmalink(){
+     curl -s -o /dev/null -w "%{http_code}" "$url_property"
+    }
+
+    add_property_to_git() {
+
+    until $(get_http_status); do
+    echo 'waiting for system'
+    sleep 11
+    done;
+
+    get_rmalinkyml=$(get_rmalink)
+
+    if [ "$get_rmalinkyml" = 200 ]; then
+    echo 'rmalink-prod.yml already exists'
+    exit 0
+    elif [ "$get_rmalinkyml" = 404 ]; then
+    echo 'must create rmalink-prod.yml'
+    postyml=$(curl -POST -w "%{http_code}" -F "resource=@$file" "$url_property")
+
+    if [ $? -ne 0 ]; then
+    echo 'post rmalink-prod.yml failed'
+    exit 1
+    fi
+    fi
+    exit 1
+    }
+
+    add_property_to_git
+kind: ConfigMap
+metadata:
+  name: rmalinkinitscript

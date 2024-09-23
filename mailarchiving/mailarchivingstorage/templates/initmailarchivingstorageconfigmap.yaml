@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: initmailarchivingstorageconfigmap
+data:
+  mailarchivingstorageinit.bash: |
+    until wget -q --spider {{.Values.yuuvis.configservice.url}}/api/resources/schema.xml/path/system;
+    do 
+      echo 'waiting for configservice'; 
+      sleep 11; 
+    done;
+    
+    echo 'test if applicationmas config exists'
+    getapplicationmasyml=$(curl -s -o /dev/null -w "%{http_code}" {{.Values.yuuvis.configservice.url}}/api/resources/application-mas.yml)
+    
+    echo "config application-mas.yml result $getapplicationmasyml"
+    
+    echo 'test if mailarchivingstorage config exists'
+    getmailarchivingstorageyml=$(curl -s -o /dev/null -w "%{http_code}" {{.Values.yuuvis.configservice.url}}/api/resources/masstoragemomentum-prod.yml)
+    
+    echo "config masstoragemomentum-prod.yml result $getmailarchivingstorageyml"
+    
+    if [ "$getapplicationmasyml" = 200 ] && [ "$getmailarchivingstorageyml" = 200 ]
+      then
+        echo 'mailarchivingstorage properties already exists.'
+    exit 0
+    fi
+    
+    if [ "$getapplicationmasyml" = 404 ]
+    then
+      echo 'Must create application-mas.yml'
+      postapplicationmasyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/application-mas.yml" {{.Values.yuuvis.configservice.url}}/api/resources/application-mas.yml)
+    
+      if [ "$postapplicationmasyml" != 200 ]
+      then
+        echo 'Post application-mas.yml failed.'
+      else
+        echo 'application-mas.yml is created.'
+      fi
+    fi
+    
+    if [ "$getmailarchivingstorageyml" = 404 ]
+    then
+      echo 'Must create massmtp-prod.yml.'
+      postmailarchivingstorageyml=$(curl -POST -w "%{http_code}" -F "resource=@/yuuvis/data/masstoragemomentum-prod.yml" {{.Values.yuuvis.configservice.url}}/api/resources/masstoragemomentum-prod.yml)
+    
+      if [ "$postmailarchivingstorageyml" != 200 ]
+      then
+        echo 'Post masstoragemomentum-prod.yml failed.'
+      else
+        echo 'masstoragemomentum-prod.yml is created.'
+      fi
+    fi
+
+    exit 0
+    

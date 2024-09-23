@@ -1,0 +1,2 @@
+Repositorymanager CMIS for yuuvis
+RepositoryManager 5 implementing CMIS protocol (SAP compliant)

@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  rmalink-prod.yml: |
+    yuuvis:
+      api-url: {{.Values.yuuvis.repositorymanageral.apiUrl}}
+      config-url: {{.Values.yuuvis.systemServiceUrl}}
+    # mapping for redis DB
+    spring.data.redis.host: ${spring.redis.host:localhost}
+    spring.data.redis.port: ${spring.redis.port:6355}
+    spring.data.redis.password: ${spring.redis.password:}
+kind: ConfigMap
+metadata:
+  name: rmalink

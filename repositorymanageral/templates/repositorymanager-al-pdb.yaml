@@ -1,0 +1,18 @@
+{{- if .Values.yuuvis.repositorymanageral.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: repositorymanager-al-pdb
+  labels:
+    name: repositorymanager-al
+spec:
+  selector:
+    matchLabels:
+      name: repositorymanager-al
+  {{- if kindIs "int" .Values.yuuvis.repositorymanageral.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.repositorymanageral.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.repositorymanageral.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.repositorymanageral.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

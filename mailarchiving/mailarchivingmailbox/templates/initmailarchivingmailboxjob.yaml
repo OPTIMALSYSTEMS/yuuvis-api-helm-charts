@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mailarchivingmailbox-init
+spec:
+  template:
+    spec:
+      containers:
+      - name: mailarchivingmailbox-init
+        image: {{.Values.yuuvis.mailarchiving.initContainerImage}}
+        imagePullPolicy: IfNotPresent
+        command: [ 'bash', '/yuuvis/script/mailarchivingmailboxinit.bash' ]
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: mailarchivingmailboxconfigmap
+        - mountPath: /yuuvis/script/mailarchivingmailboxinit.bash
+          name: initmailarchivingmailboxconfigmap
+          subPath: mailarchivingmailboxinit.bash
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}       
+      volumes:
+      - configMap:
+          name: initmailarchivingmailboxconfigmap
+        name: initmailarchivingmailboxconfigmap
+      - configMap:
+          name: mailarchivingmailboxconfigmap
+        name: mailarchivingmailboxconfigmap
+      restartPolicy: OnFailure
