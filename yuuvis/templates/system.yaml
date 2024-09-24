@@ -32,18 +32,46 @@ spec:
       - name: init-system
         image: "{{.Values.yuuvis.services.system.initContainer.dockerRegistry}}/{{.Values.yuuvis.services.system.initContainer.image}}:{{ .Values.yuuvis.services.system.initContainer.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.services.system.imagePullPolicy }}
-        command: ['sh', '/yuuvis/script/checkgit.sh']
+        command: ['sh', '/tmp/script/initgit.sh']
         volumeMounts:
-        - mountPath: /yuuvis/script/checkgit.sh
+        - mountPath: /yuuvis/data
+          name: configyml
+        - mountPath: /yuuvis/data/system
+          name: systemconfig
+        - mountPath: /tmp/script/initgit.sh
           name: initscript
-          subPath: checkgit.sh
+          subPath: initgit.sh
         env:
+        - name: KEYCLOAKURL
+          value: {{.Values.yuuvis.initjob.keycloak.url}}
+        - name: KEYCLOAKADMIN
+          value: {{.Values.yuuvis.initjob.keycloak.admin}}
+        - name: KEYCLOAKPASSOWRD
+          value: {{.Values.yuuvis.initjob.keycloak.password}}
+        - name: KEYCLOAKINITREALMNAME
+          value: {{.Values.yuuvis.initjob.keycloak.realm.name}}
+        - name: KEYCLOAKINITREALMUSER
+          value: {{.Values.yuuvis.initjob.keycloak.realm.user}}
+        - name: KEYCLOAKINITREALMPASSWORD
+          value: {{.Values.yuuvis.initjob.keycloak.realm.password}}
+        - name: YUUVISAUTHURL
+          value: {{.Values.yuuvis.initjob.authurl}}
+        - name: CREATEREALM
+          value: "{{.Values.yuuvis.initjob.createrealm}}"
+        - name: GITSERVER
+          value: {{.Values.yuuvis.git.server}}
+        - name: GITURL
+          value: {{.Values.yuuvis.git.url}}
+        - name: GITBRANCH
+          value: {{.Values.yuuvis.git.branch}}
+        - name: GITNAME
+          value: {{.Values.yuuvis.git.name}}
         - name: GITUSER
           valueFrom:
             secretKeyRef:
               key: user
               name: gitsecret
-        - name: GITPWD
+        - name: GITPASSWORD
           valueFrom:
             secretKeyRef:
               key: password
@@ -121,8 +149,14 @@ spec:
       - name: {{ .Values.yuuvis.image.imagePullSecret }}
       volumes:
       - configMap:
-          name: initconfigserviceconfigmap
+          name: initcommitconfigmap
         name: initscript
+      - configMap:
+          name: profilesconfigmap
+        name: configyml
+      - configMap:
+          name: systemconfigmap
+        name: systemconfig
       {{- if .Values.yuuvis.services.system.volumes }}
 {{ tpl .Values.yuuvis.services.system.volumes . | indent 6 }}
       {{- end}}
