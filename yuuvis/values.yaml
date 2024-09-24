@@ -569,9 +569,9 @@ yuuvis:
       podAntiAffinity: {}
     system:
       initContainer:
-        image: alpine/git
-        tag: 2.43.0
-        dockerRegistry: docker.io
+        image: docker.yuuvis.org/yuuvis
+        tag: 19_v2
+        dockerRegistry: helper/init-realm
         imagePullPolicy: IfNotPresent
       dockerImage: system
       profiles: prod,git,resourcegit,oauth2,redis,kubernetes,metrics
