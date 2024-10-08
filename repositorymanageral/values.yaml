@@ -16,7 +16,7 @@ yuuvis:
       storageClassName: default
       storageSize: 1Gi
     dockerImage: repositorymanager-al
-    tag: 5.0.2
+    tag: 5.0.4
     apiUrl: http://api.yuuvis
     pdb:
       # pdb requires instances > 1 and  minAvailable < instances,

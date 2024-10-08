@@ -2,7 +2,7 @@ apiVersion: v1
 appVersion: "1.0"
 description: yuuvis repositorymanager AL component
 name: yuuvis-repositorymanageral
-version: 1.0.0
+version: 1.0.1
 keywords:
 - yuuvis
 - repositorymanageral

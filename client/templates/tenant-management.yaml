@@ -28,6 +28,7 @@ spec:
         podAntiAffinity: {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- end }}
+      serviceAccountName: tenantmanagement
       initContainers:
       - name: init-api-tm
         image: "{{.Values.initContainer.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"

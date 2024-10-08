@@ -57,7 +57,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m
     userservice:
-      dockerImage: userservice:1.14.0
+      dockerImage: userservice:1.15.0-RC01
       initContainerImage: helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -136,7 +136,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     architect:
-      dockerImage: architect:2.6.0-rc1
+      dockerImage: architect:2.6.0-rc2
       instances: 1
       nodeSelector: {}
       priorityClassName: ""
@@ -164,7 +164,7 @@ yuuvis:
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
     tenantmanagement:
-      dockerImage: tenant-management:1.18.0-rc1
+      dockerImage: tenant-management:1.18.0-rc2
       profiles: prod,kubernetes,oauth2
       instances: 1
       pdb:

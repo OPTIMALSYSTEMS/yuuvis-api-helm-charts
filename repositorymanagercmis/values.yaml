@@ -14,7 +14,7 @@ yuuvis:
     initContainerImage: helper/init-helper:2023-12-03
     profile: prod,kubernetes,yuuvis
     dockerImage: repositorymanager-cmis
-    tag: 5.0.1
+    tag: 5.0.3
     instances: 1
     pdb:
       # pdb requires instances > 1 and  minAvailable < instances,
