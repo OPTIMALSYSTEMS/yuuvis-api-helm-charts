@@ -574,7 +574,7 @@ yuuvis:
         dockerRegistry: docker.io
         imagePullPolicy: IfNotPresent
       dockerImage: system
-      profiles: prod,git,resourcegit,oauth2,redis,kubernetes,metrics
+      profiles: prod,native,resourcegit,oauth2,redis,kubernetes,metrics
       tag: 4.21.0-RC02
       instances: 1
       pdb:
