@@ -574,7 +574,7 @@ yuuvis:
         dockerRegistry: helper/init-realm
         imagePullPolicy: IfNotPresent
       dockerImage: system
-      profiles: prod,git,resourcegit,oauth2,redis,kubernetes,metrics
+      profiles: prod,native,resourcegit,oauth2,redis,kubernetes,metrics
       tag: 4.20.1
       instances: 1
       pdb:
