@@ -98,28 +98,15 @@ yuuvis:
         health:
           enabled: true
 
-    routing.endpoints:
-      - 'authentication'
-      - 'api'
-      - 'search'
-      - 'api-web'
-      - 'client'
-      - 'tenant-management'
-      - 'viewer'
-      - 'architect'
-      - 'bpm-engine'
-      - 'dashlet365'
-      - 'office365'
-        
     authorization.accesses:
     ### Manage-Endpunkte
       - endpoints: /manage/**
         expose: true
       - endpoints: /*/manage/**,/session/invalidateAll/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
     ### API-Endpunkte
       - endpoints: /api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/dms/**
@@ -127,7 +114,7 @@ yuuvis:
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
       - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
       - endpoints: /api/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/api/dms/**
@@ -139,18 +126,18 @@ yuuvis:
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
       - endpoints: /bpm-engine/internal/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
       - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**,/api-web/api/idm/**
       - endpoints: /api-web/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api-web/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN') 
     ### tenant-management
       - endpoints: /tenant-management/swagger-ui.html,/tenant-management/swagger-ui/**,/tenant-management/**/v3/api-docs/**
       - endpoints: /tenant-management/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /tenant-management/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /tenant-management/api/admin/users/**
