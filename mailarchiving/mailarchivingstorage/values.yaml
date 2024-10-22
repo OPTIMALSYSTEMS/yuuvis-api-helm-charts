@@ -14,7 +14,7 @@ yuuvis:
     storage:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-storage
-      tag: 2.1.7
+      tag: 2.1.8
       java:
         maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
       profiles:

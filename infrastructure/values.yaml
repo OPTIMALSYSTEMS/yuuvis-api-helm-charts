@@ -217,7 +217,7 @@ keycloak:
   fullnameOverride: "keycloak"
   image:
     repository: docker.yuuvis.org/yuuvis/keycloak
-    tag: "24.0.2-stable1"
+    tag: "26.0.0-stable1"
     pullPolicy: IfNotPresent
   imagePullSecrets: 
    - name: dockeryuuvisorg
@@ -249,7 +249,8 @@ keycloak:
     - --verbose
     - start
     - --hostname-strict=false
-    - --hostname-strict-https=false
+    - --http-enabled=true
+    - --proxy-headers=xforwarded
     - --spi-events-listener-jboss-logging-success-level=info
     - --spi-events-listener-jboss-logging-error-level=warn
   extraEnv: |

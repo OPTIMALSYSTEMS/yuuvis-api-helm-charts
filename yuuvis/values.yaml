@@ -98,28 +98,15 @@ yuuvis:
         health:
           enabled: true
 
-    routing.endpoints:
-      - 'authentication'
-      - 'api'
-      - 'search'
-      - 'api-web'
-      - 'client'
-      - 'tenant-management'
-      - 'viewer'
-      - 'architect'
-      - 'bpm-engine'
-      - 'dashlet365'
-      - 'office365'
-        
     authorization.accesses:
     ### Manage-Endpunkte
       - endpoints: /manage/**
         expose: true
       - endpoints: /*/manage/**,/session/invalidateAll/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
     ### API-Endpunkte
       - endpoints: /api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/dms/**
@@ -127,7 +114,7 @@ yuuvis:
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
       - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
       - endpoints: /api/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /api/api/dms/**
@@ -139,18 +126,18 @@ yuuvis:
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
       - endpoints: /bpm-engine/internal/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
       - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**,/api-web/api/idm/**
       - endpoints: /api-web/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /api-web/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN') 
     ### tenant-management
       - endpoints: /tenant-management/swagger-ui.html,/tenant-management/swagger-ui/**,/tenant-management/**/v3/api-docs/**
       - endpoints: /tenant-management/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and principal.getTenant() == '{{.Values.yuuvis.keycloak.system.realm}}'
+        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
       - endpoints: /tenant-management/api/admin/**
         access: hasAuthority('YUUVIS_TENANT_ADMIN')
       - endpoints: /tenant-management/api/admin/users/**
@@ -399,7 +386,7 @@ yuuvis:
   services:
     api:
       dockerImage: api-gateway
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -426,7 +413,7 @@ yuuvis:
         use: true
         value: 30080
       dockerImage: authentication
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -461,7 +448,7 @@ yuuvis:
     index:
       dockerImage: index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -483,7 +470,7 @@ yuuvis:
       podAntiAffinity: {}
     registry:
       dockerImage: registry
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -513,7 +500,7 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: repository
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       profiles: prod,storage,kubernetes,redis,metrics
       instances: 2
       pdb:
@@ -546,7 +533,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: search
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -575,7 +562,7 @@ yuuvis:
         imagePullPolicy: IfNotPresent
       dockerImage: system
       profiles: prod,native,resourcegit,oauth2,redis,kubernetes,metrics
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -609,7 +596,7 @@ yuuvis:
     commander:
       dockerImage: commander
       profiles: prod,kubernetes,dbs,es
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -624,7 +611,7 @@ yuuvis:
     archive:
       deploy: false
       dockerImage: archiveservice
-      tag: 4.21.0-RC02
+      tag: 4.21.0-RC03
       profiles: prod,storage
       instances: 1
       pdb:
