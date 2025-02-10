@@ -64,9 +64,6 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: true
-        volumeMounts:
-        - mountPath: /tmp
-          name: tmp
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.archive.java.maxHeap}}
@@ -79,6 +76,12 @@ spec:
               key: CONFIGSERVICEURL
         ports:
         - containerPort: {{.Values.yuuvis.services.archive.port}}
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      {{- if .Values.yuuvis.services.archive.volumeMounts }}
+{{ tpl .Values.yuuvis.services.archive.volumeMounts . | indent 8 }}
+        {{- end }}
       restartPolicy: Always
       automountServiceAccountToken: false
       {{- with .Values.yuuvis.services.archive.nodeSelector }}
@@ -92,15 +95,10 @@ spec:
       {{- end }}
       imagePullSecrets:
       - name: yuuvisorg
-      {{- if .Values.yuuvis.services.archive.volumeMounts }}
-        volumeMounts:
-{{ tpl .Values.yuuvis.services.archive.volumeMounts . | indent 8 }}
-        {{- end }}
       restartPolicy: Always
       automountServiceAccountToken: false
       imagePullSecrets:
       - name: yuuvisorg
-      {{- if .Values.yuuvis.services.archive.volumes }}
       securityContext:
         fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
         runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
@@ -111,6 +109,7 @@ spec:
       volumes:
       - emptyDir: {}
         name: tmp
+      {{- if .Values.yuuvis.services.archive.volumes }}
 {{ tpl .Values.yuuvis.services.archive.volumes . | indent 6 }}
       {{- end}}
 {{- end}}

@@ -63,9 +63,6 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: true
-        volumeMounts:
-        - mountPath: /tmp
-          name: tmp
         env:
         - name: JAVA_OPTS
           value: {{.Values.yuuvis.services.authentication.java.maxHeap}}
@@ -78,8 +75,10 @@ spec:
               key: CONFIGSERVICEURL
         ports:
         - containerPort: {{.Values.yuuvis.services.authentication.port}}
-        {{- if .Values.yuuvis.services.authentication.volumeMounts }}
         volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        {{- if .Values.yuuvis.services.authentication.volumeMounts }}
 {{ tpl .Values.yuuvis.services.authentication.volumeMounts . | indent 8 }}
         {{- end }}
       restartPolicy: Always
