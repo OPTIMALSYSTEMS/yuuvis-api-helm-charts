@@ -1,2 +1,0 @@
-Repositorymanager AL for yuuvis
-RepositoryManager 5 implementing ArchiveLink protocol (SAP compliant)

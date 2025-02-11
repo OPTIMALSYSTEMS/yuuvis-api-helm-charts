@@ -1,2 +1,0 @@
-Repositorymanager ILM for yuuvis
-RepositoryManager 5 implementing ILM protocol (SAP compliant)
