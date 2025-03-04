@@ -72,6 +72,9 @@ spec:
         image: busybox
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
       {{- with .Values.yuuvis.repositorymanager.core.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
