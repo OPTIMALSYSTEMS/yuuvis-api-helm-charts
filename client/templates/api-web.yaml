@@ -38,6 +38,7 @@ spec:
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
       containers:
       - env:

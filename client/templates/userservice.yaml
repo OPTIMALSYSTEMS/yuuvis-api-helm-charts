@@ -102,6 +102,10 @@ spec:
         - name: DBNAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.initContainerImage}}
+        {{- if and .Values.yuuvis.client.userservice.database.createdb .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
         imagePullPolicy: Always
         name: init-database
         volumeMounts:
@@ -115,6 +119,7 @@ spec:
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
       restartPolicy: Always
       {{- with .Values.yuuvis.client.userservice.nodeSelector }}
