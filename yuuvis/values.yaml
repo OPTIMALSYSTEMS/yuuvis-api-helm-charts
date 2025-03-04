@@ -33,6 +33,7 @@ yuuvis:
     docker:
       image: yuuvis/helper/init-realm
       tag: 24_v3
+      imagePullPolicy: IfNotPresent
     # if enabled the config-init job will create a realm in keycloak with the 
     # name from yuuvis.initjob.keycloak.realm.name 
     # and an user with all yuuvis roles 
@@ -613,10 +614,6 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     system:
-      initContainer:
-        image: yuuvis/helper/init-realm
-        tag: 19_v2
-        imagePullPolicy: IfNotPresent
       dockerImage: yuuvis/system
       profiles: prod,native,resourcegit,oauth2,redis,kubernetes,metrics
       tag: 4.21.5

@@ -35,6 +35,7 @@ spec:
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
       containers:
       - name: authentication
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.authentication.dockerImage}}:{{ .Values.yuuvis.services.authentication.tag }}"

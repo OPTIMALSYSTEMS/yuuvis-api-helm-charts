@@ -35,6 +35,7 @@ spec:
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
       containers:
       - name: index
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.index.dockerImage}}:{{ .Values.yuuvis.services.index.tag }}"

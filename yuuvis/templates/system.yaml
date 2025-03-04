@@ -30,8 +30,8 @@ spec:
       {{- end }}
       initContainers:
       - name: init-system
-        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.system.initContainer.image}}:{{ .Values.yuuvis.services.system.initContainer.tag }}"
-        imagePullPolicy: {{ .Values.yuuvis.services.system.imagePullPolicy }}
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.initjob.docker.image}}:{{ .Values.yuuvis.initjob.docker.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.initjob.docker.imagePullPolicy }}
         command: ['sh', '/tmp/script/initgit.sh']
         volumeMounts:
         - mountPath: /yuuvis/data

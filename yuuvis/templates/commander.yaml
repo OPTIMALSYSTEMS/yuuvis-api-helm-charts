@@ -35,6 +35,7 @@ spec:
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
       containers:
       - name: commander
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.commander.dockerImage}}:{{ .Values.yuuvis.services.commander.tag }}"
