@@ -112,6 +112,9 @@ spec:
       - name: init-config
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
         imagePullPolicy: IfNotPresent
       restartPolicy: Always
       {{- with .Values.yuuvis.client.userservice.nodeSelector }}

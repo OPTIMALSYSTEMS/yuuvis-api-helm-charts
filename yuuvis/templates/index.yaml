@@ -32,6 +32,9 @@ spec:
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
       containers:
       - name: index
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.index.dockerImage}}:{{ .Values.yuuvis.services.index.tag }}"
