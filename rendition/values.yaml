@@ -19,7 +19,7 @@ yuuvis:
   configservice:
     url: http://system/config
   renditionservice:
-    dockerImage: yuuvis/renditionservice:4.21.4
+    dockerImage: yuuvis/renditionservice:4.21.7
     profiles: prod
     instances: 1
     java:
@@ -71,7 +71,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditiontextworker:
-    dockerImage: yuuvis/textextraction-worker-service:4.21.4
+    dockerImage: yuuvis/textextraction-worker-service:4.21.7
     instances: 1
     profiles: prod
     java:
