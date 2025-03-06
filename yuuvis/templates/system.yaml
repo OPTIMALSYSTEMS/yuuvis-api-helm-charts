@@ -33,6 +33,10 @@ spec:
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.initjob.docker.image}}:{{ .Values.yuuvis.initjob.docker.tag }}"
         imagePullPolicy: {{ .Values.yuuvis.initjob.docker.imagePullPolicy }}
         command: ['sh', '/tmp/script/initgit.sh']
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
         volumeMounts:
         - mountPath: /yuuvis/data
           name: configyml
