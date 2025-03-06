@@ -87,6 +87,10 @@ spec:
         - mountPath: /tmp/script/inityml.sh
           name: initbpmenginescript
           subPath: inityml.sh
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
       {{- if .Values.yuuvis.bpm.engine.database.createdb }}
       - name: init-database
         command:
@@ -117,6 +121,10 @@ spec:
           value: {{.Values.yuuvis.bpm.engine.database.name}}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.engine.initContainerImage}}
         imagePullPolicy: Always
+        {{- if and .Values.yuuvis.bpm.engine.database.createdb .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
         volumeMounts:
         - mountPath: /yuuvis/script/initdb.sh
           name: initscript
