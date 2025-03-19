@@ -128,7 +128,7 @@ yuuvis:
         minAvailable: 1
       resources:
         requests:
-          memory: "512Mi"
+          memory: "128Mi"
         #  cpu:
         #limits:
         #  memory:
@@ -169,7 +169,7 @@ yuuvis:
       instances: 1
       resources:
         requests:
-          memory: "512Mi"
+          memory: "128Mi"
         #  cpu:
         #limits:
         #  memory:
@@ -209,7 +209,7 @@ yuuvis:
         #  cpu: 
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.18.3
+      dockerImage: yuuvis/tenant-management:1.18.5
       profiles: prod,oauth2
       instances: 1
       pdb:
