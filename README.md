@@ -166,6 +166,9 @@ Installation of the mailarchiving services described in README.md in mailarchivi
 
 ### Install steps for the yuuvis repositorymanager Helm chart
 
+> **_DEPRECATED:_**
+> Repositorymanager is deprecated as of 2024 winter version. Please contact support regarding migration to new repositorymanager 5 version.
+
 **Edit the repositorymanager values.yaml and docker registry credentials**
 
 ```shell

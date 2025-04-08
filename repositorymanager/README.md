@@ -1,4 +1,6 @@
 # REPOSITORYMANAGER HELM CHART
+> **_DEPRECATED:_** 
+> Repositorymanager is deprecated as of 2024 winter version. Please contact support regarding migration to new repositorymanager 5 version.
 
 Repositorymanager has ClusterIp type of port that means that outside of cluster it is not reachable. 
 We suggest that depends on cloud provider you should choose to use cloud provider load balancer or to implement appropriate Ingress controller.
