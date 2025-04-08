@@ -15,7 +15,7 @@ yuuvis:
     # before running change the value to an existing realm
     # TODO: changeme
     system:
-      realm: myfirsttennant
+      realm: myfirsttenant
   git:
     protocol: http
     url: gitea-http.infrastructure:3000/yuuvis/yuuvis-config.git
