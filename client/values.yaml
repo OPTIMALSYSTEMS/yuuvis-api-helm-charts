@@ -128,7 +128,7 @@ yuuvis:
         minAvailable: 1
       resources:
         requests:
-          memory: "128Mi"
+          memory: "64Mi"
         #  cpu:
         #limits:
         #  memory:
@@ -169,7 +169,7 @@ yuuvis:
       instances: 1
       resources:
         requests:
-          memory: "128Mi"
+          memory: "64Mi"
         #  cpu:
         #limits:
         #  memory:
