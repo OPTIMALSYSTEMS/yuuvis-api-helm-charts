@@ -117,7 +117,7 @@ yuuvis:
           password: changeme
     client:
       enabled: true
-      dockerImage: yuuvis/client:6.1.4
+      dockerImage: yuuvis/client:6.1.5
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
