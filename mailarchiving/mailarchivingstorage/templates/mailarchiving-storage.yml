@@ -50,5 +50,8 @@ spec:
           ports:
             - containerPort: 8130
               protocol: TCP
+          {{- with .Values.yuuvis.mailarchiving.storage.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
       imagePullSecrets:
         - name: {{.Values.yuuvis.image.imagePullSecret}}

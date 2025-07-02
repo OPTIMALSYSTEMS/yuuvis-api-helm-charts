@@ -4,19 +4,35 @@ metadata:
   name: mailarchivingstorageconfigmap
 data:
   application-mas.yml: |
-    mas:
-      exchange-online:
-        access:
-          client-id: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchangeonline.access.clientid}}
-          tenant-id: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchangeonline.access.tenantid}}
-          secret: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.exchangeonline.access.secret}}
-      mailbox-related-storage:
-        folder-name-config:
-          domains: {{.Values.yuuvis.mailarchiving.storage.profiles.mas.mailboxrelatedstorage.foldernameconfig.domains}}
+    #mas:
+      #exchange-onprem:
+        #access:
+          #uri: https://mail.example.org/EWS/Exchange.asmx # URI of the EWS API
+          #username: sample@example.org # Username of impersonation user
+          #password: 123456789 # Password of impersonation user
+      #onprem-mailbox-related-storage:
+        #folder-name-config:
+          #domains: test.org, testorg.onmicrosoft.com # Exchange On-premises domains for limiting mail addresses resolution. If empty there are no restrictions
+          #property: USERNAME #Other values: LAST_NAME FIRST_NAME DISPLAY_NAME #Mail's propertly for controlling access. For more details, please refer to the official documentation
+      #exchange-online:
+        #access:
+          #client-id: yyyyyyy-bbb-cccc-aaaaa-xxxxxxxx # Application authentification parameter on Azure portal.
+          #tenant-id: fgfhfhh-bdf0-ghg-7668-vvvvvv  # Application authentification parameter on Azure portal.
+          #secret: bbbbb~yyyyyy-cccccccc~wwwwwww # Application authentification parameter on Azure portal.
+      #mailbox-related-storage:
+        #folder-name-config:
+          #domains: test.org,test.onmicrosoft.com # Domains that are part of the Exchange Online Active Directory
+          #property: USERNAME #SAM_ACCOUNT_NAME USERNAME LAST_NAME FIRST_NAME DISPLAY_NAME #Mail's propertly for controlling access. For more details, please refer to the official documentation
+  
   masstoragemomentum-prod.yml: |
     mas-storage-momentum:
       dms:
-        url: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.url}}
-        username: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.username}}
-        password: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.password}}
-        tenant: {{.Values.yuuvis.mailarchiving.storage.profiles.prod.dms.tenant}}
+        url: {{.Values.yuuvis.mailarchiving.storage.dms.url}}
+        username: {{.Values.yuuvis.mailarchiving.storage.dms.username}}
+        password: {{.Values.yuuvis.mailarchiving.storage.dms.password}}
+        tenant: {{.Values.yuuvis.mailarchiving.storage.dms.tenant}}
+    # user-info:
+    #   url: "http://system.yuuvis/api/userinfo/${tenant}/${userId}"
+    #   mailbox-mapping:
+    #     -"[xxxx@test.org]": xxxx
+    #     -"[kooka02@test.org]": kookatestuser03@test.org

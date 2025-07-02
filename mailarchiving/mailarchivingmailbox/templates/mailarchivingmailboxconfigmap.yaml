@@ -3,6 +3,49 @@ data:
   masmailbox-prod.yml: |
     mas-storage:
         uri: {{.Values.yuuvis.mailarchiving.mailbox.profiles.prod.masstorage.uri}}
+    mas-mailbox:
+      journaling:
+        mailboxes: #Backup mailboxes with details about folder to read from and expected type of messages in read folder
+        # - mailbox: #sample_mail_one@osdevtest.de #mailbox address which represents backup mailbox
+        #   read-folder: Inbox #folder name from which backup mails should be pulled
+        #   message-mode: ALTERNATE #Type of messages expected to be pulled from read-folder. Set as alternate mailbox (ALTERNATE) for NDR, JOURNAL for journaling reports or NORMAL for ordinary mails
+        # - mailbox: sample_mail_two@osdevtest.de
+        #   read-folder: Posteingang
+        #   message-mode: NORMAL
+      archiving:
+        mailboxes: #Mailboxes for archiving; multiple entries are possible, and each should be in the new line
+        # - sample@test.org
+        # - sample_mail@test.org
+        groups: #Names of groups for archiving; multiple entries are possible, and each should be in the new line
+        # - GroupName1
+        # - GroupName2
+        whitelist: # Inbox, Sent #Comma separated names of mailbox folders that are allowed for archiving
+        blacklist: # CustomFolder, MyFolder #Comma separated names of folders that should be omitted from archiving
+      categories:
+        archived: Archived #Category for marking successfully archived mails
+        error: Error #Category for marking unsuccessfully processed mails
+      #Configuration below is related to journaling and archiving for Exchange On-premises connection
+      onprem:
+        archiving:
+          whitelist: #Inbox, Sent #Comma separated names of mailbox folders that are allowed for archiving
+          blacklist: #Black, MyFolder #Comma separated names of folders that should be omitted from archiving
+          mailboxes: #Mailboxes for archiving; multiple entries are possible, and each should be in the new line
+          # - sample1@testonprem.org
+          # - sample2@testonprem.org
+          groups: #Names of groups or group mailboxes for archiving; multiple entries are possible, and each should be in the new line
+          # -  group1@testonprem.org
+          # -  group2@testonprem.org
+        categories:
+          archived: ArchivedOnPrem #Category for marking successfully archived mails
+          error: ErrorOnPrem #Comma separated names of folders that should be omitted from archiving
+        journaling: #Backup mailboxes with details about folder to read from and expected type of messages in read folder
+          mailboxes:
+          # - mailbox: sample1@testonprem.org #mailbox address which represents backup mailbox
+          #   read-folder: Posteingang #folder name from which backup mails should be pulled
+          #   message-mode: ALTERNATE #Type of messages expected to be pulled from read-folder. Set as alternate mailbox (ALTERNATE) for NDR, JOURNAL for journaling reports or NORMAL for ordinary mails
+          # - mailbox: sample2@testonprem.org
+          #   read-folder: Posteingang
+          #   message-mode: JOURNAL
 kind: ConfigMap
 metadata:
   name: mailarchivingmailboxconfigmap
