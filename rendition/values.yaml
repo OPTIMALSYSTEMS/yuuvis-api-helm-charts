@@ -45,7 +45,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditionrepository:
-    dockerImage: yuuvis/rendition-repository:2.3.0
+    dockerImage: yuuvis/rendition-repository:2.3.1
     profiles: prod,storage,dbs
     instances: 1
     java:
