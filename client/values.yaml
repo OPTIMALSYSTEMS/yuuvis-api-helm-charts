@@ -209,7 +209,7 @@ yuuvis:
         #  cpu: 
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.18.8
+      dockerImage: yuuvis/tenant-management:1.18.9
       profiles: prod,oauth2
       instances: 1
       pdb:
