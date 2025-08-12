@@ -44,7 +44,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.21.8
+      dockerImage: yuuvis/api-web:1.21.9
       profiles: prod,kubernetes
       instances: 1
       pdb:
@@ -209,7 +209,7 @@ yuuvis:
         #  cpu: 
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.18.9
+      dockerImage: yuuvis/tenant-management:1.18.10
       profiles: prod,oauth2
       instances: 1
       pdb:
