@@ -9,7 +9,7 @@ data:
         #access:
           #uri: https://mail.example.org/EWS/Exchange.asmx # URI of the EWS API
           #username: sample@example.org # Username of impersonation user
-          #password: 123456789 # Password of impersonation user
+          #password: ${EXCHANGE_ONPREM_PASSWORD} # Password of impersonation user
       #onprem-mailbox-related-storage:
         #folder-name-config:
           #domains: test.org, testorg.onmicrosoft.com # Exchange On-premises domains for limiting mail addresses resolution. If empty there are no restrictions
@@ -18,7 +18,7 @@ data:
         #access:
           #client-id: yyyyyyy-bbb-cccc-aaaaa-xxxxxxxx # Application authentification parameter on Azure portal.
           #tenant-id: fgfhfhh-bdf0-ghg-7668-vvvvvv  # Application authentification parameter on Azure portal.
-          #secret: bbbbb~yyyyyy-cccccccc~wwwwwww # Application authentification parameter on Azure portal.
+          #secret: ${EXCHANGE_ONLINE_SECRET} # Application authentification parameter on Azure portal.
       #mailbox-related-storage:
         #folder-name-config:
           #domains: test.org,test.onmicrosoft.com # Domains that are part of the Exchange Online Active Directory
@@ -29,7 +29,7 @@ data:
       dms:
         url: {{.Values.yuuvis.mailarchiving.storage.dms.url}}
         username: {{.Values.yuuvis.mailarchiving.storage.dms.username}}
-        password: {{.Values.yuuvis.mailarchiving.storage.dms.password}}
+        password: ${DMS_PASSWORD}
         tenant: {{.Values.yuuvis.mailarchiving.storage.dms.tenant}}
     # user-info:
     #   url: "http://system.yuuvis/api/userinfo/${tenant}/${userId}"

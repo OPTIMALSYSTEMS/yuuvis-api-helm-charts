@@ -4,12 +4,22 @@ imageCredentials:
     username:
     password:
 yuuvis:
+  labels:
+    app: yuuvis
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorgmailbox
   configservice:
     url: http://system.yuuvis #change value if system is in another namespace not yuuvis e.g. http://system.2021winter
   mailarchiving:
+    exchangeOnPremPasswordSecret:
+      enabled: false
+      name: exchange-onprem-secret-name # please change the value if it is in script different
+      key: exchange-onprem-secret-key # please change the value if it is in script different
+    exchangeOnlineSecret:
+      enabled: false
+      name: exchange-online-secret-name # please change the value if it is in script different
+      key: exchange-online-secret-key # please change the value if it is in script different
     initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
     mailbox:
       instances: 1

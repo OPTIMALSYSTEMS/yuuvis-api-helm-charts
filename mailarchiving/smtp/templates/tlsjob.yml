@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mailarchiving-smtp-create-selfsigned-cert
   labels:
-    app: mailarchiving-smtp-create-selfsigned-cert
+    app: {{.Values.yuuvis.labels.app}}
+  name: mailarchiving-smtp-create-selfsigned-cert-job
 spec:
   template:
     spec:

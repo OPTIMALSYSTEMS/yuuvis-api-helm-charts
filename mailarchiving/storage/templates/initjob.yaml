@@ -1,7 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mailarchivingstorage-init
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+  name: mailarchivingstorage-init-job
 spec:
   template:
     spec:

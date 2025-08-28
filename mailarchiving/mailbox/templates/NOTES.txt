@@ -1,0 +1,2 @@
+mailarchiving mailbox for yuuvis
+Service that provides journaling and archiving solutions for mailboxes.

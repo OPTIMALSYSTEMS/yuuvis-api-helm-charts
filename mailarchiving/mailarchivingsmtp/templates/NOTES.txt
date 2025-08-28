@@ -1,2 +1,0 @@
-mas-smtp for yuuvis
-Service that provides SMTP server

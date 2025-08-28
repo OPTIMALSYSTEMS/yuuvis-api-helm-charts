@@ -1,2 +1,0 @@
-mas-storage for yuuvis
-Service that provides solution for storing journaled and archived emails

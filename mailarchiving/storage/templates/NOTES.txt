@@ -1,0 +1,2 @@
+mailarchiving storage for yuuvis
+Service that enables the storage and management of journaled and archived emails for the yuuvis platform.

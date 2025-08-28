@@ -4,6 +4,7 @@ apiVersion: policy/v1
 metadata:
   name: mailarchiving-smtp-pdb
   labels:
+    app: {{.Values.yuuvis.labels.app}}
     name: mailarchiving-smtp
 spec:
   selector:

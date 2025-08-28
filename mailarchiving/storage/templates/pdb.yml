@@ -2,9 +2,10 @@
 kind: PodDisruptionBudget
 apiVersion: policy/v1
 metadata:
-  name: mailarchiving-storage-pdb
   labels:
+    app: {{.Values.yuuvis.labels.app}}
     name: mailarchiving-storage
+  name: mailarchiving-storage-pdb
 spec:
   selector:
     matchLabels:

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: yuuvis
+    app: {{.Values.yuuvis.labels.app}}
     name: mailarchiving-smtp
   name: mailarchiving-smtp
 spec:
@@ -47,6 +47,20 @@ spec:
               value: prod,docker,kubernetes
             - name: SPRING_CLOUD_CONFIG_URI
               value: {{.Values.yuuvis.configservice.url}}/config
+            {{- if .Values.yuuvis.mailarchiving.exchangeOnlineSecret.enabled }}
+            - name: EXCHANGE_ONLINE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.yuuvis.mailarchiving.exchangeOnlineSecret.name}}
+                  key: {{.Values.yuuvis.mailarchiving.exchangeOnlineSecret.key}}
+            {{- end }}
+            {{- if .Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.enabled }}
+            - name: EXCHANGE_ONPREM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.name}}
+                  key: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.key}}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8120
