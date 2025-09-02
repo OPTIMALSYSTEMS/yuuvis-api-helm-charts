@@ -1,3 +1,7 @@
+global:
+  security:
+    allowInsecureImages: true
+
 imageCredentials:
   dockeryuuvisorg:
     registry: docker.yuuvis.org
@@ -143,6 +147,8 @@ postgresql:
   enabled: true
   fullnameOverride: postgresql
   architecture: standalone
+  image:
+    repository: bitnamilegacy/postgresql
   global:
     postgresql:
       auth:
@@ -169,6 +175,8 @@ postgresql:
 rabbitmq:
   enabled: true
   fullnameOverride: rabbitmq
+  image:
+    repository: bitnamilegacy/rabbitmq
   auth:
     username: rodger
     password: changeme
@@ -321,6 +329,8 @@ redis:
   fullnameOverride: redis
   ## Cluster settings
   architecture: standalone
+  image:
+    repository: bitnamilegacy/redis
   auth:
     enabled: false
     password: changeme
