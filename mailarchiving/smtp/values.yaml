@@ -24,7 +24,7 @@ yuuvis:
     smtp:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-smtp
-      tag: 2.2.0
+      tag: 2.2.1
       resources:
         requests:
           cpu: "0.2"
