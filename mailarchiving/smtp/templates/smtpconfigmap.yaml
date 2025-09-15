@@ -28,4 +28,4 @@ data:
       #obfuscate-message: true #Indicates should received mail be logged and stored with hidden sensitive information.
 kind: ConfigMap
 metadata:
-  name: mailarchivingsmtpconfigmap
+  name: massmtp-prod

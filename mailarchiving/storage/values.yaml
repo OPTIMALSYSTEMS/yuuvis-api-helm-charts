@@ -8,11 +8,21 @@ yuuvis:
     app: yuuvis
   image:
     imagePullPolicy: Always
+    dockerRegistry: docker.yuuvis.org
     imagePullSecret: yuuvisorg
   configservice:
     url: http://system.yuuvis #change value if system is in another namespace not yuuvis e.g. http://system.2024winter
   mailarchiving:
-    initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+    initContainer:
+      image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      tolerations: [ ]
+      nodeAffinity: { }
+      securityContext: { }
+      restartPolicy: OnFailure
+      imagePullPolicy: IfNotPresent
+    gitConfigInitJob:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 3600 #job will be deleted after 1 hour
     exchangeOnPremPasswordSecret:
       enabled: false
       name: exchange-onprem-secret-name # please change the value if it is in script different
@@ -25,6 +35,7 @@ yuuvis:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-storage
       tag: 2.2.1
+      restartPolicy: Always
       resources:
         requests:
           cpu: "0.2"
@@ -41,6 +52,24 @@ yuuvis:
         passwordSecret:
           name: dms-secret-name # please change the value if it is in script different
           key: dms-secret-key # please change the value if it is in script different
+      port: 8130
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+        runAsNonRoot: true
+      livenessProbe:
+        enable: true
+        initialDelaySeconds: 300
+        periodSeconds: 30
+        timeoutSeconds: 10
+        path: /manage/info
+      readinessProbe:
+        enable: true
+        initialDelaySeconds: 0
+        periodSeconds: 30
+        timeoutSeconds: 5
+        path: /manage/health
       pdb:
         # pdb requires instances > 1 and  minAvailable < instances,
         # otherwise draining nodes will deadlock!
@@ -56,3 +85,7 @@ yuuvis:
 # please change value of system service namespace e.g. http://system.2024winter
 initContainer:
   command: "until wget -q --spider http://system.yuuvis/manage/health; do echo waiting for config; sleep 11; done;"
+  image: library/busybox
+  tag: 1.36
+  imagePullPolicy: IfNotPresent
+  securityContext: { }

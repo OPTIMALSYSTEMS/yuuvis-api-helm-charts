@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+  name: smtp-git-config-init-job-{{ .Release.Revision }}
+spec:
+  backoffLimit: {{.Values.yuuvis.mailarchiving.initContainer.backoffLimit}}
+  ttlSecondsAfterFinished: {{.Values.yuuvis.mailarchiving.initContainer.ttlSecondsAfterFinished}}
+  template:
+    spec:
+      {{- with .Values.yuuvis.mailarchiving.initContainer.nodeAffinity }}
+      affinity:
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      containers:
+      - name: mailarchivingsmtp-init
+        image: {{.Values.yuuvis.mailarchiving.initContainer.helperImage}}
+        imagePullPolicy: {{.Values.yuuvis.mailarchiving.initContainer.imagePullPolicy}}
+        command: [ 'bash', '/yuuvis/script/mailarchivingsmtpinit.bash' ]
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: massmtp-prod
+        - mountPath: /yuuvis/script/mailarchivingsmtpinit.bash
+          name: git-scripts-mailarchiving-smtp
+          subPath: mailarchivingsmtpinit.bash
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}       
+      volumes:
+      - configMap:
+          name: git-scripts-mailarchiving-smtp
+        name: git-scripts-mailarchiving-smtp
+      - configMap:
+          name: massmtp-prod
+        name: massmtp-prod
+      restartPolicy: {{.Values.yuuvis.mailarchiving.initContainer.restartPolicy}}
+      {{- if .Values.yuuvis.mailarchiving.initContainer.securityContext }}
+      securityContext:
+      {{- toYaml .Values.yuuvis.mailarchiving.initContainer.securityContext | nindent 8 }}
+      {{- end }}
+      {{- with .Values.yuuvis.mailarchiving.initContainer.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

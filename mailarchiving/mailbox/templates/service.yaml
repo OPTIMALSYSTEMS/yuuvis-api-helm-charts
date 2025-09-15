@@ -10,7 +10,7 @@ spec:
   - name: http
     port: 80
     protocol: TCP
-    targetPort: 8110
+    targetPort: {{.Values.yuuvis.mailarchiving.mailbox.port}}
   selector:
     name: mailarchiving-mailbox
   type: ClusterIP

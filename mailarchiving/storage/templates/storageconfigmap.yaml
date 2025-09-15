@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mailarchivingstorageconfigmap
+  name:  application-mas-masstoragemomentum-prod
 data:
   application-mas.yml: |
     #mas:

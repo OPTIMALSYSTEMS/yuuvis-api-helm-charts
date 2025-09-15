@@ -27,15 +27,15 @@ spec:
         podAntiAffinity: {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- end }}
-      securityContext:
-        fsGroup: 2000
-        runAsGroup: 3000
-        runAsUser: 1000
       initContainers:
         - name: init-mailarchiving-storage
-          image: busybox
-          imagePullPolicy: IfNotPresent
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+          imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
           command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]
+          {{- if .Values.initContainer.securityContext }}
+          securityContext:
+          {{- toYaml .Values.initContainer.securityContext | nindent 12 }}
+          {{- end }}
       containers:
         - env:
             - name: JAVA_OPTS
@@ -66,11 +66,49 @@ spec:
           image: "{{.Values.yuuvis.mailarchiving.storage.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.storage.tag}}"
           imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           name: mailarchiving-storage
-          ports:
-            - containerPort: 8130
-              protocol: TCP
+          {{- if .Values.yuuvis.mailarchiving.storage.livenessProbe.enable }}
+          livenessProbe:
+            httpGet:
+              path: {{.Values.yuuvis.mailarchiving.storage.livenessProbe.path}}
+              port: {{.Values.yuuvis.mailarchiving.storage.port}}
+            initialDelaySeconds: {{.Values.yuuvis.mailarchiving.storage.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{.Values.yuuvis.mailarchiving.storage.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{.Values.yuuvis.mailarchiving.storage.livenessProbe.timeoutSeconds }}
+          {{- end}}
+          {{- if .Values.yuuvis.mailarchiving.storage.readinessProbe.enable }}
+          readinessProbe:
+            httpGet:
+              path: {{.Values.yuuvis.mailarchiving.storage.readinessProbe.path}}
+              port: {{.Values.yuuvis.mailarchiving.storage.port}}
+            initialDelaySeconds: {{.Values.yuuvis.mailarchiving.storage.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{.Values.yuuvis.mailarchiving.storage.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{.Values.yuuvis.mailarchiving.storage.readinessProbe.timeoutSeconds }}
+          {{- end}}
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           {{- with .Values.yuuvis.mailarchiving.storage.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
       imagePullSecrets:
         - name: {{.Values.yuuvis.image.imagePullSecret}}
+      restartPolicy: {{ .Values.yuuvis.mailarchiving.storage.restartPolicy }}
+      {{- with .Values.yuuvis.mailarchiving.storage.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.mailarchiving.storage.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.mailarchiving.storage.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.mailarchiving.storage.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.mailarchiving.storage.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.mailarchiving.storage.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.mailarchiving.storage.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.mailarchiving.storage.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault

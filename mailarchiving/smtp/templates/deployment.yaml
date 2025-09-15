@@ -27,15 +27,15 @@ spec:
         podAntiAffinity: {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- end }}
-      securityContext:
-        fsGroup: 2000
-        runAsGroup: 3000
-        runAsUser: 1000
       initContainers:
         - name: init-mailarchiving-smtp
-          image: busybox
-          imagePullPolicy: IfNotPresent
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+          imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
           command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]
+          {{- if .Values.initContainer.securityContext }}
+          securityContext:
+          {{- toYaml .Values.initContainer.securityContext | nindent 12 }}
+          {{- end }}
       containers:
         - name: mailarchiving-smtp
           image: "{{.Values.yuuvis.mailarchiving.smtp.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.smtp.tag}}"
@@ -47,34 +47,56 @@ spec:
               value: prod,docker,kubernetes
             - name: SPRING_CLOUD_CONFIG_URI
               value: {{.Values.yuuvis.configservice.url}}/config
-            {{- if .Values.yuuvis.mailarchiving.exchangeOnlineSecret.enabled }}
-            - name: EXCHANGE_ONLINE_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{.Values.yuuvis.mailarchiving.exchangeOnlineSecret.name}}
-                  key: {{.Values.yuuvis.mailarchiving.exchangeOnlineSecret.key}}
-            {{- end }}
-            {{- if .Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.enabled }}
-            - name: EXCHANGE_ONPREM_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.name}}
-                  key: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.key}}
-            {{- end }}
-          ports:
-            - name: http
-              containerPort: 8120
-            - name: smtp
-              containerPort: 25000
           volumeMounts:
             - name: tls
               mountPath: /mailarchiving-tls
           {{- with .Values.yuuvis.mailarchiving.smtp.resources }}
           resources: {{- toYaml . | nindent 12 }}
-          {{- end }}   
+          {{- end }}
+          {{- if .Values.yuuvis.mailarchiving.smtp.livenessProbe.enable }}
+          livenessProbe:
+            httpGet:
+              path: {{.Values.yuuvis.mailarchiving.smtp.livenessProbe.path}}
+              port: {{.Values.yuuvis.mailarchiving.smtp.port}}
+            initialDelaySeconds: {{.Values.yuuvis.mailarchiving.smtp.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{.Values.yuuvis.mailarchiving.smtp.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{.Values.yuuvis.mailarchiving.smtp.livenessProbe.timeoutSeconds }}
+          {{- end}}
+          {{- if .Values.yuuvis.mailarchiving.smtp.readinessProbe.enable }}
+          readinessProbe:
+            httpGet:
+              path: {{.Values.yuuvis.mailarchiving.smtp.readinessProbe.path}}
+              port: {{.Values.yuuvis.mailarchiving.smtp.port}}
+            initialDelaySeconds: {{.Values.yuuvis.mailarchiving.smtp.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{.Values.yuuvis.mailarchiving.smtp.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{.Values.yuuvis.mailarchiving.smtp.readinessProbe.timeoutSeconds }}
+          {{- end}}
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
       volumes:
         - name: tls
           secret:
             secretName: mailarchiving-smtp-selfsigned-tls-secret
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
+      restartPolicy: {{ .Values.yuuvis.mailarchiving.smtp.restartPolicy }}
+      {{- with .Values.yuuvis.mailarchiving.smtp.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.mailarchiving.smtp.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.mailarchiving.smtp.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.mailarchiving.smtp.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.mailarchiving.smtp.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.mailarchiving.smtp.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.mailarchiving.smtp.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.mailarchiving.smtp.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault

@@ -8,23 +8,29 @@ yuuvis:
     app: yuuvis
   image:
     imagePullPolicy: Always
+    dockerRegistry: docker.yuuvis.org
     imagePullSecret: yuuvisorgsmtp
   configservice:
     url: http://system.yuuvis #change  value if system is in another namespace not yuuvis e.g. http://system.2021winter
   mailarchiving:
-    exchangeOnPremPasswordSecret:
-      enabled: false
-      name: exchange-onprem-secret-name # please change the value if it is in script different
-      key: exchange-onprem-secret-key # please change the value if it is in script different
-    exchangeOnlineSecret:
-      enabled: false
-      name: exchange-online-secret-name # please change the value if it is in script different
-      key: exchange-online-secret-key # please change the value if it is in script different
-    initContainerImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+    initContainer:
+      helperImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      tolerations: [ ]
+      nodeAffinity: { }
+      securityContext: { }
+      restartPolicy: OnFailure
+      imagePullPolicy: IfNotPresent
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 3600 #job will be deleted after 1 hour
+    selfSignedCert:
+      image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:jre11
+      reinstallifexists: false # set to true if you want to reinstall certificate on chart upgrade
+      password: optimal1! # change the password or use default value
     smtp:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-smtp
       tag: 2.2.1
+      restartPolicy: Always
       resources:
         requests:
           cpu: "0.2"
@@ -37,6 +43,24 @@ yuuvis:
       profiles:
         masstorage:
           uri: http://mailarchiving-storage #if it is in another namespace, please change value e.g. http://mailarchiving-storage.kookaburra
+      port: 8120
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsUser: 1000
+        runAsNonRoot: true
+      livenessProbe:
+        enable: true
+        initialDelaySeconds: 300
+        periodSeconds: 30
+        timeoutSeconds: 10
+        path: /manage/info
+      readinessProbe:
+        enable: true
+        initialDelaySeconds: 0
+        periodSeconds: 30
+        timeoutSeconds: 5
+        path: /manage/health
       pdb:
         # pdb requires instances > 1 and  minAvailable < instances,
         # otherwise draining nodes will deadlock!
@@ -51,6 +75,10 @@ yuuvis:
       podAffinity: { }
       podAntiAffinity: { }
 
-# please change value of system service namespace e.g. http://system.2024winter
+# please change value of system service namespace e.g. http://system.2024winter and mailarchiving-storage e.g. http://mailarchiving-storage.kookaburra
 initContainer:
-  command: "until wget -q --spider http://system.yuuvis/manage/health; do echo waiting for config; sleep 11; done;"
+  command: "until wget -q --spider http://system/manage/health && wget -q --spider http://mailarchiving-storage/manage/health; do echo waiting for services; sleep 11; done;"
+  image: library/busybox
+  tag: 1.36
+  imagePullPolicy: IfNotPresent
+  securityContext: { }

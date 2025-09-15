@@ -3,14 +3,16 @@ kind: Job
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
-  name: mailarchiving-smtp-create-selfsigned-cert-job
+  name: mailarchiving-smtp-create-selfsigned-cert-job-{{ .Release.Revision }}
 spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600
   template:
     spec:
       containers:
         - name: mailarchiving-smtp-tls
-          image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:jre11
-          imagePullPolicy: IfNotPresent
+          image: {{.Values.yuuvis.mailarchiving.selfSignedCert.image}}
+          imagePullPolicy: {{.Values.yuuvis.mailarchiving.initContainer.imagePullPolicy}}
           command: [ "/bin/bash" ]
           args: [ "/mailarchiving/script/createSelfsignedCert.bash" ]
           volumeMounts:
@@ -21,7 +23,14 @@ spec:
         - name: {{.Values.yuuvis.image.imagePullSecret}}
       volumes:
         - configMap:
-            name: mailarchivingcreateselfsignedcert
+            name: selfsignedcert
           name: createscript
-      restartPolicy: OnFailure
-      serviceAccountName: create-selfsigned-cert
+      restartPolicy: {{.Values.yuuvis.mailarchiving.initContainer.restartPolicy}}
+      serviceAccountName: mailarchiving-smtp
+      {{- if .Values.yuuvis.mailarchiving.initContainer.securityContext }}
+      securityContext:
+      {{- toYaml .Values.yuuvis.mailarchiving.initContainer.securityContext | nindent 8 }}
+      {{- end }}
+      {{- with .Values.yuuvis.mailarchiving.initContainer.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
