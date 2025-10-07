@@ -71,7 +71,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditiontextworker:
-    dockerImage: yuuvis/textextraction-worker-service:4.21.7
+    dockerImage: yuuvis/textextraction-worker-service:4.21.9
     instances: 1
     profiles: prod
     java:

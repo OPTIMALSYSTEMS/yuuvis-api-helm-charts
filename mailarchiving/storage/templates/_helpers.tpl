@@ -30,7 +30,7 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
-Create yuuvisorg pull secret.
+Create yuuvisorgstorage pull secret.
 */}}
 {{- define "imagePullSecret" }}
 {{- printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}}}" .Values.imageCredentials.yuuvisorg.registry (printf "%s:%s" .Values.imageCredentials.yuuvisorg.username .Values.imageCredentials.yuuvisorg.password | b64enc) | b64enc }}

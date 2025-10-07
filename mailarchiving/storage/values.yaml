@@ -9,7 +9,7 @@ yuuvis:
   image:
     imagePullPolicy: Always
     dockerRegistry: docker.yuuvis.org
-    imagePullSecret: yuuvisorg
+    imagePullSecret: yuuvisorgstorage
   configservice:
     url: http://system.yuuvis #change value if system is in another namespace not yuuvis e.g. http://system.2024winter
   mailarchiving:
