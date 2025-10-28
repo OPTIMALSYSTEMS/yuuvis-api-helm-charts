@@ -3,7 +3,7 @@ kind: Job
 metadata:
   labels:
     app: {{.Values.yuuvis.labels.app}}
-  name: mailbox-git-config-init-job-{{ .Release.Revision }}
+  name: mas-mailbox-git-config-init-job-{{ .Release.Revision }}
 spec:
   backoffLimit: {{.Values.yuuvis.mailarchiving.gitConfigInitJob.backoffLimit}}
   ttlSecondsAfterFinished: {{.Values.yuuvis.mailarchiving.gitConfigInitJob.ttlSecondsAfterFinished}}
