@@ -93,6 +93,10 @@ spec:
           {{- with .Values.yuuvis.mailarchiving.storage.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with .Values.yuuvis.mailarchiving.storage.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       imagePullSecrets:
         - name: {{.Values.yuuvis.image.imagePullSecret}}
       restartPolicy: {{ .Values.yuuvis.mailarchiving.storage.restartPolicy }}
@@ -104,6 +108,10 @@ spec:
       {{- end }}
       {{- with .Values.yuuvis.mailarchiving.storage.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.yuuvis.mailarchiving.storage.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
         fsGroup: {{.Values.yuuvis.mailarchiving.storage.securityContext.fsGroup}}

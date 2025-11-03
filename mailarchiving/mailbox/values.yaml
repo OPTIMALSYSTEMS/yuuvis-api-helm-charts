@@ -50,6 +50,14 @@ yuuvis:
           masstorage:
             uri: http://mailarchiving-storage #if it is in another namespace, please change value e.g. http://mailarchiving-storage.kookaburra
       port: 8110
+    #  volumes:
+    #    - name: ews-secret
+    #      secret:
+    #        secretName: ews-secret
+    #  volumeMounts:
+    #    - name: ews-secret
+    #      mountPath: "/etc/mailarchiving/certs/"
+    #      subPath: ews.crt
       securityContext:
         fsGroup: 2000
         runAsGroup: 3000

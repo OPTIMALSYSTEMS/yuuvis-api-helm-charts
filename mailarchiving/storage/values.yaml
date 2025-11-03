@@ -53,6 +53,14 @@ yuuvis:
           name: dms-secret-name # please change the value if it is in script different
           key: dms-secret-key # please change the value if it is in script different
       port: 8130
+    #  volumes:
+    #    - name: ews-secret
+    #      secret:
+    #        secretName: ews-secret
+    #  volumeMounts:
+    #    - name: ews-secret
+    #      mountPath: "/etc/mailarchiving/certs/"
+    #      subPath: ews.crt
       securityContext:
         fsGroup: 2000
         runAsGroup: 3000
