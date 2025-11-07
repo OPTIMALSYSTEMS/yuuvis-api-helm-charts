@@ -29,7 +29,7 @@ yuuvis:
     smtp:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-smtp
-      tag: 2.2.1
+      tag: 2.2.2
       restartPolicy: Always
       resources:
         requests:

@@ -34,7 +34,7 @@ yuuvis:
     storage:
       instances: 1
       dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-storage
-      tag: 2.2.1
+      tag: 2.2.2
       restartPolicy: Always
       resources:
         requests:
@@ -60,7 +60,6 @@ yuuvis:
     #  volumeMounts:
     #    - name: ews-secret
     #      mountPath: "/etc/mailarchiving/certs/"
-    #      subPath: ews.crt
       securityContext:
         fsGroup: 2000
         runAsGroup: 3000

@@ -141,7 +141,7 @@ yuuvis:
       podAntiAffinity: {}
     viewer:
       enabled: true
-      dockerImage: yuuvis/viewerservice:3.0.12
+      dockerImage: yuuvis/viewerservice:3.0.15
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
