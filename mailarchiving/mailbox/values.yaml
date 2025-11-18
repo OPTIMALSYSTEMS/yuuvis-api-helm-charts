@@ -10,6 +10,7 @@ yuuvis:
     imagePullPolicy: IfNotPresent
     dockerRegistry: docker.yuuvis.org
     imagePullSecret: yuuvisorgmailbox
+    restartPolicy: OnFailure
   configservice:
     url: http://system.yuuvis #change value if system is in another namespace not yuuvis e.g. http://system.2021winter
   mailarchiving:
@@ -22,19 +23,17 @@ yuuvis:
       name: exchange-online-secret-name # please change the value if it is in script different
       key: exchange-online-secret-key # please change the value if it is in script different
     initContainer:
-      image: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      image: yuuvis/helper/init-helper
+      tag: latest
       tolerations: [ ]
       nodeAffinity: { }
       securityContext: { }
-      restartPolicy: OnFailure
-      imagePullPolicy: IfNotPresent
     gitConfigInitJob:
       backoffLimit: 3
       ttlSecondsAfterFinished: 3600 #job will be deleted after 1 hour
     mailbox:
       instances: 1
-      dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-mailbox
-      restartPolicy: Always
+      image: yuuvis/mailarchiving-mailbox
       tag: 2.2.2
       resources:
         requests:
@@ -91,5 +90,4 @@ initContainer:
   command: "until wget -q --spider http://system/manage/health && wget -q --spider http://mailarchiving-storage/manage/health; do echo waiting for services; sleep 11; done;"
   image: library/busybox
   tag: 1.36
-  imagePullPolicy: IfNotPresent
   securityContext: { }

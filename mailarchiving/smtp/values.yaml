@@ -7,30 +7,30 @@ yuuvis:
   labels:
     app: yuuvis
   image:
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     dockerRegistry: docker.yuuvis.org
     imagePullSecret: yuuvisorgsmtp
+    restartPolicy: OnFailure
   configservice:
     url: http://system.yuuvis #change  value if system is in another namespace not yuuvis e.g. http://system.2021winter
   mailarchiving:
     initContainer:
-      helperImage: docker.yuuvis.org/yuuvis/helper/init-helper:latest
+      image: yuuvis/helper/init-helper
+      tag: latest
       tolerations: [ ]
       nodeAffinity: { }
       securityContext: { }
-      restartPolicy: OnFailure
-      imagePullPolicy: IfNotPresent
       backoffLimit: 3
       ttlSecondsAfterFinished: 3600 #job will be deleted after 1 hour
     selfSignedCert:
-      image: docker.yuuvis.org/yuuvis/helper/create-selfsigned-cert:jre11
+      image: yuuvis/helper/create-selfsigned-cert
+      tag: jre11
       reinstallifexists: false # set to true if you want to reinstall certificate on chart upgrade
       password: optimal1! # change the password or use default value
     smtp:
       instances: 1
-      dockerRegistry: docker.yuuvis.org/yuuvis/mailarchiving-smtp
+      image: yuuvis/mailarchiving-smtp
       tag: 2.2.2
-      restartPolicy: Always
       resources:
         requests:
           cpu: "0.2"
@@ -80,5 +80,4 @@ initContainer:
   command: "until wget -q --spider http://system/manage/health && wget -q --spider http://mailarchiving-storage/manage/health; do echo waiting for services; sleep 11; done;"
   image: library/busybox
   tag: 1.36
-  imagePullPolicy: IfNotPresent
   securityContext: { }

@@ -30,7 +30,7 @@ spec:
       initContainers:
         - name: init-mailarchiving-smtp
           image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
-          imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]
           {{- if .Values.initContainer.securityContext }}
           securityContext:
@@ -38,7 +38,7 @@ spec:
           {{- end }}
       containers:
         - name: mailarchiving-smtp
-          image: "{{.Values.yuuvis.mailarchiving.smtp.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.smtp.tag}}"
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.mailarchiving.smtp.image}}:{{.Values.yuuvis.mailarchiving.smtp.tag}}"
           imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           env:
             - name: JAVA_OPTS
@@ -83,7 +83,6 @@ spec:
             secretName: mailarchiving-smtp-selfsigned-tls-secret
       imagePullSecrets:
       - name: {{.Values.yuuvis.image.imagePullSecret}}
-      restartPolicy: {{ .Values.yuuvis.mailarchiving.smtp.restartPolicy }}
       {{- with .Values.yuuvis.mailarchiving.smtp.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}

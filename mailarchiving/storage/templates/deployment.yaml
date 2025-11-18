@@ -30,7 +30,7 @@ spec:
       initContainers:
         - name: init-mailarchiving-storage
           image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
-          imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           command: [ "sh", "-c", "{{.Values.initContainer.command}}" ]
           {{- if .Values.initContainer.securityContext }}
           securityContext:
@@ -63,7 +63,7 @@ spec:
                   name: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.name}}
                   key: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.key}}
             {{- end }}
-          image: "{{.Values.yuuvis.mailarchiving.storage.dockerRegistry}}:{{.Values.yuuvis.mailarchiving.storage.tag}}"
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.mailarchiving.storage.image}}:{{.Values.yuuvis.mailarchiving.storage.tag}}"
           imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           name: mailarchiving-storage
           {{- if .Values.yuuvis.mailarchiving.storage.livenessProbe.enable }}
@@ -99,7 +99,6 @@ spec:
           {{- end }}
       imagePullSecrets:
         - name: {{.Values.yuuvis.image.imagePullSecret}}
-      restartPolicy: {{ .Values.yuuvis.mailarchiving.storage.restartPolicy }}
       {{- with .Values.yuuvis.mailarchiving.storage.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}

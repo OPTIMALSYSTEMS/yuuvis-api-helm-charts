@@ -15,8 +15,8 @@ spec:
       {{- end }}
       containers:
       - name: mailarchivingsmtp-init
-        image: {{.Values.yuuvis.mailarchiving.initContainer.helperImage}}
-        imagePullPolicy: {{.Values.yuuvis.mailarchiving.initContainer.imagePullPolicy}}
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.mailarchiving.initContainer.image}}:{{.Values.yuuvis.mailarchiving.initContainer.tag}}"
+        imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
         command: [ 'bash', '/yuuvis/script/mailarchivingsmtpinit.bash' ]
         volumeMounts:
         - mountPath: /yuuvis/data
@@ -33,7 +33,7 @@ spec:
       - configMap:
           name: massmtp-prod
         name: massmtp-prod
-      restartPolicy: {{.Values.yuuvis.mailarchiving.initContainer.restartPolicy}}
+      restartPolicy: {{.Values.yuuvis.image.restartPolicy}}
       {{- if .Values.yuuvis.mailarchiving.initContainer.securityContext }}
       securityContext:
       {{- toYaml .Values.yuuvis.mailarchiving.initContainer.securityContext | nindent 8 }}

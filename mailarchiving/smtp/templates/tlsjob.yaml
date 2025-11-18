@@ -11,8 +11,8 @@ spec:
     spec:
       containers:
         - name: mailarchiving-smtp-tls
-          image: {{.Values.yuuvis.mailarchiving.selfSignedCert.image}}
-          imagePullPolicy: {{.Values.yuuvis.mailarchiving.initContainer.imagePullPolicy}}
+          image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.mailarchiving.selfSignedCert.image}}:{{.Values.yuuvis.mailarchiving.selfSignedCert.tag}}"
+          imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           command: [ "/bin/bash" ]
           args: [ "/mailarchiving/script/createSelfsignedCert.bash" ]
           volumeMounts:
@@ -25,7 +25,7 @@ spec:
         - configMap:
             name: selfsignedcert
           name: createscript
-      restartPolicy: {{.Values.yuuvis.mailarchiving.initContainer.restartPolicy}}
+      restartPolicy: {{.Values.yuuvis.image.restartPolicy}}
       serviceAccountName: mailarchiving-smtp
       {{- if .Values.yuuvis.mailarchiving.initContainer.securityContext }}
       securityContext:
