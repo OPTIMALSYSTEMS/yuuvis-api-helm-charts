@@ -1,0 +1,107 @@
+{{- if .Values.yuuvis.client.templateservice.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: template-service
+  name: template-service
+spec:
+  replicas: {{.Values.yuuvis.client.templateservice.instances}}
+  selector:
+     matchLabels:
+      name: template-service
+  template:
+    metadata:
+      labels:
+        app: yuuvis
+        name: template-service
+    spec:
+      automountServiceAccountToken: false
+      {{- if or .Values.yuuvis.client.templateservice.nodeAffinity .Values.yuuvis.client.templateservice.podAffinity .Values.yuuvis.client.templateservice.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.templateservice.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.templateservice.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.templateservice.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+      - name: init-template-service
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
+        imagePullPolicy: IfNotPresent
+      containers:
+      - name: template-service
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.templateservice.dockerImage}}
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.client.templateservice.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.client.templateservice.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 8080
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: /manage/health
+            port: 8080
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        ports:
+        - containerPort: 8080
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        {{- if .Values.yuuvis.client.templateservice.resources }}
+        resources: {{- toYaml .Values.yuuvis.client.templateservice.resources | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret }}
+      {{- with .Values.yuuvis.client.templateservice.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.templateservice.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.templateservice.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.templateservice.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - emptyDir: {}
+        name: tmp
+{{- end }}      

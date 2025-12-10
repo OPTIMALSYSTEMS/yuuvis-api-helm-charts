@@ -12,7 +12,7 @@ yuuvis:
   # !!! Change before running
   # replace the value with the namespace you intent to use for the yuuvis API services
   # this chart creates a k8s job that generatey a selfsigned certificate and deploys the
-  # crt file as a secret to the given namespace
+  # crt file as a secret to the given namespace 
   namespaces:
     yuuvis: yuuvis
     infrastructure: infrastructure
@@ -54,9 +54,8 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
 
-
 elasticsearch:
-  image: docker.yuuvis.org/yuuvis/elasticsearch:2024-12-09
+  image: docker.yuuvis.org/yuuvis/elasticsearch:8.19.3.25112025.0
   imagePullPolicy: IfNotPresent
   imagePullSecret: dockeryuuvisorg
   storage: 100Gi
@@ -69,6 +68,10 @@ elasticsearch:
   nodes: 1
   initial_master_nodes: elasticsearch-0  
   memory: -Xms1024m -Xmx1024m
+  # extraEnvs are used in every elsticsearch deployment, no matter if high availability is enabled or disabled, and is used to set extra environment variables
+  extraEnvs:
+    - name: ES_SETTING_XPACK_SECURITY_ENABLED #!!! Change before running: this is not recommended for live/prod systems, but this settings defaults to 'true' since elasticsearch 8.X we turn it off by default to match elasticsearch 7.X
+      value: "false"
   resources:
     requests:
       memory: 2Gi # always double of JVM memory setting
@@ -142,7 +145,6 @@ elasticsearch:
       podAffinity: {}
       podAntiAffinity: {}
   
-
 postgresql:
   enabled: true
   fullnameOverride: postgresql

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  os-drive-i18n-de.json: |
+{{ tpl .Values.configfiles.osdrivei18nde . | indent 4 }}
+  os-drive-i18n-en.json: |
+{{ tpl .Values.configfiles.osdrivei18nen . | indent 4 }}
+  ai-i18n-de.json: |
+{{ tpl .Values.configfiles.aii18nde . | indent 4 }}
+  ai-i18n-en.json: |
+{{ tpl .Values.configfiles.aii18nen . | indent 4 }}
+  ai_schema.xml: | 
+{{ tpl .Values.configfiles.aischema . | indent 4 }}
+  osdrive_adhoc_demo.bpmn: | 
+{{ tpl .Values.configfiles.osdrive_adhoc_demobpmn . | indent 4 }}
+metadata:
+  name: clientsresources

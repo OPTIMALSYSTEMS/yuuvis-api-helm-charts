@@ -1,0 +1,158 @@
+apiVersion: v1
+data:
+  initgit.sh: |
+    set -e
+    cd /tmp
+    until wget -q --spider  {{.Values.yuuvis.git.protocol}}://$GITSERVER
+    do 
+        echo waiting for git
+        sleep 11
+    done
+    
+    echo git clone
+    
+    if git clone  {{.Values.yuuvis.git.protocol}}://$GITUSER:$GITPASSWORD@$GITURL --branch $GITBRANCH; 
+    then
+        echo "git branch ${GITBRANCH} already exists"
+        cd $GITNAME
+    else
+        git clone  {{.Values.yuuvis.git.protocol}}://$GITUSER:$GITPASSWORD@$GITURL
+        cd $GITNAME
+        echo "creating new ${GITBRANCH}"
+        echo git checkout -b
+        git checkout -b  $GITBRANCH
+    fi
+    
+    if ! [ -f application-dbs.yml ]; then
+      echo "add application-dbs.yml from configmap"
+      cp /yuuvis/data/application-dbs.yml .
+    fi
+
+    if ! [ -f application-prod.yml ]; then
+      echo "add application-prod.yml from configmap"
+      cp /yuuvis/data/application-prod.yml .
+    fi
+
+    if ! [ -f application-kubernetes.yml ]; then
+      echo "add application-kubernetes.yml from configmap"
+      cp /yuuvis/data/application-kubernetes.yml .
+    fi
+ 
+    if ! [ -f system-prod.yml ]; then
+      echo "add system-prod.yml from configmap"
+      cp /yuuvis/data/system-prod.yml .
+    fi
+
+    if ! [ -f authentication-prod.yml ]; then
+      echo "add authentication-prod.yml from configmap"
+      cp /yuuvis/data/authentication-prod.yml .
+    fi
+
+    if ! [ -f application-es.yml ]; then
+      echo "add application-es.yml from configmap"
+      cp /yuuvis/data/application-es.yml .
+    fi
+
+    if ! [ -f application-mq.yml ]; then
+      echo "add application-mq.yml from configmap"
+      cp /yuuvis/data/application-mq.yml .
+    fi
+
+    if ! [ -f application-storage.yml ]; then
+      echo "add application-storage.yml from configmap"
+      cp /yuuvis/data/application-storage.yml .
+    fi
+
+    if ! [ -f application-redis.yml ]; then
+      echo "add application-redis.yml from configmap"
+      cp /yuuvis/data/application-redis.yml .
+    fi
+
+    if ! [ -f registry-prod.yml ]; then
+      echo "add registry-prod.yml from configmap"
+      cp /yuuvis/data/registry-prod.yml .
+    fi
+
+    if ! [ -f application-metrics.yml ]; then
+      echo "add application-metrics.yml from configmap"
+      cp /yuuvis/data/application-metrics.yml .
+    fi
+
+{{- if .Values.yuuvis.services.coreextensions.enabled }}
+    if ! [ -f application-corex.yml ]; then
+      echo "add application-corex.yml from configmap"
+      cp /yuuvis/data/application-corex.yml .
+    fi
+
+    if ! [ -f api.yml ]; then
+       echo "add api.yml from configmap"
+      cp /yuuvis/data/api.yml .
+    fi
+{{- end}}
+
+    if ! [ -f application-oauth2.yml ]; then
+      echo "add application-oauth2.yml from configmap"
+      cp /yuuvis/data/application-oauth2.yml .
+      echo "create realm"
+      eval export OAUTH2PATH=$(pwd)/application-oauth2.yml
+      java -jar /yuuvis/init.jar
+    fi
+    
+    echo "copy system files"
+    mkdir system || true
+    
+    cd system
+{{- if .Values.yuuvis.init.system.schema.enabled }}
+    echo "add system/schema.xml from configmap"  
+    cp /yuuvis/data/system/schema.xml .
+{{- end}}
+{{- if .Values.yuuvis.init.system.roleset.enabled }}
+    echo "add system/roleset.xml from configmap"  
+    cp /yuuvis/data/system/roleset.xml .
+{{- end}}
+{{- if .Values.yuuvis.init.system.serviceConfiguration.enabled }}
+    echo "add system/serviceConfiguration.json from configmap"  
+    cp /yuuvis/data/system/serviceConfiguration.json .
+{{- end}}
+{{- if .Values.yuuvis.init.system.systemHookConfiguration.enabled }}
+    echo "add system/systemHookConfiguration.json from configmap"  
+    cp /yuuvis/data/system/systemHookConfiguration.json .
+{{- end}}
+    cd ..
+
+{{- if .Values.yuuvis.init.app.osdrive.enabled }}
+    echo "add app osdrive files from configmap"
+    mkdir apps || true
+    cd apps
+    mkdir osdrive || true
+    cd osdrive
+    mkdir system || true
+    cd system
+    cp /yuuvis/data/osdrive/schema.xml .
+    cp /yuuvis/data/osdrive/systemHookConfiguration.json .
+    cd ..
+    cd ..
+    cd ..
+{{- end}}
+
+    if [ -z "$(git status --porcelain)" ]; then
+      echo "no changes, exiting ..."
+      exit 0
+    fi
+
+    git config --local user.email {{.Values.yuuvis.git.email}}
+    git config --local user.name {{.Values.yuuvis.git.user}}
+    git add .
+    git commit -m "init config"
+
+    echo 'git push'    
+    if git push origin {{.Values.yuuvis.git.branch}} &> /dev/null
+    then
+        echo 'push sucessful'
+    else
+        echo 'push unsucessful'
+        exit 1
+    fi    
+kind: ConfigMap
+metadata:
+  name: initcommitconfigmap

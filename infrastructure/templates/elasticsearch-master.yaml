@@ -48,25 +48,27 @@ spec:
         args:
         - elasticsearch
         - -E
-        - node.master=true
-        - -E
-        - node.data=false
-        - -E
-        - node.ingest=false
+        - node.roles=[master]
         - -E
         - discovery.seed_hosts=elasticsearch
         - -E
         - cluster.initial_master_nodes={{.Values.elasticsearch.highAvailability.master.initial_master_nodes}}
         ports:
-        - containerPort: 9300
-          name: transport
-          protocol: TCP
         - containerPort: 9200
           name: http
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
           protocol: TCP
         env:
         - name: "ES_JAVA_OPTS"
           value: {{.Values.elasticsearch.highAvailability.master.memory}}
+        {{- with .Values.elasticsearch.extraEnvs }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.elasticsearch.highAvailability.master.extraEnvs }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- if .Values.elasticsearch.highAvailability.master.resources }}
         resources: {{- toYaml .Values.elasticsearch.highAvailability.master.resources | nindent 10 }}
         {{- end }}

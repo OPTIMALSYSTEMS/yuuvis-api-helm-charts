@@ -1,0 +1,19 @@
+{{- if .Values.yuuvis.client.clients.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    yuuvis: "true"
+    name: clients
+  name: clients
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: clients
+  type: ClusterIP
+{{- end }}

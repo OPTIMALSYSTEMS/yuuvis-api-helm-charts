@@ -1,0 +1,19 @@
+{{- if and .Values.yuuvis.bpm.modeler.enabled .Values.yuuvis.bpm.engine.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: bpm-modeler-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: bpm-modeler
+spec:
+  selector:
+    matchLabels:
+      name: bpm-modeler
+  {{- if kindIs "int" .Values.yuuvis.bpm.modeler.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.bpm.modeler.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.bpm.modeler.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.bpm.modeler.pdb.maxUnavailable }}
+  {{- end }}
+{{- end }}

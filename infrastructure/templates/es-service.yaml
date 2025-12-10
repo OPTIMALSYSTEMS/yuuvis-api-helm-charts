@@ -6,12 +6,12 @@ metadata:
   name: elasticsearch
 spec:
   ports:
-  - name: "9300"
-    port: {{.Values.elasticsearch.port}}
-    targetPort: {{.Values.elasticsearch.targetPort}}
   - name: "9200"
     port: {{.Values.elasticsearch.port2}}
     targetPort: {{.Values.elasticsearch.targetPort2}}
+  - name: "9300"
+    port: {{.Values.elasticsearch.port}}
+    targetPort: {{.Values.elasticsearch.targetPort}}
   clusterIP: None
   selector:
     name: elasticsearch

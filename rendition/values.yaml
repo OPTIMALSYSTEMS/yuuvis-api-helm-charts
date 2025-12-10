@@ -19,7 +19,7 @@ yuuvis:
   configservice:
     url: http://system/config
   renditionservice:
-    dockerImage: yuuvis/renditionservice:4.21.7
+    dockerImage: yuuvis/renditionservice:2025.4.0
     profiles: prod
     instances: 1
     java:
@@ -33,7 +33,7 @@ yuuvis:
       #  cpu: 
     pdb:
       # pdb requires instances > 1 and minAvailable < instances,
-      # otherwise draining nodes will deadlock!
+      # otherwise draining nodes will deadlock !
       enabled: false
 
       # set `minAvailable: null` if you want to use maxUnavailable instead
@@ -45,7 +45,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditionrepository:
-    dockerImage: yuuvis/rendition-repository:2.3.1
+    dockerImage: yuuvis/rendition-repository:2025.4.0
     profiles: prod,storage,dbs
     instances: 1
     java:
@@ -71,7 +71,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditiontextworker:
-    dockerImage: yuuvis/textextraction-worker-service:4.21.9
+    dockerImage: yuuvis/textextraction-worker-service:2025.4.0
     instances: 1
     profiles: prod
     java:
@@ -100,16 +100,67 @@ yuuvis:
         password: changeme
         createuser: 
           enabled: true
-          image: yuuvis/helper/create-cross-tenant-user:24_v3
+          image: yuuvis/helper/create-cross-tenant-user:24_v7
           # required in keycloak
           # if missing keycloak will show a form to add the address
           # this will break the yuuvis login
-          email: email@example.com
+          email: textextraction@example.com
           keycloak:
             url: http://keycloak-http.infrastructure/auth
             admin: keycloak
             adminpassword: changeme
+    pdb:
+      # pdb requires instances > 1 and minAvailable < instances,
+      # otherwise draining nodes will deadlock!
+      enabled: false
 
+      # set `minAvailable: null` if you want to use maxUnavailable instead
+      minAvailable: 1
+    nodeSelector: {}
+    priorityClassName: ""
+    tolerations: []
+    nodeAffinity: {}
+    podAffinity: {}
+    podAntiAffinity: {}
+  ocrworker:
+    dockerImage: yuuvis/ocr-worker-service:2025.4.0
+    instances: 1
+    profiles: prod
+    java:
+      options: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+    resources:
+      requests:
+        memory: "1024Mi"
+      #  cpu:
+      #limits:
+      #  memory:
+      #  cpu: 
+    yuuvis:
+      url: http://authentication-internal
+      renditionrepository:
+        url: http://renditionrepository
+      user:
+      # if createnewsecret is  set, the values from
+      # user and password will be used to create a secret with
+      # the name secretname
+      # keys in the secret are 'tenant', 'user' and 'password'
+      # and optionally (if createuser.enabled 'true') 'email', 'keycloakadmin' and 'keycloakadminpassword'
+        createnewsecret: true
+        secretname: ocrworker
+        tenant: myfirsttenant
+        username: changeme
+        password: changeme
+        createuser: 
+          enabled: true
+          image: yuuvis/helper/create-cross-tenant-user:24_v7
+          # required in keycloak
+          # if missing keycloak will show a form to add the address
+          # this will break the yuuvis login
+          email: ocrworker@example.com
+          keycloak:
+            url: http://keycloak-http.infrastructure/auth
+            admin: keycloak
+            adminpassword: changeme
     pdb:
       # pdb requires instances > 1 and minAvailable < instances,
       # otherwise draining nodes will deadlock!

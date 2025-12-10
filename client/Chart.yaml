@@ -1,9 +1,10 @@
 apiVersion: v1
-appVersion: "2024winter"
+appVersion: "2025winter"
 description: yuuvis client components
 name: yuuvis-client
-version: 0.12.34
+version: 0.15.11
 keywords:
 - yuuvis
 - client
+- bpm
 home: https://yuuvis.com/scalable-content-services

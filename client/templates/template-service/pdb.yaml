@@ -1,0 +1,19 @@
+{{- if and .Values.yuuvis.client.templateservice.enabled .Values.yuuvis.client.templateservice.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: template-service-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: template-service
+spec:
+  selector:
+    matchLabels:
+      name: template-service
+  {{- if kindIs "int" .Values.yuuvis.client.templateservice.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.templateservice.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.templateservice.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.templateservice.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

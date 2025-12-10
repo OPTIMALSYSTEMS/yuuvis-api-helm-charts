@@ -1,0 +1,52 @@
+{{- if and .Values.yuuvis.services.coreextensions.enabled .Values.yuuvis.services.coreextensions.config.webdav.nginxingress.enabled }}
+{{- $top := . -}}
+{{- $yuuvis := .Values.yuuvis -}}
+{{- range $tenant := .Values.yuuvis.services.coreextensions.config.webdav.nginxingress.tenants }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webdav-{{ $tenant.name }}
+  labels:
+    app: {{ $yuuvis.labels.app}}
+  annotations:
+    {{- if $yuuvis.services.coreextensions.config.webdav.nginxingress.certmanager }}
+{{ tpl $yuuvis.services.coreextensions.config.webdav.nginxingress.certmanager $top | indent 4 }}    
+    {{- end }}
+    ingress.kubernetes.io/proxy-buffer-size: 32k
+    ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: 'true'
+    nginx.ingress.kubernetes.io/cors-allow-headers: >-
+      Authorization,X-ID-TENANT-NAME,DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range
+    nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, PROPFIND, HEAD, DELETE, TRACE, PROPPATCH, COPY, MOVE, LOCK, UNLOCK, MKCOL
+    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    nginx.ingress.kubernetes.io/enable-cors: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 32k
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '1800'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '1800'
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-ID-TENANT-NAME "{{ $tenant.name }}";
+      proxy_set_header Cookie "tenant={{ $tenant.name }}; Path=/; SameSite=Lax";
+    
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: {{ $tenant.secretname }}
+      hosts:
+        - {{ $tenant.host }}
+  rules:
+    - host: {{ $tenant.host }}
+      http:
+        paths:
+          - path: /
+            pathType: "Prefix"
+            backend:
+              service:
+                name: authentication
+                port:
+                  number: 80
+{{- end }}
+{{- end }}

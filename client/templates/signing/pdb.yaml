@@ -1,0 +1,19 @@
+{{- if and .Values.yuuvis.client.signing.enabled .Values.yuuvis.client.signing.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: signing-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: signing
+spec:
+  selector:
+    matchLabels:
+      name: signing
+  {{- if kindIs "int" .Values.yuuvis.client.signing.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.client.signing.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.client.signing.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.client.signing.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}
