@@ -169,7 +169,7 @@ yuuvis:
     apiweb:
       enabled: true
       dockerImage: yuuvis/api-web:1.25.0
-      profiles: prod,kubernetes
+      profiles: prod,kubernetes,redis
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -267,7 +267,7 @@ yuuvis:
     clients:
       enabled: true
       initContainerImage: yuuvis/sam:2025.4.0
-      dockerImage: yuuvis/clients:2.8.2
+      dockerImage: yuuvis/clients:2.8.3
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -491,7 +491,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.2.0
+      dockerImage: yuuvis/template-service:1.2.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
