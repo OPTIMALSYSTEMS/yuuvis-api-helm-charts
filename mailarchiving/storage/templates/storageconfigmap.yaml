@@ -32,7 +32,7 @@ data:
         password: ${DMS_PASSWORD}
         tenant: {{.Values.yuuvis.mailarchiving.storage.dms.tenant}}
     # user-info:
-    #   url: "http://system.yuuvis/api/userinfo/${tenant}/${userId}"
+    #   url: "http://system.yuuvis/api/userinfo/${tenant}/${userId}" #The webhook URL to fetch user information
     #   mailbox-mapping:
-    #     -"[xxxx@test.org]": xxxx
+    #     -"[mustermann@test.org]": max #Maps email addresses to internal user identifiers or names
     #     -"[kooka02@test.org]": kookatestuser03@test.org

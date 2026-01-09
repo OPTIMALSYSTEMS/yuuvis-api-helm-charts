@@ -14,17 +14,9 @@ data:
         #key-store-pass: #password for accessing key-store-file
         #key-store-type: # default value is PCK12
       #message-mode: JOURNAL  #expected type of message through smtp, set to receive journal reports (JOURNAL), Non-delivery reports, ie. alternate messages (ALTERNATE) or ordinary mails (NORMAL)
-      #exchange-mode: ONPREM #Connection type depending on service operating environment. Default value to support existing Exchange On-premises Server connection is ONPREM.
-                               #If you are using Exchange Online Server, set value to ONLINE.
-                               #If the service is operating in hybrid environment, i.e. you have both connections Exchange Online and Exchange On-premises enabled, use value HYBRID.
-                               #IMPORTANT: For HYBRID connection type, mas-smtp.restrictions.allowed-senders and mas-smtp.onprem.restrictions.allowed-senders configuration paramteres are mandatory.
       #restrictions: #Allowed senders and recipients of journaling reports for Exchange Online connection
          #allowed-senders: #sender1@sample.de, sender2@mail.com #comma separated mail addresses of accepted senders, should be adapted according to the Exchange configuration
          #allowed-recipients: #recipient1@example.de, recipient2@exchange.com #comma separated mail addresses of accepted senders, should be adapted according to the Exchange configuration
-      #onprem: #Allowed senders and recipients of journaling reports for Exchange On-premises connection
-        #restrictions:
-          #allowed-senders: #sender1@sample.de, sender2@mail.com #comma separated mail addresses of accepted senders, should be adapted according to the Exchange configuration
-          #allowed-recipients: #recipient1@example.de, recipient2@exchange.com #comma separated mail addresses of accepted senders, should be adapted according to the Exchange configuration
       #obfuscate-message: true #Indicates should received mail be logged and stored with hidden sensitive information.
 kind: ConfigMap
 metadata:
