@@ -241,7 +241,7 @@ yuuvis:
           password: changeme
     client:
       enabled: true
-      initContainerImage: yuuvis/sam:2025.4.0
+      initContainerImage: yuuvis/sam:2026.1.0-RC01
       dockerImage: yuuvis/client:6.5.0
       instances: 1
       pdb:
@@ -266,8 +266,8 @@ yuuvis:
       podAntiAffinity: {}
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2025.4.0
-      dockerImage: yuuvis/clients:2.8.3
+      initContainerImage: yuuvis/sam:2026.1.0-RC01
+      dockerImage: yuuvis/clients:3.0.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
