@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rendition
+    name: ocrworker 
+  name: ocrworker
+spec:
+  replicas: {{.Values.yuuvis.ocrworker.instances}}
+  selector:
+    matchLabels:
+      name: ocrworker
+  template:
+    metadata:
+      labels:
+        name: ocrworker
+    spec:
+      automountServiceAccountToken: false
+      {{- if or .Values.yuuvis.ocrworker.nodeAffinity .Values.yuuvis.ocrworker.podAffinity .Values.yuuvis.ocrworker.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.ocrworker.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.ocrworker.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.ocrworker.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+      - name: ocrworker
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.ocrworker.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 8080
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        readinessProbe:
+          httpGet:
+            path: /manage/info
+            port: 8080
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.ocrworker.java.options}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.ocrworker.profiles}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: YUUVIS_URL
+          value: {{.Values.yuuvis.ocrworker.yuuvis.url}}
+        - name: YUUVIS_RENDITION_REPOSITORY
+          value: {{.Values.yuuvis.ocrworker.yuuvis.renditionrepository.url}}
+        - name: YUUVIS_TENANT
+          valueFrom:
+            secretKeyRef:
+              key: tenant 
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: YUUVIS_USER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: YUUVIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        ports:
+        - containerPort: 8080
+        {{- if .Values.yuuvis.ocrworker.resources }}
+        resources: {{- toYaml .Values.yuuvis.ocrworker.resources | nindent 10 }}
+        {{- end }}
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      {{- if .Values.yuuvis.ocrworker.yuuvis.user.createuser.enabled }}
+      - name: init-create-user 
+        env:
+        - name: KEYCLOAKURL
+          value:  {{ .Values.yuuvis.ocrworker.yuuvis.user.createuser.keycloak.url }}
+        - name: KEYCLOAKADMIN
+          valueFrom:
+            secretKeyRef:
+              key: keycloakadmin 
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: KEYCLOAKPASSOWRD
+          valueFrom:
+            secretKeyRef:
+              key: keycloakadminpassword 
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: KEYCLOAKINITREALMNAME
+          valueFrom:
+            secretKeyRef:
+              key: tenant 
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: KEYCLOAKINITREALMUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: KEYCLOAKINITREALMPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        - name: KEYCLOAKINITREALMUSEREMAIL
+          valueFrom:
+            secretKeyRef:
+              key: email
+              name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.ocrworker.yuuvis.user.createuser.image}}
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      {{- end }}
+      - name: init-ocrworker
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
+      {{- with .Values.yuuvis.ocrworker.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.ocrworker.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.ocrworker.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.ocrworker.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - emptyDir: {}
+        name: tmp

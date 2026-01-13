@@ -1,0 +1,106 @@
+{{- if .Values.yuuvis.client.signing.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: signingservice
+  name: signingservice
+spec:
+  replicas: {{.Values.yuuvis.client.signing.instances}}
+  selector:
+    matchLabels:
+      name: signingservice
+  template:
+    metadata:
+      labels:
+        name: signingservice
+    spec:
+      {{- if or .Values.yuuvis.client.signing.nodeAffinity .Values.yuuvis.client.signing.podAffinity .Values.yuuvis.client.signing.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.client.signing.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.signing.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.client.signing.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+      - name: init-api-tm
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
+        imagePullPolicy: IfNotPresent
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.client.signing.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.client.signing.profiles}}
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.signing.dockerImage }}"
+        imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: /manage/info
+            port: 7560
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: /manage/health
+            port: 7561
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        name: signing
+        ports:
+        - containerPort: 7561
+          protocol: TCP
+        {{- if .Values.yuuvis.client.signing.resources }}
+        resources: {{- toYaml .Values.yuuvis.client.signing.resources | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      {{- with .Values.yuuvis.client.signing.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.client.signing.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.client.signing.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.client.signing.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - emptyDir: {}
+        name: tmp
+{{- end }}

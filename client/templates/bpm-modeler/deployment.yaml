@@ -1,0 +1,148 @@
+{{- if .Values.yuuvis.bpm.modeler.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: bpm-modeler
+  name: bpm-modeler
+spec:
+  replicas: {{.Values.yuuvis.bpm.modeler.instances}}
+  selector:
+    matchLabels:
+      name: bpm-modeler
+  template:
+    metadata:
+      labels:
+        name: bpm-modeler
+    spec:
+      automountServiceAccountToken: false
+      {{- if or .Values.yuuvis.bpm.modeler.nodeAffinity .Values.yuuvis.bpm.modeler.podAffinity .Values.yuuvis.bpm.modeler.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.bpm.modeler.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.modeler.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.modeler.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.bpm.modeler.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.bpm.modeler.profiles}}
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: bpm-modeler-dbsecret
+        - name: DB_PWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-modeler-dbsecret
+        - name: DB_HOST
+          value: {{.Values.yuuvis.bpm.modeler.database.address}}
+        - name: DB_PORT
+          value: {{.Values.yuuvis.bpm.modeler.database.port | quote }}
+        - name: DB_NAME
+          value: {{.Values.yuuvis.bpm.modeler.database.name}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.modeler.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: bpm-modeler
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        {{- if .Values.yuuvis.bpm.modeler.resources }}
+        resources: {{- toYaml .Values.yuuvis.bpm.modeler.resources | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret }}
+      initContainers:
+      {{- if .Values.yuuvis.bpm.modeler.database.createdb }}
+      - command:
+        - sh
+        - /yuuvis/script/initdb.sh
+        env:
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: init-bpmmodler-dbsecret
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: init-bpmmodler-dbsecret
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: bpm-modeler-dbsecret
+        - name: DBPWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-modeler-dbsecret
+        - name: DBNAME
+          value: {{.Values.yuuvis.bpm.modeler.database.name}}
+        - name: DBADDRESS
+          value: {{.Values.yuuvis.bpm.modeler.database.address}}
+        - name: DBPORT
+          value: {{.Values.yuuvis.bpm.modeler.database.port | quote}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.modeler.initContainerImage}}
+        imagePullPolicy: Always
+        name: init-database
+        volumeMounts:
+        - mountPath: /yuuvis/script/initdb.sh
+          name: initdbscript
+          subPath: initdb.sh
+      {{- end}}
+      - name: init-bpmmodeler
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
+        imagePullPolicy: IfNotPresent
+      {{- with .Values.yuuvis.bpm.modeler.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.bpm.modeler.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.bpm.modeler.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.bpm.modeler.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - emptyDir: {}
+        name: tmp
+      {{- if .Values.yuuvis.bpm.modeler.database.createdb }}
+      - configMap:
+          name: initbpmdbconfigmap
+        name: initdbscript
+      {{- end}}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault
+{{- end }}

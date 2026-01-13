@@ -1,0 +1,11 @@
+{{- if .Values.yuuvis.init.app.osdrive.enabled }}
+apiVersion: v1
+data:
+  schema.xml:
+{{ tpl .Values.yuuvis.osdriveAppSchema . | indent 4 }}
+  systemHookConfiguration.json: |
+{{ tpl .Values.yuuvis.osDriveSystemHookConfiguration . | indent 4 }}
+kind: ConfigMap
+metadata:
+  name: app-osdrive-configmap
+{{- end}}

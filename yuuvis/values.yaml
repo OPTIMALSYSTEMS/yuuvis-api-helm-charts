@@ -9,10 +9,11 @@ yuuvis:
     # !!! Change before  running 
     # this variable must contain the "public" ip of keycloak
     # this ip will be sent to the user from the authentication service
-    address: 192.168.99.100:30111
+    publicaddress: 192.168.99.100:30111/auth
+    clusterurl: http://keycloak-http.infrastructure/auth
     # this realm will be used in the authentication-prod yml to limit the access to 
     # endpoints to a dedicated system tenant
-    # before running change the value to an existing realm
+    # before running change the value to an existing realm 
     # TODO: changeme
     system:
       realm: myfirsttenant
@@ -29,25 +30,42 @@ yuuvis:
     password: changeme
     email: yuuvis@example.com
     branch: master
-  initjob:
+  init:
     docker:
       image: yuuvis/helper/init-realm
-      tag: 24_v3
-      imagePullPolicy: IfNotPresent
+      tag: 24_v7
     # if enabled the config-init job will create a realm in keycloak with the 
-    # name from yuuvis.initjob.keycloak.realm.name 
+    # name from yuuvis.init.keycloak.realm.name 
     # and an user with all yuuvis roles 
-    createrealm: "true"
+    createrealm: true
+    app:
+      osdrive:
+      # control if the app 'osdrive' should be added while running the system init container
+        enabled: true
+    system:
+      # control if the files defined by 'yuuvis.systemschema' etc. should be added while running the system init container
+      # the init container always copies the files if enabled
+      # WARN: existing configurations in system folder in the cluster will be overwritten
+      schema:
+        enabled: false
+      roleset:
+        enabled: true
+      systemHookConfiguration:
+        enabled: true
+      serviceConfiguration:
+        enabled: true
     keycloak: 
       url: "http://keycloak-http.infrastructure/auth"
       admin: "keycloak"
       password: "changeme"
-      # scheme used for keycloak urls in the realm entry created in the application-oauth2
-      publicscheme: https
       realm:
         name: "myfirsttenant"
         user: "root"
         password: "changeme"
+        # required in keycloak
+        # if missing keycloak will show a form to add the address
+        # this will break the yuuvis login
+        email: email@example.com
     # !!! Change before running
     # this variable must contain the "public" ip of the authentication service
     # this variable will be used by keycloak e.g. checked if it matches the redirect uri during login
@@ -105,8 +123,10 @@ yuuvis:
     ### Manage-Endpunkte
       - endpoints: /manage/**
         expose: true
-      - endpoints: /*/manage/**,/session/invalidateAll/**
+      - endpoints: /*/manage/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
+    ### internal service account endpoints
+      - endpoints: /session/invalidateAll/**,/jwt/token
     ### API-Endpunkte
       - endpoints: /api/system/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
@@ -125,11 +145,16 @@ yuuvis:
       - endpoints: /search/**,/viewer/**,/architect/**
       - endpoints: /client/**
         expose: true
+      - endpoints: /clients/**
+        expose: true
     ### bpm-engine
       - endpoints: /bpm-engine/swagger-ui.html,/bpm-engine/swagger-ui/**,/bpm-engine/v2/api-docs/**,/bpm-engine/v3/api-docs/**
       - endpoints: /bpm-engine/api/**
       - endpoints: /bpm-engine/internal/**
         access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
+    ### BPM-Modeler
+      - endpoints: /bpm-modeler/**
+        access: hasAuthority('YUUVIS_TENANT_ADMIN') 
     ### api-web
       - endpoints: /api-web/swagger-ui.html,/api-web/swagger-ui/**,/api-web/**/v3/api-docs/**
       - endpoints: /api-web/api/resources/**,/api-web/api/users/**,/api-web/api/bpm/**,/api-web/api/dms/**,/api-web/api/idm/**
@@ -149,14 +174,24 @@ yuuvis:
     ### office 365
       - endpoints: /office365/**
       - endpoints: /dashlet365/**  
+      {{- if and .Values.yuuvis.services.coreextensions.enabled .Values.yuuvis.services.coreextensions.config.webdav.nginxingress.enabled }}
+    ### core-extensions
+      - endpoints: /core-extensions/webdav/**
+        expose: true
+      {{- end}}
+    ### template-service
+      - endpoints: /template-service/**
 
   storage: |
     storage:
       default-rendition-repository: renrepo
       repositories:
+        s3_path_tenant_date_csid:
+          profiles: ['s3profile_path_tenant_date_csid']
+          default: true
         s3_with_path:
           profiles: ['s3profile_with_path']
-          default: true
+          default: false
         s3:
           profiles: ['s3profile1']
           default: false
@@ -168,6 +203,12 @@ yuuvis:
           default: false
       profiles:
         s3:
+          s3profile_path_tenant_date_csid:
+            access-key: 'MGMWCOYTDUSLNCFE'
+            secret-key: 'changeme'
+            url: 'http://minio.infrastructure:9000'
+            bucket: 'dmscloudrepodocker'
+            pathTemplate: '{tenant}-{objectTypeId}/{DATE(yyyy)}/{DATE(MM)}/{DATE(dd)}/{contentStreamId.substring(0,2)}/{contentStreamId.substring(2,4)}/{contentStreamId.substring(4,6)}'
           s3profile1:
             access-key: 'MGMWCOYTDUSLNCFE'
             secret-key: 'changeme'
@@ -194,7 +235,7 @@ yuuvis:
 
   oauth2: |
     # configuration for the yuuvis authentication service
-    keycloak.host: {{.Values.yuuvis.keycloak.address}}
+    keycloak.host: {{.Values.yuuvis.keycloak.publicaddress}}
     authentication.filter: oauth2
     authentication.provider: oauth2
     authentication.exposed.endpoints: ''
@@ -203,15 +244,46 @@ yuuvis:
     #- name: example
     #  clientId: yuuvis-authentication-service
     #  clientSecret: <my-secret>
-    #  userAuthorizationUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/auth
-    #  accessTokenUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/token
-    #  userInfoUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/userinfo
-    #  endSessionUri: https://${keycloak.host}/auth/realms/example/protocol/openid-connect/logout
+    #  userAuthorizationUri: ${keycloak.host}/realms/example/protocol/openid-connect/auth
+    #  accessTokenUri: ${keycloak.host}/realms/example/protocol/openid-connect/token
+    #  userInfoUri: ${keycloak.host}/realms/example/protocol/openid-connect/userinfo
+    #  endSessionUri: ${keycloak.host}/realms/example/protocol/openid-connect/logout
     #  userNameExtractionPattern: $.sub
     # configuration for the yuuvis organization service
-    keycloak.server: http://keycloak-http.infrastructure/auth
-    keycloak.admin.username: {{.Values.yuuvis.initjob.keycloak.admin}}
-    keycloak.admin.password: {{.Values.yuuvis.initjob.keycloak.password}}
+    keycloak.server: {{.Values.yuuvis.keycloak.clusterurl}}
+    keycloak.admin.username: {{.Values.yuuvis.init.keycloak.admin}}
+    keycloak.admin.password: {{.Values.yuuvis.init.keycloak.password}}
+  coreextension: |
+    yuuvis:
+      service-user:
+        tenant: ${YUUVIS_SERVICEUSER_TENANT:unset_ym_su_tenant}
+        user: ${YUUVIS_SERVICEUSER_USER:unset_ym_su_user}
+        password: ${YUUVIS_SERVICEUSER_PASSWORD:unset_ym_su_password}
+    corex:
+      drive:
+        app-name: drive
+        name-property: appOsdrive:fileName
+        file-type: system:document
+        file-sots: [appOsdrive:file]
+        folder-type: system:folder
+        folder-sots: [appOsdrive:file]
+        locks:
+          waitTimeSeconds: 3
+          cacheTimeSeconds: 30
+          leaseTimeSeconds: 10
+      webdav:
+        rootPath: /webdav
+        drivePath: OS Drive
+        searchPaths:
+          - name: Recently edited
+            maxHits: 20
+            query: "SELECT * FROM appOsdrive:file WHERE system:baseTypeId <> 'system:folder' AND system:lastModifiedBy = @userId ORDER BY system:lastModificationDate DESC"
+        autoRename: true
+  apiconfig: | 
+    routing.endpoints:
+    - endpoint: '/api/dms/objects/{objectId}/contents/file/{index}/**'
+      methods: 'post,get,head' # if not set, all methods are taken
+      destination: 'http://core-extensions'
   systemschema: |
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
@@ -297,6 +369,7 @@ yuuvis:
     }
   systemProd: |
     schema.changed.observers: /rest-ws/refreshschema?global=%s, /sothook/schema/refresh?global=%s, /primarysothook/schema/refresh?global=%s
+    user.info.filter.add-authority.blacklist: YUUVIS_SYSTEM_INTEGRATOR, YUUVIS_TENANT_ADMIN
   serviceConfiguration: |
     {"services": {
        "contentanalyzer": {
@@ -368,6 +441,42 @@ yuuvis:
               mapping:
                 total_fields:
                   limit: 10000
+  osdriveAppSchema: |
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
+        <propertyStringDefinition>
+            <id>appOSDrive:fileName</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>true</required>
+        </propertyStringDefinition>
+
+        <typeSecondaryDefinition>
+            <id>appOSDrive:file</id>
+            <baseId>system:secondary</baseId>
+            <propertyReference>appOSDrive:fileName</propertyReference>
+        </typeSecondaryDefinition>
+    </schema>
+  osDriveSystemHookConfiguration: |
+    {
+      "systemhooks" : {
+        "amqp" : null,
+        "lifecycle" : null,
+        "webhooks" : [ {
+          "enable" : true,
+          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && T(org.apache.commons.collections4.CollectionUtils).containsAny(properties['system:secondaryObjectTypeIds']['value'], T(java.util.List).of('appOsdrive:file'))",
+          "type" : "dms.request.objects.upsert.database-before",
+          "url" : "http://core-extensions/hooks/request/upsert/dbb/drive",
+          "useDiscovery" : false
+        }, {
+          "enable" : true,
+          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && T(org.apache.commons.collections4.CollectionUtils).containsAny(properties['system:secondaryObjectTypeIds']['value'], T(java.util.List).of('appOsdrive:file'))",
+          "type" : "dms.response.objects.delete",
+          "url" : "http://core-extensions/hooks/response/delete/drive",
+          "useDiscovery" : false
+        } ]
+      }
+    }
   image:
     imagePullPolicy: IfNotPresent
     dockerRegistry: docker.yuuvis.org
@@ -394,7 +503,7 @@ yuuvis:
   services:
     api:
       dockerImage: yuuvis/api-gateway
-      tag: 4.21.25
+      tag: 2025.4.0
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -429,8 +538,7 @@ yuuvis:
         enabled: false
         classname: nginx
         certmanager: |
-          cert-manager.io/issuer: letsencrypt-staging
-          cert-manager.io/cluster-issuer: letsencrypt-staging
+          cert-manager.io/cluster-issuer: letsencrypt-prod
         annotations: | 
           ingress.kubernetes.io/proxy-buffer-size: 32k
           ingress.kubernetes.io/ssl-redirect: "true"
@@ -447,7 +555,7 @@ yuuvis:
           nginx.ingress.kubernetes.io/proxy-send-timeout: '1800'
           nginx.ingress.kubernetes.io/rewrite-target: "/"
       dockerImage: yuuvis/authentication
-      tag: 4.21.25
+      tag: 2025.4.0
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -487,7 +595,7 @@ yuuvis:
     index:
       dockerImage: yuuvis/index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 4.21.25
+      tag: 2025.4.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -514,7 +622,7 @@ yuuvis:
       podAntiAffinity: {}
     registry:
       dockerImage: yuuvis/registry
-      tag: 4.21.25
+      tag: 2025.4.0
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -549,7 +657,7 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: yuuvis/repository
-      tag: 4.21.25
+      tag: 2025.4.0
       profiles: prod,storage,kubernetes,redis,metrics
       instances: 2
       pdb:
@@ -587,7 +695,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: yuuvis/search
-      tag: 4.21.25
+      tag: 2025.4.0
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -616,7 +724,7 @@ yuuvis:
     system:
       dockerImage: yuuvis/system
       profiles: prod,native,resourcegit,oauth2,redis,kubernetes,metrics
-      tag: 4.21.25
+      tag: 2025.4.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -660,7 +768,7 @@ yuuvis:
     commander:
       dockerImage: yuuvis/commander
       profiles: prod,kubernetes,dbs,es
-      tag: 4.21.25
+      tag: 2025.4.0
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -678,9 +786,9 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
     archive:
-      deploy: false
+      enabled: false
       dockerImage: yuuvis/archiveservice
-      tag: 4.21.25
+      tag: 2025.4.0
       profiles: prod,storage
       instances: 1
       pdb:
@@ -706,8 +814,75 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
+    coreextensions:
+      enabled: false
+      dockerImage: yuuvis/core-extensions
+      tag: 2025.4.0
+      profiles: prod,kubernetes,redis,jpapostgres,dbs,corex
+      instances: 1
+      config:
+        serviceuser:
+        # if createnewsecret is  set, the values from
+        # user and password will be used to create a secret with
+        # the name secretname
+        # keys in the secret are 'tenant', 'user' and 'password'
+        # and optionally (if createuser.enabled 'true') 'email', 'keycloakadmin' and 'keycloakadminpassword'
+          createnewsecret: true
+          secretname: coreextension
+          tenant: myfirsttenant
+          username: changeme
+          password: changeme
+          createuser: 
+            enabled: true
+            image: yuuvis/helper/create-cross-tenant-user:24_v7
+            # required in keycloak
+            # if missing keycloak will show a form to add the address
+            # this will break the yuuvis login
+            email: coreextension@example.com
+            keycloak:
+              url: http://keycloak-http.infrastructure/auth
+              admin: keycloak
+              adminpassword: changeme
+        webdav:
+          nginxingress:
+            enabled: false
+            certmanager: |
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            # list of yuuvis tenants for which an ingress should be created
+            # with most webdav clients a tenant selection e.g. via X-ID-TENANT header is not possible
+            # thus a dedicated ingress is required
+            tenants:
+              - name: myfirsttenant
+                host: webdav.url.fortenant.example.com
+                secretname: webdav-myfirsttenant
+              #- name: test
+              #  host: test.example.com,
+              #  secretname: webdav-test
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      java:
+        maxHeap: -Xmx1024m -XX:+ExitOnOutOfMemoryError
+      resources:
+        requests:
+          memory: "1024Mi"
+        #  cpu:
+        #limits:
+        #  memory:
+        #  cpu: 
+      port: 7600
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
 initContainer:
-  command: "until wget -q --spider http://system/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/api/resources/roleset.xml/path/system; do echo waiting for configservice; sleep 11; done;"
   image: library/busybox
   tag: 1.36
   imagePullPolicy: IfNotPresent

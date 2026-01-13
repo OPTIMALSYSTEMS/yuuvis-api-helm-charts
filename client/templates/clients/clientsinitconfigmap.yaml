@@ -1,0 +1,52 @@
+{{- if .Values.yuuvis.client.clients.enabled -}}
+apiVersion: v1
+data:
+  addresources.sh: |
+    set -e
+    echo 'copy resources'
+    cd /tmp
+    rm -r addresources || true
+    mkdir addresources || true
+    cd addresources
+    mkdir osdrive || true
+    mkdir ai || true
+    mkdir ai_i18n || true
+    mkdir bpm || true
+    
+    cp /yuuvis/data/resources/os-drive-i18n-de.json /tmp/addresources/osdrive/de.json
+    cp /yuuvis/data/resources/os-drive-i18n-en.json /tmp/addresources/osdrive/en.json
+
+    cp /yuuvis/data/resources/ai_schema.xml /tmp/addresources/ai/schema.xml
+
+    cp /yuuvis/data/resources/ai-i18n-de.json /tmp/addresources/ai_i18n/de.json
+    cp /yuuvis/data/resources/ai-i18n-en.json /tmp/addresources/ai_i18n/en.json
+
+    cp /yuuvis/data/resources/osdrive_adhoc_demo.bpmn /tmp/addresources/bpm/adhoc_demo.bpmn
+
+    cd /
+    echo "wait for system"
+    java -jar sam.jar wait -name system -times 10 
+    echo "wait for api-web"
+    java -jar sam.jar wait -name api-web -times 10 
+    echo "upload osdrive i18n"
+    java -jar sam.jar i18n -name osdrive -path /tmp/addresources/osdrive
+
+    {{- if .Values.yuuvis.apps.ai.enabled }} 
+    echo "upload ai i18n"
+    java -jar sam.jar i18n -name ai -path /tmp/addresources/ai_i18n
+    echo "upload app ai"
+    java -jar sam.jar app -name ai -path /tmp/addresources/ai
+    {{- end}}
+
+    {{- if .Values.yuuvis.taskflow.enabled }} 
+    echo "wait for bpm"
+    java -jar sam.jar wait -name bpm-engine -times 10 
+    echo "upload taskflow bpm"
+    java -jar sam.jar bpm -name adhoc_demo -file /tmp/addresources/bpm/adhoc_demo.bpmn
+    {{- end}}
+
+    rm -r /tmp/addresources
+kind: ConfigMap
+metadata:
+  name: clientsinit
+{{- end}}

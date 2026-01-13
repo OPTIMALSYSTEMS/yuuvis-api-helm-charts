@@ -1,0 +1,182 @@
+{{- if .Values.yuuvis.services.coreextensions.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: core-extensions
+  name: core-extensions
+spec:
+  replicas: {{.Values.yuuvis.services.coreextensions.instances}}
+  selector:
+    matchLabels:
+      name: core-extensions
+  template:
+    metadata:
+      labels:
+        name: core-extensions
+    spec:
+      {{- if or .Values.yuuvis.services.coreextensions.nodeAffinity .Values.yuuvis.services.coreextensions.podAffinity .Values.yuuvis.services.coreextensions.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.services.coreextensions.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.coreextensions.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.services.coreextensions.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+      {{- if .Values.yuuvis.services.coreextensions.config.serviceuser.createuser.enabled }}
+      - name: init-create-user 
+        env:
+        - name: KEYCLOAKURL
+          value:  {{ .Values.yuuvis.services.coreextensions.config.serviceuser.createuser.keycloak.url }}
+        - name: KEYCLOAKADMIN
+          valueFrom:
+            secretKeyRef:
+              key: keycloakadmin 
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: KEYCLOAKPASSOWRD
+          valueFrom:
+            secretKeyRef:
+              key: keycloakadminpassword 
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: KEYCLOAKINITREALMNAME
+          valueFrom:
+            secretKeyRef:
+              key: tenant 
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: KEYCLOAKINITREALMUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: KEYCLOAKINITREALMPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: KEYCLOAKINITREALMUSEREMAIL
+          valueFrom:
+            secretKeyRef:
+              key: email
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.coreextensions.config.serviceuser.createuser.image}}
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      {{- end }}
+      - name: init-wait-for-system
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
+        imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
+        command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.initContainer.securityContext }}
+        securityContext:
+        {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
+      containers:
+      - name: core-extensions
+        image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.coreextensions.dockerImage}}:{{ .Values.yuuvis.services.coreextensions.tag }}"
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.livenessProbe.enable }}
+        livenessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.livenessProbe.path}}
+            port: {{.Values.yuuvis.services.coreextensions.port}}
+          initialDelaySeconds: {{.Values.yuuvis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.livenessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.readinessProbe.enable }}
+        readinessProbe:
+          httpGet:
+            path: {{.Values.yuuvis.readinessProbe.path}}
+            port: {{.Values.yuuvis.services.coreextensions.port}}
+          initialDelaySeconds: {{.Values.yuuvis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{.Values.yuuvis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{.Values.yuuvis.readinessProbe.timeoutSeconds }}
+        {{- end}}
+        {{- if .Values.yuuvis.services.coreextensions.resources }}
+        resources: {{- toYaml .Values.yuuvis.services.coreextensions.resources | nindent 10 }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.services.coreextensions.java.maxHeap}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.services.coreextensions.profiles}}
+        - name: YUUVIS_SERVICEUSER_TENANT
+          valueFrom:
+            secretKeyRef:
+              key: tenant
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: YUUVIS_SERVICEUSER_USER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: YUUVIS_SERVICEUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{.Values.yuuvis.services.coreextensions.config.serviceuser.secretname}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          valueFrom:
+            configMapKeyRef:
+              name: yuuvis-common-env
+              key: CONFIGSERVICEURL
+        ports:
+        - containerPort: {{.Values.yuuvis.services.coreextensions.port}}
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        {{- if .Values.yuuvis.services.coreextensions.volumeMounts }}
+{{ tpl .Values.yuuvis.services.coreextensions.volumeMounts . | indent 8 }}
+        {{- end }}
+      restartPolicy: Always
+      automountServiceAccountToken: false
+      {{- with .Values.yuuvis.services.coreextensions.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.services.coreextensions.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.services.coreextensions.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.services.coreextensions.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      imagePullSecrets:
+      - name: {{ .Values.yuuvis.image.imagePullSecret }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: corextensions-configmap
+        name: corex-configmap
+      - emptyDir: {}
+        name: tmp
+      {{- if .Values.yuuvis.services.coreextensions.volumes }}
+{{ tpl .Values.yuuvis.services.coreextensions.volumes . | indent 6 }}
+      {{- end}}
+{{- end}}

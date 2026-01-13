@@ -1,0 +1,41 @@
+{{- if .Values.yuuvis.client.client.enabled -}}
+apiVersion: v1
+data:
+  addresources.sh: |
+    set -e
+    echo 'copy resources'
+    cd /tmp
+    rm -r addresources || true
+    mkdir addresources || true
+    cd addresources
+    mkdir client || true
+    mkdir clientsystem || true
+    mkdir api-web || true
+    cp /yuuvis/data/resources/schema.xml /tmp/addresources/client/schema.xml
+    cp /yuuvis/data/resources/clientsystem_schema.xml /tmp/addresources/clientsystem/schema.xml
+    cp /yuuvis/data/resources/clientsystem_systemHookConfiguration.json /tmp/addresources/clientsystem/systemHookConfiguration.json
+    cp /yuuvis/data/resources/i18n_de.json /tmp/addresources/api-web/de.json
+    cp /yuuvis/data/resources/i18n_en.json /tmp/addresources/api-web/en.json
+
+    cd /
+    echo "wait for system"
+    java -jar sam.jar wait -name system -times 10 
+    echo "wait for api-web"
+    java -jar sam.jar wait -name api-web -times 10 
+    echo "upload i18n"
+    java -jar sam.jar i18n -name api-web -path /tmp/addresources/api-web
+    {{- if .Values.yuuvis.apps.clientsystem.enabled }} 
+    echo "upload app clientsystem"
+    java -jar sam.jar app -name clientsystem -path /tmp/addresources/clientsystem
+    {{- end}}
+    {{- if .Values.yuuvis.apps.client.enabled }} 
+    echo "upload app client"
+    java -jar sam.jar app -name client -path /tmp/addresources/client
+    {{- end}}
+
+    rm -r /tmp/addresources
+
+kind: ConfigMap
+metadata:
+  name: clientinit
+{{- end}}

@@ -1,31 +1,39 @@
 yuuvis:
+  labels:
+    app: yuuvis
   image:
     imagePullPolicy: Always
     imagePullSecret: yuuvisorg
     dockerRegistry: docker.yuuvis.org
-  labels:
-    app: yuuvis
   configservice:
     url: http://system/config
-  git:
-    protocol: http
-    # please not that since infrastructure helm chart 0.9.0 gitea is used 
-    # in previous versions gogs was used
-    # url: gogs.infrastructure/yuuvis/yuuvis-config.git
-    url: gitea-http.infrastructure:3000/yuuvis/yuuvis-config.git
-    name: yuuvis-config
-    user: yuuvis
-    password: changeme
-    branch: master
-    initjob:
-      docker:
-        image: yuuvis/helper/init-helper:2023-12-03
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
+  system:
+    url: http://system
+  init:
+    configuser:
+      # the init container for the 'client' and 'clients' service will
+      # add the required apps, i18n and wokrflow configurations for the services
+      # therefore an yuuvis user with the role 'YUUVIS_SYSTEM_INTEGRATOR' is required
+      secretname: configure-apps
+      # if true a secret secretName is created with
+      # values of user, tenant, password
+      createnewsecret: true
+      tenant: myfirsttenant
+      username: root
+      password: changeme
+  apps:
+  # the apps 'client' and 'clientsystem' are required by the client (no 's') service
+    client:
+      enabled: true
+    clientsystem:
+      enabled: true
+    ai:
+      enabled: true
+  # workflow used by the clients (with an 's') service
+  # this requires a running bpm-engine
+  # the bpm-engine can be installed via the bpm helm chart
+  taskflow:
+    enabled: true
   livenessProbe:
     enable: false
     initialDelaySeconds: 300
@@ -41,11 +49,127 @@ yuuvis:
     runAsGroup: 1000
     runAsUser: 1000
     runAsNonRoot: true
+  bpm:
+    engine:
+      enabled: true
+      dockerImage: yuuvis/bpm-engine:0.19.0
+      initContainerImage: yuuvis/helper/init-helper:2023-12-03
+      profiles: dbspostgres,swagger,oauth2
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock! 
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+      java:
+        maxHeap: -Xmx128m
+      resources:
+        requests:
+          memory: "512Mi"
+        #  cpu:
+        #limits:
+        #  memory:
+        #  cpu: 
+      spring:
+        datasource:
+          hikari:
+            minimumIdle: 10
+            maximumPoolSize: 100
+      configyml: |
+        # only one idm provide can be enabled at the same time
+        bpm:
+          engine:
+            idm:
+              keycloak:
+                enabled: true
+                server: 'http://keycloak-http.infrastructure/auth'
+                admin:
+                  username: 'keycloak'
+                  password: 'changeme'
+              # to use a custom identity provider that implements the Custom IDM API
+              custom:
+                enabled: false
+                base-url: 'http://my-custom-idm-provider/api'
+                # for example
+                #base-url: 'http://tenant-management/api/idm'
+      database:
+        # user and password used by the bpm service to access the desired database
+        name: themis
+        user: bpmusr
+        password: changeme
+        port: "5432"
+        address: postgresql.infrastructure
+        createdb: true
+        # for postgres systems the database an optional init job can be used to create 
+        # the database
+        # if createdb is 'true' 
+        # the following user is used to test if the database and user exists
+        # and if they dont exit, to create the database, the user and
+        # grand the user privileges for the database
+        # the privilege user must have the rights to create databases, users
+        # and grand privileges to users
+        privilege:
+          user: postgres
+          password: changeme
+    modeler:
+      enabled: true
+      dockerImage: yuuvis/bpm-modeler:0.3.0
+      initContainerImage: yuuvis/helper/init-helper:2023-12-03
+      profiles: dbspostgres,swagger
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock! 
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+      java:
+        maxHeap: -Xmx128m
+      resources:
+        requests:
+          memory: "512Mi"
+        #  cpu:
+        #limits:
+        #  memory:
+        #  cpu: 
+      database:
+        name: bpmmodel
+        user: bpmusr
+        password: changeme
+        port: "5432"
+        address: postgresql.infrastructure
+        createdb: true
+        # for postgres systems the database an optional init job can be used to create 
+        # the database
+        # if createdb is 'true' 
+        # the following user is used to test if the database and user exists
+        # and if they dont exit, to create the database, the user and
+        # grand the user privileges for the database
+        # the privilege user must have the rights to create databases, users
+        # and grand privileges to users
+        privilege:
+          user: postgres
+          password: changeme
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.21.10
-      profiles: prod,kubernetes
+      dockerImage: yuuvis/api-web:1.25.0
+      profiles: prod,kubernetes,redis
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -71,7 +195,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.15.0
+      dockerImage: yuuvis/userservice:1.17.0
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -117,7 +241,33 @@ yuuvis:
           password: changeme
     client:
       enabled: true
-      dockerImage: yuuvis/client:6.1.8
+      initContainerImage: yuuvis/sam:2025.4.0
+      dockerImage: yuuvis/client:6.5.0
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      resources:
+        requests:
+          memory: "64Mi"
+        #  cpu:
+        #limits:
+        #  memory:
+        #  cpu: 
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+    clients:
+      enabled: true
+      initContainerImage: yuuvis/sam:2025.4.0
+      dockerImage: yuuvis/clients:2.8.3
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -165,7 +315,7 @@ yuuvis:
       podAntiAffinity: {}
     architect:
       enabled: true
-      dockerImage: yuuvis/architect:2.6.0
+      dockerImage: yuuvis/architect:2.8.0
       instances: 1
       resources:
         requests:
@@ -182,7 +332,7 @@ yuuvis:
       podAntiAffinity: {}
     sothook:
       enabled: true
-      dockerImage: yuuvis/sandbox/sothook:4.21.0
+      dockerImage: yuuvis/sandbox/sothook:2025.4.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -209,7 +359,7 @@ yuuvis:
         #  cpu: 
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.18.10
+      dockerImage: yuuvis/tenant-management:1.21.0
       profiles: prod,oauth2
       instances: 1
       pdb:
@@ -226,7 +376,7 @@ yuuvis:
       podAffinity: {}
       podAntiAffinity: {}
       java:
-        maxHeap: -Xmx128m
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
       resources:
         requests:
           memory: "512Mi"
@@ -247,9 +397,36 @@ yuuvis:
       volumeMounts: |
         - mountPath: /etc/yuuvis/certs
           name: keycloak-tls-selfsigned
+    signing:
+      enabled: false
+      dockerImage: yuuvis/signingservice:11.1.2
+      profiles: prod,dev,docker,mq,components,redis
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+      java:
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+      resources:
+        requests:
+          memory: "512Mi"
+        #  cpu:
+        #limits:
+        #  memory:
+        #  cpu:
     office365:
       enabled: true
-      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-provider-client:2.0.4
+      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-provider-client:2.0.5
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -285,7 +462,7 @@ yuuvis:
         #  cpu: 
     dashlet:
       enabled: true
-      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:2.0.4
+      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:2.0.3
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -311,10 +488,36 @@ yuuvis:
         #  memory:
         #  cpu: 
       configservice:
-        url: http://configservice/config  
-      
+        url: http://system/config  
+    templateservice:
+      enabled: true
+      dockerImage: yuuvis/template-service:1.2.1
+      instances: 1
+      pdb:
+        # pdb requires instances > 1 and minAvailable < instances,
+        # otherwise draining nodes will deadlock!
+        enabled: false
+
+        # set `minAvailable: null` if you want to use maxUnavailable instead
+        minAvailable: 1
+      nodeSelector: {}
+      priorityClassName: ""
+      tolerations: []
+      nodeAffinity: {}
+      podAffinity: {}
+      podAntiAffinity: {}
+      profiles: redis
+      java:
+        maxHeap: -Xmx256m -XX:+ExitOnOutOfMemoryError
+      resources:
+        requests:
+          memory: "512Mi"
+        #  cpu:
+        #limits:
+        #  memory:
+        #  cpu:   
 initContainer:
-  command: "until wget -q --spider http://system/api/resources/schema.xml/path/system; do echo waiting for configservice; sleep 11; done;"
+  command: "until wget -q --spider http://system/api/resources/roleset.xml/path/system; do echo waiting for configservice; sleep 11; done;"
   image: library/busybox
   tag: 1.36
   imagePullPolicy: IfNotPresent
@@ -327,14 +530,14 @@ configfiles:
         <id>clienttitle</id>
         <propertyType>string</propertyType>
         <cardinality>single</cardinality>
-        <required>true</required>
+        <required>false</required>
         <maxLength>200</maxLength>
       </propertyStringDefinition>
       <propertyStringDefinition>
         <id>clientdescription</id>
         <propertyType>string</propertyType>
         <cardinality>single</cardinality>
-        <required>true</required>
+        <required>false</required>
         <maxLength>200</maxLength>
       </propertyStringDefinition>
       <typeDocumentDefinition>
@@ -391,7 +594,7 @@ configfiles:
        ]
      }
     }
-  i18nde: |
+  clienti18nde: |
     {
       "system:folder_label": "Alle Ordner",
       "system:folder_description": "01 Übergreifend",
@@ -446,7 +649,7 @@ configfiles:
       "appClientsystem:leadingType_label": "Typ",
       "appClientsystem:leadingTypeId_label": "Typ"
     }
-  i18nen: |
+  clienti18nen: |
     {
      "system:folder_label": "All folders",
      "system:folder_description": "01 Across all",
@@ -501,3 +704,513 @@ configfiles:
      "appClientsystem:leadingType_label": "Type",
      "appClientsystem:leadingTypeId_label": "Type"
     }
+  osdrivei18nde: |
+    {
+     "appOsdrive": null,
+     "appOsdrive:file_label": "Datei",
+     "appOsdrive:file_description": null,
+     "appOsdrive:fileName_label": "Name",
+     "appOsdrive:fileName_description": null
+    }
+  osdrivei18nen: |
+    {
+     "appOsdrive": null,
+     "appOsdrive:file_label": "File",
+     "appOsdrive:file_description": null,
+     "appOsdrive:fileName_label": "Name",
+     "appOsdrive:fileName_description": null
+    }
+  aii18nde: |
+    {
+      "appAi": null,
+      "appAi:invoice_label": "Rechnung",
+      "appAi:invoice_description": null,
+      "appAi:issuingCompanyName_label": "Rechnungssteller",
+      "appAi:issuingCompanyName_description": null,
+      "appAi:receivingCompanyName_label": "Rechnungsempfänger",
+      "appAi:receivingCompanyName_description": null,
+      "appAi:issuedDate_label": "Rechnungsdatum",
+      "appAi:issuedDate_description": null,
+      "appAi:invoiceNumber_label": "Rechnungsnummer",
+      "appAi:invoiceNumber_description": null,
+      "appAi:amount_label": "Betrag",
+      "appAi:amount_description": null,
+      "appAi:baseAmount_label": "Grundbetrag",
+      "appAi:baseAmount_description": null,
+      "appAi:issuerTaxNumber_label": "Umsatzsteuer-Identifikationsnummer des Rechnungsstellers",
+      "appAi:issuerTaxNumber_description": null,
+      "appAi:receiverTaxNumber_label": "Umsatzsteuer-Identifikationsnummer des Rechnungsempfängers",
+      "appAi:receiverTaxNumber_description": null,
+      "appAi:currency_label": "Währung",
+      "appAi:currency_description": null,
+      "appAi:taxAmount_label": "MwSt.",
+      "appAi:taxAmount_description": null,
+      "appAi:iban_label": "IBAN",
+      "appAi:iban_description": null,
+      "appAi:declarationOfConformity_label": "TÜV Zertifikat",
+      "appAi:declarationOfConformity_description": null,
+      "appAi:serialNumber_label": "Seriennummer",
+      "appAi:serialNumber_description": null,
+      "appAi:typeOfComponent_label": "Typ",
+      "appAi:typeOfComponent_description": null,
+      "appAi:manufacturer_label": "Hersteller",
+      "appAi:manufacturer_description": null,
+      "appAi:offer_label": "Angebot",
+      "appAi:offer_description": null,
+      "appAi:offerNumber_label": "Angebotsnummer",
+      "appAi:offerNumber_description": null,
+      "appAi:street_label": "Straße",
+      "appAi:street_description": null,
+      "appAi:zipcode_label": "PLZ",
+      "appAi:zipcode_description": null,
+      "appAi:offerDate_label": "Angebotsdatum",
+      "appAi:offerDate_description": null,
+      "appAi:city_label": "Ort",
+      "appAi:city_description": null
+    }
+  aii18nen: |
+    {
+      "appAi": null,
+      "appAi:invoice_label": "Invoice",
+      "appAi:invoice_description": null,
+      "appAi:issuingCompanyName_label": "Issuer",
+      "appAi:issuingCompanyName_description": null,
+      "appAi:receivingCompanyName_label": "Recipient",
+      "appAi:receivingCompanyName_description": null,
+      "appAi:issuedDate_label": "Invoice Date",
+      "appAi:issuedDate_description": null,
+      "appAi:invoiceNumber_label": "Invoice Number",
+      "appAi:invoiceNumber_description": null,
+      "appAi:amount_label": "Amount",
+      "appAi:amount_description": null,
+      "appAi:baseAmount_label": "Base Amount",
+      "appAi:baseAmount_description": null,
+      "appAi:issuerTaxNumber_label": "VAT Identification Number of the Issuer",
+      "appAi:issuerTaxNumber_description": null,
+      "appAi:receiverTaxNumber_label": "VAT Identification Number of the Recipient",
+      "appAi:receiverTaxNumber_description": null,
+      "appAi:currency_label": "Currency",
+      "appAi:currency_description": null,
+      "appAi:taxAmount_label": "VAT",
+      "appAi:taxAmount_description": null,
+      "appAi:iban_label": "IBAN",
+      "appAi:iban_description": null,
+      "appAi:declarationOfConformity_label": "Declaration of Conformity",
+      "appAi:declarationOfConformity_description": null,
+      "appAi:serialNumber_label": "Serial number",
+      "appAi:serialNumber_description": null,
+      "appAi:typeOfComponent_label": "Type of the component",
+      "appAi:typeOfComponent_description": null,
+      "appAi:manufacturer_label": "Manufacturer",
+      "appAi:manufacturer_description": null,
+      "appAi:offer_label": "Offer",
+      "appAi:offer_description": null,
+      "appAi:offerNumber_label": "Offer number",
+      "appAi:offerNumber_description": null,
+      "appAi:street_label": "Street",
+      "appAi:street_description": null,
+      "appAi:zipcode_label": "Postal code",
+      "appAi:zipcode_description": null,
+      "appAi:offerDate_label": "Offer date",
+      "appAi:offerDate_description": null,
+      "appAi:city_label": "City",
+      "appAi:city_description": null
+    }
+  aischema: |
+    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
+        <propertyStringDefinition>
+            <id>appAi:issuingCompanyName</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:receivingCompanyName</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyDateTimeDefinition>
+            <id>appAi:issuedDate</id>
+            <propertyType>datetime</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyDateTimeDefinition>
+        <propertyStringDefinition>
+            <id>appAi:invoiceNumber</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyDecimalDefinition>
+            <id>appAi:amount</id>
+            <propertyType>decimal</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyDecimalDefinition>
+        <propertyDecimalDefinition>
+            <id>appAi:baseAmount</id>
+            <propertyType>decimal</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyDecimalDefinition>
+        <propertyStringDefinition>
+            <id>appAi:issuerTaxNumber</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:receiverTaxNumber</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:currency</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyDecimalDefinition>
+            <id>appAi:taxAmount</id>
+            <propertyType>decimal</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyDecimalDefinition>
+        <propertyStringDefinition>
+            <id>appAi:iban</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:serialNumber</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:typeOfComponent</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:manufacturer</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:offerNumber</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:street</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyStringDefinition>
+            <id>appAi:zipcode</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <propertyDateTimeDefinition>
+            <id>appAi:offerDate</id>
+            <propertyType>datetime</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyDateTimeDefinition>
+        <propertyStringDefinition>
+            <id>appAi:city</id>
+            <propertyType>string</propertyType>
+            <cardinality>single</cardinality>
+            <required>false</required>
+        </propertyStringDefinition>
+        <typeSecondaryDefinition>
+            <id>appAi:invoice</id>
+            <baseId>system:secondary</baseId>
+            <propertyReference>appAi:issuingCompanyName</propertyReference>
+            <propertyReference>appAi:receivingCompanyName</propertyReference>
+            <propertyReference>appAi:issuedDate</propertyReference>
+            <propertyReference>appAi:invoiceNumber</propertyReference>
+            <propertyReference>appAi:amount</propertyReference>
+            <propertyReference>appAi:baseAmount</propertyReference>
+            <propertyReference>appAi:issuerTaxNumber</propertyReference>
+            <propertyReference>appAi:receiverTaxNumber</propertyReference>
+            <propertyReference>appAi:currency</propertyReference>
+            <propertyReference>appAi:taxAmount</propertyReference>
+            <propertyReference>appAi:iban</propertyReference>
+            <contentStreamAllowed>required</contentStreamAllowed>
+        </typeSecondaryDefinition>
+        <typeSecondaryDefinition>
+            <id>appAi:declarationOfConformity</id>
+            <baseId>system:secondary</baseId>
+            <propertyReference>appAi:serialNumber</propertyReference>
+            <propertyReference>appAi:typeOfComponent</propertyReference>
+            <propertyReference>appAi:manufacturer</propertyReference>
+            <contentStreamAllowed>required</contentStreamAllowed>
+        </typeSecondaryDefinition>
+        <typeSecondaryDefinition>
+            <id>appAi:offer</id>
+            <baseId>system:secondary</baseId>
+            <propertyReference>appAi:offerNumber</propertyReference>
+            <propertyReference>appAi:street</propertyReference>
+            <propertyReference>appAi:zipcode</propertyReference>
+            <propertyReference>appAi:offerDate</propertyReference>
+            <propertyReference>appAi:city</propertyReference>
+            <contentStreamAllowed>required</contentStreamAllowed>
+        </typeSecondaryDefinition>
+    </schema>
+  osdrive_adhoc_demobpmn: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="os-drive" exporter="Flowable Open Source Modeler" exporterVersion="6.7.0">
+      <process id="osdrive_adhoc_demo" name="OS Drive Adhoc Workflow - Demo Version" isExecutable="true">
+        <documentation>OS-Drive Ad-Hoc (uses OrgSet instead of single user assignment)</documentation>
+        <dataObject id="timerInPast" name="timerInPast" itemSubjectRef="xsd:boolean">
+          <extensionElements>
+            <flowable:value>false</flowable:value>
+          </extensionElements>
+        </dataObject>
+        <dataObject id="commentList" name="commentList" itemSubjectRef="xsd:string">
+          <extensionElements>
+            <flowable:value></flowable:value>
+          </extensionElements>
+        </dataObject>
+        <startEvent id="startEvent1" flowable:initiator="initiator" flowable:formKey="adhoc-startform" flowable:formFieldValidation="true"></startEvent>
+        <userTask id="sid-A6328636-A586-472E-8F4D-98D20576CF40" name="${title}" flowable:assignee="${directAssignment ? userCandidates : null }" flowable:candidateUsers="${candidateUsersAssignment ? userCandidates : null }" flowable:candidateGroups="${candidateRolesAssignment ? roleCandidates : null }" flowable:formKey="adhoc-form" flowable:formFieldValidation="true">
+          <extensionElements>
+            <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+          </extensionElements>
+        </userTask>
+        <exclusiveGateway id="sid-AB1CA685-0553-43B1-AB42-73D7755421AA" default="sid-F4954796-A7ED-4ECD-84A5-17F2E6F5965E"></exclusiveGateway>
+        <sequenceFlow id="sid-0564EC9C-7552-485A-8438-BB4FF7C6AFF7" sourceRef="sid-A6328636-A586-472E-8F4D-98D20576CF40" targetRef="sid-AB1CA685-0553-43B1-AB42-73D7755421AA"></sequenceFlow>
+        <endEvent id="sid-35A59FCC-DE9E-43F1-A36E-B93B96FBA0D4"></endEvent>
+        <exclusiveGateway id="sid-D5A58D9D-EF9F-4928-B35D-7ED1962D64EC" default="sid-5AF8A29A-32AA-498A-AB1F-55312F4CFC0C"></exclusiveGateway>
+        <sequenceFlow id="sid-5AF8A29A-32AA-498A-AB1F-55312F4CFC0C" sourceRef="sid-D5A58D9D-EF9F-4928-B35D-7ED1962D64EC" targetRef="sid-A6328636-A586-472E-8F4D-98D20576CF40"></sequenceFlow>
+        <exclusiveGateway id="sid-1C2E35D9-0C4C-4F32-AD26-6B24D6EBD135"></exclusiveGateway>
+        <exclusiveGateway id="sid-F092ADC3-8923-48B4-823F-6FAD5B6B07A3" default="sid-CD8EA910-039E-43A1-8563-11C4AB04E6C5"></exclusiveGateway>
+        <scriptTask id="sid-7EDA9179-533E-4316-8F73-96A83BE917EC" name="init inner loop variables" scriptFormat="groovy" flowable:autoStoreVariables="false">
+          <script><![CDATA[import com.fasterxml.jackson.databind.JsonNode;
+    import com.fasterxml.jackson.databind.ObjectMapper; 
+    import java.text.SimpleDateFormat
+
+    ObjectMapper objectMapper = new ObjectMapper()
+
+    //set process variables from the taskList table
+    execution.setVariable("title", taskList[0].get("title").textValue())
+    execution.setVariable("taskStatus", "Open")
+    execution.setVariable("note", "")
+
+    /* set who will work on the next task from OrgSet that is kept in table in variable nextAssignee
+    nextAssignee is of client OrgSet type: an array that contains strings and these strings are stringified JSONs:
+
+    "nextAssignee":["{\"id\":\"00d5e4f1-a960-423f-867e-f1fc0fd4daa2\",\"title\":\"USER TITLE\",\"type\":\"user\"}","{\"id\":\"YUUVIS_DEFAULT\",\"title\":\"YUUVIS_DEFAULT\",\"type\":\"role\"}"]
+
+    */
+
+    def users=new HashSet<String>()
+    def roles=new HashSet<String>()
+
+    execution.setVariable("nextAssignee", taskList[0].get("nextAssignee"))
+
+    for (final Iterator<JsonNode> i = nextAssignee.elements(); i.hasNext(); ) {
+      def JsonNode strElement= i.next(); //string from array that has to be parsed into JsonNode
+      def JsonNode element= objectMapper.readTree(strElement.textValue());
+      if(element.get("type").textValue().equals("role")) {
+          roles.add(element.get("id").textValue())
+        } else if(element.get("type").textValue().equals("user")) {
+          users.add(element.get("id").textValue())
+        }
+    }
+
+    def strLenUsers = users.toString().length()
+    def strLenRoles = roles.toString().length()
+    //set process variables for user and role candidates in CSV format (https://www.flowable.com/open-source/docs/bpmn/ch07b-BPMN-Constructs/#user-assignment)
+    execution.setVariable("userCandidates", users.toString().substring(1,strLenUsers-1))
+    execution.setVariable("roleCandidates", roles.toString().substring(1,strLenRoles-1))
+
+    //set flags for UserTask, so that we know which (candidate) assignment to use
+    def directAssignment = ( roles.size()==0 && users.size()==1 )
+    def candidateRolesAssignment = (roles.size()>0)
+    def candidateUsersAssignment = (users.size()>1) || (users.size()==1 && candidateRolesAssignment)
+
+    execution.setVariable("directAssignment", directAssignment)
+    execution.setVariable("candidateUsersAssignment", candidateUsersAssignment)
+    execution.setVariable("candidateRolesAssignment", candidateRolesAssignment)
+
+    // JUELs for User Task:
+    // ${directAssignment ? userCandidates : null }
+    // ${candidateUsersAssignment ? userCandidates : null }
+    // ${candidateRolesAssignment ? roleCandidates : null }
+
+
+    def expiry = taskList[0].get("expiryDatetime")
+    def expiryDate = null
+    if( expiry != null ) {
+      expiryDate=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(expiry.textValue())
+    }
+    execution.setVariable("expiryDatetime", expiryDate)
+
+    //remove first item in the taskList table (array)
+    if (taskList.isArray()) {
+      for (final Iterator<JsonNode> i = taskList.elements(); i.hasNext(); ) {
+        i.next();
+        i.remove();
+        break;
+      }
+    }]]></script>
+        </scriptTask>
+        <sequenceFlow id="sid-400FA456-A715-4D42-8C85-E4746010654C" sourceRef="sid-7EDA9179-533E-4316-8F73-96A83BE917EC" targetRef="sid-D5A58D9D-EF9F-4928-B35D-7ED1962D64EC"></sequenceFlow>
+        <sequenceFlow id="sid-CD8EA910-039E-43A1-8563-11C4AB04E6C5" sourceRef="sid-F092ADC3-8923-48B4-823F-6FAD5B6B07A3" targetRef="sid-1C2E35D9-0C4C-4F32-AD26-6B24D6EBD135"></sequenceFlow>
+        <sequenceFlow id="sid-F4954796-A7ED-4ECD-84A5-17F2E6F5965E" sourceRef="sid-AB1CA685-0553-43B1-AB42-73D7755421AA" targetRef="sid-D5A58D9D-EF9F-4928-B35D-7ED1962D64EC"></sequenceFlow>
+        <exclusiveGateway id="sid-293BD042-7D88-492D-8FBC-FC6A857F371E" default="sid-CEB32C09-F082-47AE-8001-096A84A2DFF3"></exclusiveGateway>
+        <exclusiveGateway id="sid-A3B5DF04-C564-4643-817E-7C04BA2F01D8"></exclusiveGateway>
+        <sequenceFlow id="sid-CEB32C09-F082-47AE-8001-096A84A2DFF3" sourceRef="sid-293BD042-7D88-492D-8FBC-FC6A857F371E" targetRef="sid-A3B5DF04-C564-4643-817E-7C04BA2F01D8"></sequenceFlow>
+        <userTask id="sid-82CC3368-F7BC-4F47-AF84-6C303A586663" name="confirm_completion" flowable:assignee="${initiator}" flowable:formKey="adhoc-form-confirmation" flowable:formFieldValidation="true">
+          <extensionElements>
+            <modeler:initiator-can-complete xmlns:modeler="http://flowable.org/modeler"><![CDATA[false]]></modeler:initiator-can-complete>
+          </extensionElements>
+        </userTask>
+        <sequenceFlow id="sid-3CA96187-6238-4989-A98E-77A3FED8C70F" sourceRef="sid-293BD042-7D88-492D-8FBC-FC6A857F371E" targetRef="sid-82CC3368-F7BC-4F47-AF84-6C303A586663">
+          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${ variables:exists(notifyInitiator)  && notifyInitiator}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="sid-FFB03812-4A4A-4511-A26A-483A81AD9AC2" sourceRef="sid-82CC3368-F7BC-4F47-AF84-6C303A586663" targetRef="sid-A3B5DF04-C564-4643-817E-7C04BA2F01D8"></sequenceFlow>
+        <exclusiveGateway id="sid-6514B102-B52D-4299-BA97-66E04ADB85F4"></exclusiveGateway>
+        <sequenceFlow id="sid-96902176-DCEF-4E5D-8C5C-74E62FD0AC11" sourceRef="sid-A3B5DF04-C564-4643-817E-7C04BA2F01D8" targetRef="sid-6514B102-B52D-4299-BA97-66E04ADB85F4"></sequenceFlow>
+        <sequenceFlow id="sid-9B22755E-D4E0-42C6-AB5D-7F8DE6DC5B86" sourceRef="sid-6514B102-B52D-4299-BA97-66E04ADB85F4" targetRef="sid-35A59FCC-DE9E-43F1-A36E-B93B96FBA0D4"></sequenceFlow>
+        <exclusiveGateway id="sid-184C60FE-46DA-403C-8D8C-8CDB0728F5DD" default="sid-DC415ECD-612E-4D39-8134-CB5B1DF4DF99"></exclusiveGateway>
+        <sequenceFlow id="sid-DC415ECD-612E-4D39-8134-CB5B1DF4DF99" sourceRef="sid-184C60FE-46DA-403C-8D8C-8CDB0728F5DD" targetRef="sid-1C2E35D9-0C4C-4F32-AD26-6B24D6EBD135"></sequenceFlow>
+        <sequenceFlow id="sid-8939D36B-2A3F-4F24-B3A0-AF2B9FD6D03C" sourceRef="sid-1C2E35D9-0C4C-4F32-AD26-6B24D6EBD135" targetRef="sid-7EDA9179-533E-4316-8F73-96A83BE917EC"></sequenceFlow>
+        <sequenceFlow id="sid-FE2DEB57-C5F9-411E-B03D-E1F8CED28D55" sourceRef="startEvent1" targetRef="sid-184C60FE-46DA-403C-8D8C-8CDB0728F5DD"></sequenceFlow>
+        <sequenceFlow id="sid-B45EE841-DA6D-4711-A504-4FD032517EA4" name="taskList not set (is null)" sourceRef="sid-184C60FE-46DA-403C-8D8C-8CDB0728F5DD" targetRef="sid-6514B102-B52D-4299-BA97-66E04ADB85F4">
+          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskList==null}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="sid-D41B1BD9-D531-4474-890C-BDE2E9A501EC" name="Task done" sourceRef="sid-AB1CA685-0553-43B1-AB42-73D7755421AA" targetRef="sid-F092ADC3-8923-48B4-823F-6FAD5B6B07A3">
+          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskStatus == 'Done'}]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="sid-41D3F071-A92D-40E0-8756-44B92C58C4A6" name="Tasklist empty" sourceRef="sid-F092ADC3-8923-48B4-823F-6FAD5B6B07A3" targetRef="sid-293BD042-7D88-492D-8FBC-FC6A857F371E">
+          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskList.size() == 0}]]></conditionExpression>
+        </sequenceFlow>
+      </process>
+      <bpmndi:BPMNDiagram id="BPMNDiagram_osdrive_adhoc_demo">
+        <bpmndi:BPMNPlane bpmnElement="osdrive_adhoc_demo" id="BPMNPlane_osdrive_adhoc_demo">
+          <bpmndi:BPMNShape bpmnElement="startEvent1" id="BPMNShape_startEvent1">
+            <omgdc:Bounds height="30.0" width="30.0" x="15.0" y="285.0"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-A6328636-A586-472E-8F4D-98D20576CF40" id="BPMNShape_sid-A6328636-A586-472E-8F4D-98D20576CF40">
+            <omgdc:Bounds height="80.0" width="100.0" x="460.0" y="258.0000000000002"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-AB1CA685-0553-43B1-AB42-73D7755421AA" id="BPMNShape_sid-AB1CA685-0553-43B1-AB42-73D7755421AA">
+            <omgdc:Bounds height="40.0" width="40.0" x="625.0" y="278.0000000000002"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-35A59FCC-DE9E-43F1-A36E-B93B96FBA0D4" id="BPMNShape_sid-35A59FCC-DE9E-43F1-A36E-B93B96FBA0D4">
+            <omgdc:Bounds height="28.0" width="28.0" x="1305.0" y="286.0"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-D5A58D9D-EF9F-4928-B35D-7ED1962D64EC" id="BPMNShape_sid-D5A58D9D-EF9F-4928-B35D-7ED1962D64EC">
+            <omgdc:Bounds height="40.0" width="40.0" x="385.0" y="278.0000000000002"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-1C2E35D9-0C4C-4F32-AD26-6B24D6EBD135" id="BPMNShape_sid-1C2E35D9-0C4C-4F32-AD26-6B24D6EBD135">
+            <omgdc:Bounds height="40.0" width="40.0" x="160.0" y="278.00000000000006"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-F092ADC3-8923-48B4-823F-6FAD5B6B07A3" id="BPMNShape_sid-F092ADC3-8923-48B4-823F-6FAD5B6B07A3">
+            <omgdc:Bounds height="40.0" width="40.0" x="760.0" y="278.0000000000002"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-7EDA9179-533E-4316-8F73-96A83BE917EC" id="BPMNShape_sid-7EDA9179-533E-4316-8F73-96A83BE917EC">
+            <omgdc:Bounds height="80.0" width="100.00000000000003" x="235.00000000000003" y="258.00000000000006"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-293BD042-7D88-492D-8FBC-FC6A857F371E" id="BPMNShape_sid-293BD042-7D88-492D-8FBC-FC6A857F371E">
+            <omgdc:Bounds height="40.0" width="40.0" x="870.0" y="278.0000000000002"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-A3B5DF04-C564-4643-817E-7C04BA2F01D8" id="BPMNShape_sid-A3B5DF04-C564-4643-817E-7C04BA2F01D8">
+            <omgdc:Bounds height="40.0" width="40.0" x="1125.0" y="280.0"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-82CC3368-F7BC-4F47-AF84-6C303A586663" id="BPMNShape_sid-82CC3368-F7BC-4F47-AF84-6C303A586663">
+            <omgdc:Bounds height="80.0" width="100.0" x="975.0" y="260.0"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-6514B102-B52D-4299-BA97-66E04ADB85F4" id="BPMNShape_sid-6514B102-B52D-4299-BA97-66E04ADB85F4">
+            <omgdc:Bounds height="40.0" width="40.0" x="1200.0" y="280.0"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNShape bpmnElement="sid-184C60FE-46DA-403C-8D8C-8CDB0728F5DD" id="BPMNShape_sid-184C60FE-46DA-403C-8D8C-8CDB0728F5DD">
+            <omgdc:Bounds height="40.0" width="40.0" x="75.0" y="278.00000000000006"></omgdc:Bounds>
+          </bpmndi:BPMNShape>
+          <bpmndi:BPMNEdge bpmnElement="sid-9B22755E-D4E0-42C6-AB5D-7F8DE6DC5B86" id="BPMNEdge_sid-9B22755E-D4E0-42C6-AB5D-7F8DE6DC5B86" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+            <omgdi:waypoint x="1239.939934409687" y="300.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1305.0" y="300.0"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-400FA456-A715-4D42-8C85-E4746010654C" id="BPMNEdge_sid-400FA456-A715-4D42-8C85-E4746010654C" flowable:sourceDockerX="50.000000000000014" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="334.9499999999418" y="298.0000000000001"></omgdi:waypoint>
+            <omgdi:waypoint x="365.0" y="298.00000000000017"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-FE2DEB57-C5F9-411E-B03D-E1F8CED28D55" id="BPMNEdge_sid-FE2DEB57-C5F9-411E-B03D-E1F8CED28D55" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="44.943064366522236" y="299.53867565629434"></omgdi:waypoint>
+            <omgdi:waypoint x="75.59701492537312" y="298.5955223880597"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-0564EC9C-7552-485A-8438-BB4FF7C6AFF7" id="BPMNEdge_sid-0564EC9C-7552-485A-8438-BB4FF7C6AFF7" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="559.9499999998759" y="298.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="625.0" y="298.0000000000002"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-DC415ECD-612E-4D39-8134-CB5B1DF4DF99" id="BPMNEdge_sid-DC415ECD-612E-4D39-8134-CB5B1DF4DF99" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="114.93827849588718" y="298.00000000000006"></omgdi:waypoint>
+            <omgdi:waypoint x="160.0" y="298.00000000000006"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-8939D36B-2A3F-4F24-B3A0-AF2B9FD6D03C" id="BPMNEdge_sid-8939D36B-2A3F-4F24-B3A0-AF2B9FD6D03C" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.000000000000014" flowable:targetDockerY="40.0">
+            <omgdi:waypoint x="199.94050903901044" y="298.00000000000006"></omgdi:waypoint>
+            <omgdi:waypoint x="235.00000000000003" y="298.00000000000006"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-96902176-DCEF-4E5D-8C5C-74E62FD0AC11" id="BPMNEdge_sid-96902176-DCEF-4E5D-8C5C-74E62FD0AC11" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="1164.9367177097204" y="300.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1200.0" y="300.0"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-5AF8A29A-32AA-498A-AB1F-55312F4CFC0C" id="BPMNEdge_sid-5AF8A29A-32AA-498A-AB1F-55312F4CFC0C" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+            <omgdi:waypoint x="424.9405090389853" y="298.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="460.0" y="298.0000000000002"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-F4954796-A7ED-4ECD-84A5-17F2E6F5965E" id="BPMNEdge_sid-F4954796-A7ED-4ECD-84A5-17F2E6F5965E" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="645.0" y="278.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="645.0" y="190.0"></omgdi:waypoint>
+            <omgdi:waypoint x="405.0" y="190.0"></omgdi:waypoint>
+            <omgdi:waypoint x="405.0" y="278.0000000000002"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-3CA96187-6238-4989-A98E-77A3FED8C70F" id="BPMNEdge_sid-3CA96187-6238-4989-A98E-77A3FED8C70F" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+            <omgdi:waypoint x="909.6516958424494" y="298.29124087591265"></omgdi:waypoint>
+            <omgdi:waypoint x="975.0" y="299.25925925925935"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-D41B1BD9-D531-4474-890C-BDE2E9A501EC" id="BPMNEdge_sid-D41B1BD9-D531-4474-890C-BDE2E9A501EC" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="664.9426165801545" y="298.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="760.0" y="298.0000000000002"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-FFB03812-4A4A-4511-A26A-483A81AD9AC2" id="BPMNEdge_sid-FFB03812-4A4A-4511-A26A-483A81AD9AC2" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="1074.949999999839" y="300.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1125.0" y="300.0"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-B45EE841-DA6D-4711-A504-4FD032517EA4" id="BPMNEdge_sid-B45EE841-DA6D-4711-A504-4FD032517EA4" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="95.0" y="317.93962018730497"></omgdi:waypoint>
+            <omgdi:waypoint x="95.0" y="394.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1220.0" y="394.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1220.0" y="319.9105697550586"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-CEB32C09-F082-47AE-8001-096A84A2DFF3" id="BPMNEdge_sid-CEB32C09-F082-47AE-8001-096A84A2DFF3" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="890.0" y="278.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="890.0" y="212.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1145.0" y="212.0"></omgdi:waypoint>
+            <omgdi:waypoint x="1145.0" y="280.0"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-41D3F071-A92D-40E0-8756-44B92C58C4A6" id="BPMNEdge_sid-41D3F071-A92D-40E0-8756-44B92C58C4A6" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="799.9409400543448" y="298.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="870.0" y="298.0000000000002"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+          <bpmndi:BPMNEdge bpmnElement="sid-CD8EA910-039E-43A1-8563-11C4AB04E6C5" id="BPMNEdge_sid-CD8EA910-039E-43A1-8563-11C4AB04E6C5" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+            <omgdi:waypoint x="780.0" y="278.0000000000002"></omgdi:waypoint>
+            <omgdi:waypoint x="780.0" y="98.0"></omgdi:waypoint>
+            <omgdi:waypoint x="180.0" y="98.0"></omgdi:waypoint>
+            <omgdi:waypoint x="180.0" y="278.00000000000006"></omgdi:waypoint>
+          </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+      </bpmndi:BPMNDiagram>
+    </definitions>

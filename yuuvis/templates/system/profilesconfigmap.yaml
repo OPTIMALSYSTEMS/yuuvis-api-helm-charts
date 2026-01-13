@@ -1,0 +1,35 @@
+apiVersion: v1
+data:
+  application-dbs.yml: |
+{{ tpl .Values.yuuvis.dbconfig . | indent 4 }}
+  application-prod.yml: |
+    docker.enabled: true
+  application-kubernetes.yml: |
+{{ tpl .Values.yuuvis.kubernetesclientconfig . | indent 4 }}  
+  system-prod.yml: |
+{{ tpl .Values.yuuvis.systemProd . | indent 4 }}
+  authentication-prod.yml: |
+{{ tpl .Values.yuuvis.authconfig . | indent 4 }}
+  application-es.yml: |
+{{ tpl .Values.yuuvis.esconfig . | indent 4 }}
+  application-mq.yml: |
+{{ tpl .Values.yuuvis.mqconfig . | indent 4 }}
+  application-storage.yml: |
+{{ tpl .Values.yuuvis.storage . | indent 4 }}
+  application-redis.yml: |
+{{ tpl .Values.yuuvis.redisconfig . | indent 4 }}  
+  registry-prod.yml: |
+    indexing.sync: true
+  application-oauth2.yml: |
+{{ tpl .Values.yuuvis.oauth2 . | indent 4 }}
+  application-metrics.yml: |
+    management.metrics.web.server.auto-time-requests: true
+{{- if .Values.yuuvis.services.coreextensions.enabled }}
+  application-corex.yml: |
+{{ tpl .Values.yuuvis.coreextension . | indent 4 }} 
+  api.yml: |
+{{ tpl .Values.yuuvis.apiconfig . | indent 4 }} 
+{{- end}}
+kind: ConfigMap
+metadata:
+  name: profilesconfigmap

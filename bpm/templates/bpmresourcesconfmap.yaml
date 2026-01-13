@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-data:
-  bpm-engine.yml: |
-{{ tpl .Values.yuuvis.bpm.engine.configyml . | indent 4 }}
-metadata:
-  name: bpmengineresources

@@ -1,0 +1,23 @@
+{{- if .Values.yuuvis.bpm.engine.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: bpm-engine
+    name: bpm-engine
+    yuuvis: "true"
+  name: bpm-engine
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: admin
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: bpm-engine
+  type: ClusterIP
+{{- end }}

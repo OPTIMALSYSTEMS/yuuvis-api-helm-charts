@@ -1,0 +1,19 @@
+{{- if and .Values.yuuvis.services.coreextensions.enabled .Values.yuuvis.services.coreextensions.pdb.enabled -}}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: core-extensions-pdb
+  labels:
+    app: {{ .Values.yuuvis.labels.app }}
+    name: core-extensions
+spec:
+  selector:
+    matchLabels:
+      name: core-extensions
+  {{- if kindIs "int" .Values.yuuvis.services.coreextensions.pdb.minAvailable }}
+  minAvailable: {{ .Values.yuuvis.services.coreextensions.pdb.minAvailable }}
+  {{- end }}
+  {{- if kindIs "int" .Values.yuuvis.services.coreextensions.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.yuuvis.services.coreextensions.pdb.maxUnavailable }}
+  {{- end }}
+{{- end -}}

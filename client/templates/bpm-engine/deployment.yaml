@@ -1,0 +1,160 @@
+{{- if .Values.yuuvis.bpm.engine.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.yuuvis.labels.app}}
+    name: bpm-engine
+  name: bpm-engine
+spec:
+  replicas: {{.Values.yuuvis.bpm.engine.instances}}
+  selector:
+    matchLabels:
+      name: bpm-engine
+  template:
+    metadata:
+      labels:
+        name: bpm-engine
+    spec:
+      automountServiceAccountToken: false
+      {{- if or .Values.yuuvis.bpm.engine.nodeAffinity .Values.yuuvis.bpm.engine.podAffinity .Values.yuuvis.bpm.engine.podAntiAffinity }}
+      affinity:
+        {{- with .Values.yuuvis.bpm.engine.nodeAffinity }}
+        nodeAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.engine.podAffinity }}
+        podAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.yuuvis.bpm.engine.podAntiAffinity }}
+        podAntiAffinity: {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: {{.Values.yuuvis.bpm.engine.java.maxHeap}}
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: {{ .Values.yuuvis.configservice.url }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{.Values.yuuvis.bpm.engine.profiles}}
+        - name: SPRING_DATASOURCE_HIKARI_MINIMUM-IDLE
+          value: "{{.Values.yuuvis.bpm.engine.spring.datasource.hikari.minimumIdle}}"
+        - name: SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE
+          value: "{{.Values.yuuvis.bpm.engine.spring.datasource.hikari.maximumPoolSize}}"
+        - name: db.user
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: bpm-engine-dbsecret
+        - name: db.pwd
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-engine-dbsecret
+        - name: db.host
+          value: {{.Values.yuuvis.bpm.engine.database.address}}
+        - name: db.port
+          value: {{.Values.yuuvis.bpm.engine.database.port | quote }}
+        - name: db.name
+          value: {{.Values.yuuvis.bpm.engine.database.name}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.engine.dockerImage}}
+        imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        name: bpm
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        {{- if .Values.yuuvis.bpm.engine.resources }}
+        resources: {{- toYaml .Values.yuuvis.bpm.engine.resources | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      imagePullSecrets:
+      - name: {{.Values.yuuvis.image.imagePullSecret}}
+      initContainers:
+      - name: init-config-yml
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.engine.initContainerImage}}
+        imagePullPolicy: Always
+        command: ['sh', '/tmp/script/inityml.sh']
+        volumeMounts:
+        - mountPath: /yuuvis/data
+          name: bpmengineresources
+        - mountPath: /tmp/script/inityml.sh
+          name: initbpmenginescript
+          subPath: inityml.sh
+      {{- if .Values.yuuvis.bpm.engine.database.createdb }}
+      - name: init-database
+        command:
+        - sh
+        - /yuuvis/script/initdb.sh
+        env:
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: init-bpmengine-dbsecret
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: init-bpmengine-dbsecret
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              key: user
+              name: bpm-engine-dbsecret
+        - name: DBPWD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bpm-engine-dbsecret
+        - name: DBNAME
+          value: {{.Values.yuuvis.bpm.engine.database.name}}
+        - name: DBADDRESS
+          value: {{.Values.yuuvis.bpm.engine.database.address}}
+        - name: DBPORT
+          value: {{.Values.yuuvis.bpm.engine.database.port | quote}}
+        image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.engine.initContainerImage}}
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /yuuvis/script/initdb.sh
+          name: initscript
+          subPath: initdb.sh
+      {{- end }}
+      {{- with .Values.yuuvis.bpm.engine.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.yuuvis.bpm.engine.priorityClassName }}
+      priorityClassName: {{ .Values.yuuvis.bpm.engine.priorityClassName }}
+      {{- end }}
+      {{- with .Values.yuuvis.bpm.engine.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{.Values.yuuvis.securityContext.fsGroup}}
+        runAsGroup: {{.Values.yuuvis.securityContext.runAsGroup}}
+        runAsUser: {{.Values.yuuvis.securityContext.runAsUser}}
+        runAsNonRoot: {{.Values.yuuvis.securityContext.runAsNonRoot}}
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - emptyDir: {}
+        name: tmp
+      - configMap:
+          name: initbpmenginescript
+        name: initbpmenginescript
+      - configMap:
+          name: bpmengineresources
+        name: bpmengineresources
+      {{- if .Values.yuuvis.bpm.engine.database.createdb }}
+      - configMap:
+          name: initbpmdbconfigmap
+        name: initscript
+      {{- end}}
+{{- end }}
