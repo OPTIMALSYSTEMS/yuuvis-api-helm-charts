@@ -136,11 +136,6 @@ yuuvis:
     ### Endpunkte für Swagger-Webclient des API-Gateways
       - endpoints: /api/swagger-ui.html/**,/api/**/springfox-swagger-ui/**,/api/**/swagger-resources/**,/api/**/v2/api-docs/**
       - endpoints: /api/swagger-ui/**,/api/swagger/v3/api-docs/**
-      - endpoints: /api/api/system/**
-        access: hasAuthority('YUUVIS_SYSTEM_INTEGRATOR') and authentication.details.get('tenant') == '{{.Values.yuuvis.keycloak.system.realm}}'
-      - endpoints: /api/api/admin/**
-        access: hasAuthority('YUUVIS_TENANT_ADMIN')
-      - endpoints: /api/api/dms/**
     ### Webclient
       - endpoints: /search/**,/viewer/**,/architect/**
       - endpoints: /client/**
