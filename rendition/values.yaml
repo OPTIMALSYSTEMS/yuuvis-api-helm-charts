@@ -18,6 +18,15 @@ yuuvis:
     runAsNonRoot: true
   configservice:
     url: http://system/config
+  # set environment variables that should be used in every container
+  # e.g. time zone (TZ)
+  # the whole block will be added to the environment variables in the containers
+  common:
+    env: 
+    #example:
+    #env: 
+    #  - name: TZ
+    #    value: "Europe/Berlin"
   renditionservice:
     dockerImage: yuuvis/renditionservice:2025.4.0
     profiles: prod

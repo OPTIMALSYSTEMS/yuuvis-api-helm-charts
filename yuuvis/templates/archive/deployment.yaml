@@ -33,6 +33,10 @@ spec:
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         imagePullPolicy: {{.Values.initContainer.imagePullPolicy}}
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
@@ -78,6 +82,9 @@ spec:
             configMapKeyRef:
               name: yuuvis-common-env
               key: CONFIGSERVICEURL
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         ports:
         - containerPort: {{.Values.yuuvis.services.archive.port}}
         volumeMounts:

@@ -50,6 +50,9 @@ spec:
             secretKeyRef:
               key: password
               name: {{ .Values.yuuvis.init.configuser.secretname }}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         volumeMounts:
         - mountPath: /yuuvis/data/script
           name: configureapps
@@ -70,6 +73,10 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: true
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         {{- if .Values.yuuvis.client.client.resources }}
         resources: {{- toYaml .Values.yuuvis.client.client.resources | nindent 10 }}
         {{- end }}

@@ -41,7 +41,10 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: {{.Values.yuuvis.client.dashlet.profiles}}
             - name: SPRING_CLOUD_CONFIG_URI
-              value: {{ .Values.yuuvis.client.dashlet.configservice.url }} 
+              value: {{ .Values.yuuvis.client.dashlet.configservice.url }}
+          {{- if .Values.yuuvis.common.env }}
+          {{- toYaml .Values.yuuvis.common.env | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: 8099
           securityContext:

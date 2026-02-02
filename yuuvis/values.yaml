@@ -476,6 +476,15 @@ yuuvis:
     imagePullPolicy: IfNotPresent
     dockerRegistry: docker.yuuvis.org
     imagePullSecret: yuuvisorg
+  # set environment variables that should be used in every container
+  # e.g. time zone (TZ)
+  # the whole block will be added to the environment variables in the containers
+  common:
+    env: 
+    #example:
+    #env:
+    #  - name: TZ
+    #    value: "Europe/Berlin"
   livenessProbe:
     enable: true
     initialDelaySeconds: 300

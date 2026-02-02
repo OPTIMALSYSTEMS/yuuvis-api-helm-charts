@@ -53,6 +53,9 @@ spec:
           value: {{.Values.yuuvis.client.userservice.database.port | quote }}
         - name: DB_NAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: userservice
@@ -101,6 +104,9 @@ spec:
               name: userservice-dbsecret
         - name: DBNAME
           value: {{.Values.yuuvis.client.userservice.database.name}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.userservice.initContainerImage}}
         {{- if and .Values.yuuvis.client.userservice.database.createdb .Values.initContainer.securityContext }}
         securityContext:
@@ -116,6 +122,10 @@ spec:
       - name: init-config
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}

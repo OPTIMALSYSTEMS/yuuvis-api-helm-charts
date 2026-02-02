@@ -81,6 +81,9 @@ spec:
             secretKeyRef:
               key: password
               name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         ports:
         - containerPort: 8080
         {{- if .Values.yuuvis.ocrworker.resources }}
@@ -124,6 +127,9 @@ spec:
             secretKeyRef:
               key: email
               name: {{.Values.yuuvis.ocrworker.yuuvis.user.secretname}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.ocrworker.yuuvis.user.createuser.image}}
         imagePullPolicy: IfNotPresent
         securityContext:
@@ -145,6 +151,10 @@ spec:
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
+        {{- end }}
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
         {{- end }}
       {{- with .Values.yuuvis.ocrworker.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}

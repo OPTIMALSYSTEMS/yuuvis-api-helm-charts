@@ -66,6 +66,9 @@ spec:
             value:  {{.Values.yuuvis.client.office365.workDir }}  
           - name: ENABLE_RECOVERY
             value: "{{.Values.yuuvis.client.office365.enableRecovery }}"
+          {{- if .Values.yuuvis.common.env }}
+          {{- toYaml .Values.yuuvis.common.env | nindent 10 }}
+          {{- end }}
           ports:
             - containerPort: 8091
           securityContext:

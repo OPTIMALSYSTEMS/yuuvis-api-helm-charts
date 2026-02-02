@@ -9,6 +9,15 @@ yuuvis:
     url: http://system/config
   system:
     url: http://system
+  # set environment variables that should be used in every container
+  # e.g. time zone (TZ)
+  # the whole block will be added to the environment variables in the containers
+  common:
+    env: 
+    #example:
+    #env:
+    #  - name: TZ
+    #    value: "Europe/Berlin"
   init:
     configuser:
       # the init container for the 'client' and 'clients' service will

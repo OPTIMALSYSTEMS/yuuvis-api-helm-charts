@@ -39,6 +39,10 @@ spec:
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
         {{- end }}
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
       containers:
       - env:
@@ -48,6 +52,9 @@ spec:
           value: {{ .Values.yuuvis.configservice.url }}
         - name: SPRING_PROFILES_ACTIVE
           value: {{.Values.yuuvis.client.apiweb.profiles}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.apiweb.dockerImage }}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
