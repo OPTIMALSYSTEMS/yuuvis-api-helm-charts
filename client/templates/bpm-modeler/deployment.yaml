@@ -53,6 +53,9 @@ spec:
           value: {{.Values.yuuvis.bpm.modeler.database.port | quote }}
         - name: DB_NAME
           value: {{.Values.yuuvis.bpm.modeler.database.name}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.modeler.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         name: bpm-modeler
@@ -105,6 +108,9 @@ spec:
           value: {{.Values.yuuvis.bpm.modeler.database.address}}
         - name: DBPORT
           value: {{.Values.yuuvis.bpm.modeler.database.port | quote}}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.bpm.modeler.initContainerImage}}
         imagePullPolicy: Always
         name: init-database
@@ -116,6 +122,10 @@ spec:
       - name: init-bpmmodeler
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}

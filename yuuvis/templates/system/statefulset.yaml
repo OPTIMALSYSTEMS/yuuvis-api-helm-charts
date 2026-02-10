@@ -86,6 +86,9 @@ spec:
             secretKeyRef:
               key: password
               name: gitsecret
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }} 
       containers:
       - name: system
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.services.system.dockerImage}}:{{ .Values.yuuvis.services.system.tag }}"
@@ -142,6 +145,9 @@ spec:
               name: gitsecret
         - name: SPRING_CLOUD_CONFIG_SERVER_PREFIX
           value: /config/
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         ports:
         - containerPort: {{.Values.yuuvis.services.system.port}}
         volumeMounts:

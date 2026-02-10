@@ -32,6 +32,10 @@ spec:
       containers:
       - image: {{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.client.viewer.dockerImage}}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
           httpGet:

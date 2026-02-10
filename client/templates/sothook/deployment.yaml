@@ -34,6 +34,10 @@ spec:
       - name: init-sothook
         image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.initContainer.image}}:{{.Values.initContainer.tag}}"
         command: ["sh", "-c", "{{.Values.initContainer.command}}"]
+        {{- if .Values.yuuvis.common.env }}
+        env:
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         {{- if .Values.initContainer.securityContext }}
         securityContext:
         {{- toYaml .Values.initContainer.securityContext | nindent 10 }}
@@ -49,6 +53,9 @@ spec:
           value: {{.Values.yuuvis.client.sothook.profiles}}
         - name: SPRING_CLOUD_CONFIG_URI
           value: {{ .Values.yuuvis.configservice.url }}
+        {{- if .Values.yuuvis.common.env }}
+        {{- toYaml .Values.yuuvis.common.env | nindent 8 }}
+        {{- end }}
         imagePullPolicy: {{ .Values.yuuvis.image.imagePullPolicy }}
         {{- if .Values.yuuvis.livenessProbe.enable }}
         livenessProbe:
