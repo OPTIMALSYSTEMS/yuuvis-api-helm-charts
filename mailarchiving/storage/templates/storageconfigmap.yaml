@@ -8,12 +8,25 @@ data:
       #exchange-onprem:
         #access:
           #uri: https://mail.example.org/EWS/Exchange.asmx # URI of the EWS API
+
+          # --- Basic Authentication ---
+          # Use these fields if you want to authenticate with Basic Auth.
           #username: sample@example.org # Username of impersonation user
           #password: ${EXCHANGE_ONPREM_PASSWORD} # Password of impersonation user
+
+          # --- OAuth2 Authentication ---
+          # Use these fields if you want to authenticate with OAuth2.
+          #authority: https://login.microsoftonline.com/yyyyyyyy-bdf0-yyyy-8149-xxxxxxxxx/ # OAuth2 authority URL
+          #scope: https://mail.xxxx.org/.default # OAuth2 scope
+          #client-id: xxxxxxx-yyyy-zzzz-a9a1-bbbbbbbbbbb # OAuth2 client ID
+          #client-certificate: ${EXCHANGE_ONPREM_CLIENT_CERTIFICATE} # OAuth2 client certificate
+          #client-private-key: ${EXCHANGE_ONPREM_CLIENT_PRIVATE_KEY} # OAuth2 client private key
+          #technical-user: techuser@xxxx.org # OAuth2 technical user
       #onprem-mailbox-related-storage:
         #folder-name-config:
           #domains: test.org, testorg.onmicrosoft.com # Exchange On-premises domains for limiting mail addresses resolution. If empty there are no restrictions
           #property: USERNAME #Other values: LAST_NAME FIRST_NAME DISPLAY_NAME #Mail's propertly for controlling access. For more details, please refer to the official documentation
+
       #exchange-online:
         #access:
           #client-id: yyyyyyy-bbb-cccc-aaaaa-xxxxxxxx # Application authentification parameter on Azure portal.
