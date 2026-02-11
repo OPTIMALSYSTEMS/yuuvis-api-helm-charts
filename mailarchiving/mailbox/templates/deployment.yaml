@@ -58,6 +58,18 @@ spec:
                   name: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.name}}
                   key: {{.Values.yuuvis.mailarchiving.exchangeOnPremPasswordSecret.key}}
             {{- end }}
+            {{- if .Values.yuuvis.mailarchiving.exchangeOnPremOAuth2.enabled }}
+            - name: EXCHANGE_ONPREM_CLIENT_CERTIFICATE
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.yuuvis.mailarchiving.exchangeOnPremOAuth2.clientCertificateName}}
+                  key: {{.Values.yuuvis.mailarchiving.exchangeOnPremOAuth2.clientCertificateKey}}
+            - name: EXCHANGE_ONPREM_CLIENT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.yuuvis.mailarchiving.exchangeOnPremOAuth2.clientPrivateKeyName}}
+                  key: {{.Values.yuuvis.mailarchiving.exchangeOnPremOAuth2.clientPrivateKeyKey}}
+            {{- end }}
           image: "{{.Values.yuuvis.image.dockerRegistry}}/{{.Values.yuuvis.mailarchiving.mailbox.image}}:{{.Values.yuuvis.mailarchiving.mailbox.tag}}"
           imagePullPolicy: {{.Values.yuuvis.image.imagePullPolicy}}
           name: mailarchiving-mailbox

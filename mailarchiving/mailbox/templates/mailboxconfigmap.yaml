@@ -2,16 +2,12 @@ apiVersion: v1
 data:
   masmailbox-prod.yml: |
     mas-storage:
-        uri: {{.Values.yuuvis.mailarchiving.mailbox.profiles.prod.masstorage.uri}}
+      uri: {{.Values.yuuvis.mailarchiving.mailbox.profiles.prod.masstorage.uri}}
     mas-mailbox:
-      journaling:
-        mailboxes: #Backup mailboxes with details about folder to read from and expected type of messages in read folder
-        # - mailbox: #sample_mail_one@osdevtest.de #mailbox address which represents backup mailbox
-        #   read-folder: Inbox #folder name from which backup mails should be pulled
-        #   message-mode: ALTERNATE #Type of messages expected to be pulled from read-folder. Set as alternate mailbox (ALTERNATE) for NDR, JOURNAL for journaling reports or NORMAL for ordinary mails
-        # - mailbox: sample_mail_two@osdevtest.de
-        #   read-folder: Posteingang
-        #   message-mode: NORMAL
+      #archiving-exclusions:
+         #exclusion-category: skipped-sanity #Category assigned to emails skipped from archiving due to a matching exclusion rule
+         #subject-keywords: skipme, skippls #List of case-insensitive subject keywords or phrases. If any of the configured keywords is included in the subject the mail will be excluded from archiving.
+         #mailboxes: sample@test.org # List of case-insensitive mailboxes. If any of the configured mailboxes is involved in a mail (FROM, TO, CC), the mail will be excluded from archiving.
       archiving:
         mailboxes: #Mailboxes for archiving; multiple entries are possible, and each should be in the new line
         # - sample@test.org
@@ -21,6 +17,21 @@ data:
         # - GroupName2
         whitelist: # Inbox, Sent #Comma separated names of mailbox folders that are allowed for archiving
         blacklist: # CustomFolder, MyFolder #Comma separated names of folders that should be omitted from archiving
+        #retention-policy: #Retention policy requires an age condition to be triggered
+           #age-condition: #Retention policy for auto-deleting archived emails after a set period (e.g., D|30 for 30 days, M|2 for 2 months, Y|7 for 7 years)
+           #deletion-schedule: '0 0 2 * * *' #Cron expression for scheduling deletion of expired on-prem mails. Must be single-quoted. Default: runs daily at 2 AM. Note: Spring requires 6 fields (including seconds).
+        #rules:
+           #mail-date: # Configures archiving for mails received BEFORE or AFTER a specified date: <timespecifier>|dd-mm-yyyy, where timespecifier is BEFORE or AFTER. e.g. BEFORE|01-01-2025
+           #mail-size: # Configures archiving for mails with size LT (less than) or GTE (greater or equal) a value in MB: <sizespecifier>|<size in MB>, where sizespecifier is LT or GTE. e.g., LT|10
+           #mail-state: ALL # Rule to configure archiving based on mail read status. Possible values: "ALL", "READ", "UNREAD"
+      journaling:
+        mailboxes: #Backup mailboxes with details about folder to read from and expected type of messages in read folder
+        # - mailbox: #sample_mail_one@osdevtest.de #mailbox address which represents backup mailbox
+        #   read-folder: Inbox #folder name from which backup mails should be pulled
+        #   message-mode: ALTERNATE #Type of messages expected to be pulled from read-folder. Set as alternate mailbox (ALTERNATE) for NDR, JOURNAL for journaling reports or NORMAL for ordinary mails
+        # - mailbox: sample_mail_two@osdevtest.de
+        #   read-folder: Posteingang
+        #   message-mode: NORMAL
       categories:
         archived: Archived #Category for marking successfully archived mails
         error: Error #Category for marking unsuccessfully processed mails
@@ -35,9 +46,16 @@ data:
           groups: #Names of groups or group mailboxes for archiving; multiple entries are possible, and each should be in the new line
           # -  group1@testonprem.org
           # -  group2@testonprem.org
+          #retention-policy: #Retention policy requires an age condition to be triggered
+             #age-condition: #Retention policy for auto-deleting archived emails after a set period (e.g., D|30 for 30 days, M|2 for 2 months, Y|7 for 7 years)
+             #deletion-schedule: '0 0 2 * * *' #Cron expression for scheduling deletion of expired on-prem mails. Must be single-quoted. Default: runs daily at 2 AM. Note: Spring requires 6 fields (including seconds).
+          #rules:
+             #mail-date: #Configures archiving for mails received BEFORE or AFTER a specified date: <timespecifier>|dd-mm-yyyy, where timespecifier is BEFORE or AFTER. e.g. BEFORE|01-01-2025
+             #mail-size: #Configures archiving for mails with size LT (less than) or GTE (greater or equal) a value in MB: <sizespecifier>|<size in MB>, where sizespecifier is LT or GTE. e.g., LT|10
+             #mail-state: ALL #Rule to configure archiving based on mail read status. Possible values: "ALL", "READ", "UNREAD"
         categories:
           archived: ArchivedOnPrem #Category for marking successfully archived mails
-          error: ErrorOnPrem #Comma separated names of folders that should be omitted from archiving
+          error: ErrorOnPrem #Category for marking unsuccessfully processed mails
         journaling: #Backup mailboxes with details about folder to read from and expected type of messages in read folder
           mailboxes:
           # - mailbox: sample1@testonprem.org #mailbox address which represents backup mailbox
