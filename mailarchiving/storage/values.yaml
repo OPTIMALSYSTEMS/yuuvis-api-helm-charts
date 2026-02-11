@@ -23,18 +23,30 @@ yuuvis:
     gitConfigInitJob:
       backoffLimit: 3
       ttlSecondsAfterFinished: 3600 #job will be deleted after 1 hour
+    # --- Basic Authentication for Exchange Onprem ---
+    # Enable and configure these fields ONLY if you are using Basic Authentication with Exchange Onprem.
     exchangeOnPremPasswordSecret:
       enabled: false
       name: exchange-onprem-secret-name # please change the value if it is in script different
       key: exchange-onprem-secret-key # please change the value if it is in script different
+    # ---  Authentication for Exchange Online ---
+    # Enable and configure these fields ONLY if you are using Exchange Online.
     exchangeOnlineSecret:
       enabled: false
       name: exchange-online-secret-name # please change the value if it is in script different
       key: exchange-online-secret-key # please change the value if it is in script different
+    # --- Oauth2 Authentication for Exchange On-premises ---
+    # Enable and configure these fields ONLY if you are using OAuth2 Authentication with Exchange Onprem.
+    exchangeOnPremOAuth2:
+      enabled: false
+      clientCertificateName: exchange-onprem-client-certificate-name
+      clientCertificateKey: exchange-onprem-client-certificate-key
+      clientPrivateKeyName: exchange-onprem-client-private-key-name
+      clientPrivateKeyKey: exchange-onprem-client-private-key-key
     storage:
       instances: 1
       image: yuuvis/mailarchiving-storage
-      tag: 2.2.2
+      tag: 2.2.3
       resources:
         requests:
           cpu: "0.2"
