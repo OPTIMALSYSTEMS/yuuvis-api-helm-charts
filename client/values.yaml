@@ -130,7 +130,7 @@ yuuvis:
           password: changeme
     modeler:
       enabled: true
-      dockerImage: yuuvis/bpm-modeler:0.3.2
+      dockerImage: yuuvis/bpm-modeler:0.3.3
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger
       instances: 1
@@ -204,7 +204,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.17.2
+      dockerImage: yuuvis/userservice:1.17.3
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -250,7 +250,7 @@ yuuvis:
           password: changeme
     client:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.1.0-RC03
+      initContainerImage: yuuvis/sam:2026.1.0-RC04
       dockerImage: yuuvis/client:6.5.0
       instances: 1
       pdb:
@@ -275,8 +275,8 @@ yuuvis:
       podAntiAffinity: {}
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.1.0-RC03
-      dockerImage: yuuvis/clients:3.2.1
+      initContainerImage: yuuvis/sam:2026.1.0-RC04
+      dockerImage: yuuvis/clients:3.3.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -368,7 +368,7 @@ yuuvis:
         #  cpu: 
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.21.3
+      dockerImage: yuuvis/tenant-management:1.21.6
       profiles: prod,oauth2
       instances: 1
       pdb:
