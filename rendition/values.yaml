@@ -29,7 +29,7 @@ yuuvis:
     #    value: "Europe/Berlin"
   renditionservice:
     dockerImage: yuuvis/renditionservice:2025.4.2
-    profiles: prod
+    profiles: prod, redis
     instances: 1
     java:
       maxHeap: -Xmx2048m -XX:+ExitOnOutOfMemoryError
