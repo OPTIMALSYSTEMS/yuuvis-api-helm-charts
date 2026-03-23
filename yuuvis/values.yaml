@@ -459,13 +459,13 @@ yuuvis:
         "lifecycle" : null,
         "webhooks" : [ {
           "enable" : true,
-          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && T(org.apache.commons.collections4.CollectionUtils).containsAny(properties['system:secondaryObjectTypeIds']['value'], T(java.util.List).of('appOsdrive:file'))",
+          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && properties['system:secondaryObjectTypeIds']['value'].contains('appOsdrive:file')",
           "type" : "dms.request.objects.upsert.database-before",
           "url" : "http://core-extensions/hooks/request/upsert/dbb/drive",
           "useDiscovery" : false
         }, {
           "enable" : true,
-          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && T(org.apache.commons.collections4.CollectionUtils).containsAny(properties['system:secondaryObjectTypeIds']['value'], T(java.util.List).of('appOsdrive:file'))",
+          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && properties['system:secondaryObjectTypeIds']['value'].contains('appOsdrive:file')",
           "type" : "dms.response.objects.delete",
           "url" : "http://core-extensions/hooks/response/delete/drive",
           "useDiscovery" : false
