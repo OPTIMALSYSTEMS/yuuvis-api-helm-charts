@@ -31,11 +31,6 @@ yuuvis:
       username: root
       password: changeme
   apps:
-  # the apps 'client' and 'clientsystem' are required by the client (no 's') service
-    client:
-      enabled: true
-    clientsystem:
-      enabled: true
     ai:
       enabled: true
   # workflow used by the clients (with an 's') service
@@ -61,7 +56,7 @@ yuuvis:
   bpm:
     engine:
       enabled: true
-      dockerImage: yuuvis/bpm-engine:0.19.3
+      dockerImage: yuuvis/bpm-engine:0.19.5
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger,oauth2
       instances: 1
@@ -130,7 +125,7 @@ yuuvis:
           password: changeme
     modeler:
       enabled: true
-      dockerImage: yuuvis/bpm-modeler:0.3.2
+      dockerImage: yuuvis/bpm-modeler:0.3.3
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger
       instances: 1
@@ -177,7 +172,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.25.3
+      dockerImage: yuuvis/api-web:1.26.1
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
@@ -204,7 +199,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.17.2
+      dockerImage: yuuvis/userservice:1.17.3
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -248,35 +243,10 @@ yuuvis:
         privilege:
           user: postgres
           password: changeme
-    client:
-      enabled: true
-      initContainerImage: yuuvis/sam:2025.4.4
-      dockerImage: yuuvis/client:6.5.0
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      resources:
-        requests:
-          memory: "64Mi"
-        #  cpu:
-        #limits:
-        #  memory:
-        #  cpu: 
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2025.4.4
-      dockerImage: yuuvis/clients:2.8.3
+      initContainerImage: yuuvis/sam:2026.1.0
+      dockerImage: yuuvis/clients:3.4.2
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -298,77 +268,9 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-    viewer:
-      enabled: true
-      dockerImage: yuuvis/viewerservice:3.0.15
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      resources:
-        requests:
-          memory: "512Mi"
-        #  cpu:
-        #limits:
-        #  memory:
-        #  cpu: 
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
-    architect:
-      enabled: true
-      dockerImage: yuuvis/architect:2.8.0
-      instances: 1
-      resources:
-        requests:
-          memory: "64Mi"
-        #  cpu:
-        #limits:
-        #  memory:
-        #  cpu: 
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
-    sothook:
-      enabled: true
-      dockerImage: yuuvis/sandbox/sothook:2025.4.1
-      instances: 1
-      pdb:
-        # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
-        enabled: false
-
-        # set `minAvailable: null` if you want to use maxUnavailable instead
-        minAvailable: 1
-      nodeSelector: {}
-      priorityClassName: ""
-      tolerations: []
-      nodeAffinity: {}
-      podAffinity: {}
-      podAntiAffinity: {}
-      profiles: prod,cloud,redis,kubernetes
-      java:
-        maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
-      resources:
-        requests:
-          memory: "512Mi"
-        #  cpu:
-        #limits:
-        #  memory:
-        #  cpu: 
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.21.6
+      dockerImage: yuuvis/tenant-management:1.22.0
       profiles: prod,oauth2
       instances: 1
       pdb:
@@ -500,7 +402,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.2.3
+      dockerImage: yuuvis/template-service:1.2.4
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -532,77 +434,6 @@ initContainer:
   imagePullPolicy: IfNotPresent
 
 configfiles:
-  appclientschema: |
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
-      <propertyStringDefinition>
-        <id>clienttitle</id>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-        <maxLength>200</maxLength>
-      </propertyStringDefinition>
-      <propertyStringDefinition>
-        <id>clientdescription</id>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>false</required>
-        <maxLength>200</maxLength>
-      </propertyStringDefinition>
-      <typeDocumentDefinition>
-        <id>minidoc</id>
-        <baseId>system:document</baseId>
-        <contentStreamAllowed>allowed</contentStreamAllowed>
-        <secondaryObjectTypeId>appClientsystem:leadingType</secondaryObjectTypeId>
-        <secondaryObjectTypeId>appClient:clientdefaults</secondaryObjectTypeId>
-      </typeDocumentDefinition>
-      <typeSecondaryDefinition>
-        <id>clientdefaults</id>
-        <description>contains title and description fields mainly for mixed resultlist and object header</description>
-        <baseId>system:secondary</baseId>
-        <propertyReference>clienttitle</propertyReference>
-        <propertyReference>clientdescription</propertyReference>
-        <classification>appClient:required</classification>
-      </typeSecondaryDefinition>
-    </schema>
-  appclientsystemschema: |
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <schema xmlns="http://optimal-systems.org/ns/dmscloud/schema/v5.0/">
-      <propertyStringDefinition>
-        <id>leadingTypeId</id>
-        <propertyType>string</propertyType>
-        <cardinality>single</cardinality>
-        <required>true</required>
-        <classification>appClient:standardform:hidden</classification>
-      </propertyStringDefinition>
-      <typeSecondaryDefinition>
-        <id>leadingType</id>
-        <description>contains the field that supports a better use of FSOTs</description>
-        <baseId>system:secondary</baseId>
-        <propertyReference>leadingTypeId</propertyReference>
-      </typeSecondaryDefinition>
-    </schema>
-  appclientsystemsystemHookConfiguration: |
-    {"systemhooks" :
-      {"amqp" : [],
-      "webhooks": [
-         {
-           "enable" : true,
-           "predicate" : "spel:T(java.util.List).of(100,101).contains(options['action']) && properties['system:secondaryObjectTypeIds'] != null && properties['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
-           "type" : "dms.request.objects.upsert.database-before",
-           "url" : "http://sothook/api/dms/request/import/databasebefore",
-           "useDiscovery" : true
-         },
-         {
-           "enable" : true,
-           "predicate" : "spel:T(java.util.List).of(300,302).contains(options['action']) && properties['system:secondaryObjectTypeIds'] != null && properties['system:secondaryObjectTypeIds']['value'].contains('appClientsystem:leadingType')",
-           "type" : "dms.request.objects.upsert.database-before",
-           "url" : "http://sothook/api/dms/request/updatemetadata/databasebefore",
-           "useDiscovery" : true
-         }
-       ]
-     }
-    }
   clienti18nde: |
     {
       "system:folder_label": "Alle Ordner",

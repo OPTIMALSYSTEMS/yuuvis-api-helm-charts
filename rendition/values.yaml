@@ -28,7 +28,7 @@ yuuvis:
     #  - name: TZ
     #    value: "Europe/Berlin"
   renditionservice:
-    dockerImage: yuuvis/renditionservice:2025.4.4
+    dockerImage: yuuvis/renditionservice:2026.1.0
     profiles: prod, redis
     instances: 1
     java:
@@ -54,7 +54,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditionrepository:
-    dockerImage: yuuvis/rendition-repository:2025.4.4
+    dockerImage: yuuvis/rendition-repository:2026.1.0
     profiles: prod,storage,dbs
     instances: 1
     java:
@@ -80,7 +80,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   renditiontextworker:
-    dockerImage: yuuvis/textextraction-worker-service:2025.4.4
+    dockerImage: yuuvis/textextraction-worker-service:2026.1.0
     instances: 1
     profiles: prod
     java:
@@ -132,7 +132,7 @@ yuuvis:
     podAffinity: {}
     podAntiAffinity: {}
   ocrworker:
-    dockerImage: yuuvis/ocr-worker-service:2025.4.4
+    dockerImage: yuuvis/ocr-worker-service:2026.1.0
     instances: 1
     profiles: prod
     java:
