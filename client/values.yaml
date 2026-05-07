@@ -337,7 +337,7 @@ yuuvis:
         #  cpu:
     office365:
       enabled: true
-      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-provider-client:2.0.5
+      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-provider-client:2.0.7
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
