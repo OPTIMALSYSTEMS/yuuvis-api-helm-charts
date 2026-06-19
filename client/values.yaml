@@ -61,7 +61,7 @@ yuuvis:
   bpm:
     engine:
       enabled: true
-      dockerImage: yuuvis/bpm-engine:0.19.6
+      dockerImage: yuuvis/bpm-engine:0.19.7
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger,oauth2
       instances: 1
@@ -204,7 +204,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.17.4
+      dockerImage: yuuvis/userservice:1.17.6
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -324,7 +324,7 @@ yuuvis:
       podAntiAffinity: {}
     architect:
       enabled: true
-      dockerImage: yuuvis/architect:2.8.0
+      dockerImage: yuuvis/architect:2.8.2
       instances: 1
       resources:
         requests:
@@ -500,7 +500,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.2.5
+      dockerImage: yuuvis/template-service:1.2.7
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
