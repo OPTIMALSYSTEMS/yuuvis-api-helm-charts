@@ -275,7 +275,7 @@ yuuvis:
       podAntiAffinity: {}
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2025.4.10
+      initContainerImage: yuuvis/sam:2025.4.11
       dockerImage: yuuvis/clients:2.8.6
       instances: 1
       pdb:
