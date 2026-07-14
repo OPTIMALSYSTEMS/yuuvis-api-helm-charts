@@ -56,7 +56,7 @@ yuuvis:
   bpm:
     engine:
       enabled: true
-      dockerImage: yuuvis/bpm-engine:0.19.6
+      dockerImage: yuuvis/bpm-engine:0.19.8
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger,oauth2
       instances: 1
@@ -125,7 +125,7 @@ yuuvis:
           password: changeme
     modeler:
       enabled: true
-      dockerImage: yuuvis/bpm-modeler:0.3.4
+      dockerImage: yuuvis/bpm-modeler:0.3.6
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger
       instances: 1
@@ -172,7 +172,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.27.0-RC02
+      dockerImage: yuuvis/api-web:1.27.0
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
@@ -199,7 +199,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.17.4
+      dockerImage: yuuvis/userservice:1.17.8
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -245,8 +245,8 @@ yuuvis:
           password: changeme
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.2.0-RC02
-      dockerImage: yuuvis/clients:3.9.0
+      initContainerImage: yuuvis/sam:2026.3.0-RC01
+      dockerImage: yuuvis/clients:3.10.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -270,7 +270,7 @@ yuuvis:
       podAntiAffinity: {}
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.22.6
+      dockerImage: yuuvis/tenant-management:1.22.9
       profiles: prod,oauth2
       instances: 1
       pdb:
@@ -310,7 +310,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     signing:
       enabled: false
-      dockerImage: yuuvis/signingservice:11.4.1
+      dockerImage: yuuvis/signingservice:11.5.1
       profiles: prod,dev,docker,mq,components,redis
       instances: 1
       pdb:
@@ -373,7 +373,7 @@ yuuvis:
         #  cpu: 
     dashlet:
       enabled: true
-      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:2.0.3
+      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:2.0.5
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -402,7 +402,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.2.5
+      dockerImage: yuuvis/template-service:1.2.8
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
