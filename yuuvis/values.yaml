@@ -98,7 +98,7 @@ yuuvis:
     host: redis-master.infrastructure
     port: 6379
   authconfig: |
-    routing.defaultEntryPoint: '/client/index.html'
+    routing.defaultEntryPoint: '/clients/index.html'
 
     management.server.port: {{.Values.yuuvis.services.authentication.managePort}}
     management.server.servlet.context-path: /
@@ -363,7 +363,7 @@ yuuvis:
      }
     }
   systemProd: |
-    schema.changed.observers: /rest-ws/refreshschema?global=%s, /sothook/schema/refresh?global=%s, /primarysothook/schema/refresh?global=%s
+    schema.changed.observers: /sothook/schema/refresh?global=%s, /api-web/api/dms/schema/refresh?global=%s
     user.info.filter.add-authority.blacklist: YUUVIS_SYSTEM_INTEGRATOR, YUUVIS_TENANT_ADMIN
   serviceConfiguration: |
     {"services": {
@@ -459,13 +459,13 @@ yuuvis:
         "lifecycle" : null,
         "webhooks" : [ {
           "enable" : true,
-          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && properties['system:secondaryObjectTypeIds']['value'].contains('appOsdrive:file')",
+          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && T(org.apache.commons.collections4.CollectionUtils).containsAny(properties['system:secondaryObjectTypeIds']['value'], T(java.util.List).of('appOsdrive:file'))",
           "type" : "dms.request.objects.upsert.database-before",
           "url" : "http://core-extensions/hooks/request/upsert/dbb/drive",
           "useDiscovery" : false
         }, {
           "enable" : true,
-          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && properties['system:secondaryObjectTypeIds']['value'].contains('appOsdrive:file')",
+          "predicate" : "spel:properties['system:secondaryObjectTypeIds']!=null && T(org.apache.commons.collections4.CollectionUtils).containsAny(properties['system:secondaryObjectTypeIds']['value'], T(java.util.List).of('appOsdrive:file'))",
           "type" : "dms.response.objects.delete",
           "url" : "http://core-extensions/hooks/response/delete/drive",
           "useDiscovery" : false
@@ -507,7 +507,7 @@ yuuvis:
   services:
     api:
       dockerImage: yuuvis/api-gateway
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       profiles: prod,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -559,7 +559,7 @@ yuuvis:
           nginx.ingress.kubernetes.io/proxy-send-timeout: '1800'
           nginx.ingress.kubernetes.io/rewrite-target: "/"
       dockerImage: yuuvis/authentication
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       profiles: prod,oauth2,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -599,7 +599,7 @@ yuuvis:
     index:
       dockerImage: yuuvis/index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -626,7 +626,7 @@ yuuvis:
       podAntiAffinity: {}
     registry:
       dockerImage: yuuvis/registry
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       profiles: prod,jpapostgres,dbs,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -661,7 +661,7 @@ yuuvis:
       podAntiAffinity: {}
     repository:
       dockerImage: yuuvis/repository
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       profiles: prod,storage,kubernetes,redis,metrics
       instances: 2
       pdb:
@@ -699,7 +699,7 @@ yuuvis:
       podAntiAffinity: {}
     search:
       dockerImage: yuuvis/search
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       profiles: prod,es,redis,kubernetes,metrics
       instances: 1
       pdb:
@@ -728,7 +728,7 @@ yuuvis:
     system:
       dockerImage: yuuvis/system
       profiles: prod,native,resourcegit,oauth2,redis,kubernetes,metrics
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -772,7 +772,7 @@ yuuvis:
     commander:
       dockerImage: yuuvis/commander
       profiles: prod,kubernetes,dbs,es
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       instances: 0
       java:
         maxHeap: -Xmx512m -XX:+ExitOnOutOfMemoryError
@@ -792,7 +792,7 @@ yuuvis:
     archive:
       enabled: false
       dockerImage: yuuvis/archiveservice
-      tag: 2025.4.11
+      tag: 2026.2.0-RC02
       profiles: prod,storage
       instances: 1
       pdb:
@@ -821,7 +821,7 @@ yuuvis:
     coreextensions:
       enabled: false
       dockerImage: yuuvis/core-extensions
-      tag: 2025.4.4
+      tag: 2026.2.0-RC02
       profiles: prod,kubernetes,redis,jpapostgres,dbs,corex
       instances: 1
       config:
