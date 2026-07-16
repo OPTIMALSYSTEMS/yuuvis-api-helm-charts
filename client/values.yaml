@@ -61,7 +61,7 @@ yuuvis:
   bpm:
     engine:
       enabled: true
-      dockerImage: yuuvis/bpm-engine:0.19.7
+      dockerImage: yuuvis/bpm-engine:0.19.10
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger,oauth2
       instances: 1
@@ -130,7 +130,7 @@ yuuvis:
           password: changeme
     modeler:
       enabled: true
-      dockerImage: yuuvis/bpm-modeler:0.3.4
+      dockerImage: yuuvis/bpm-modeler:0.3.7
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger
       instances: 1
@@ -204,7 +204,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.17.8
+      dockerImage: yuuvis/userservice:1.17.9
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -500,7 +500,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.2.7
+      dockerImage: yuuvis/template-service:1.2.9
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
