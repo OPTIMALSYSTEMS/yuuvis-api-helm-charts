@@ -245,7 +245,7 @@ yuuvis:
           password: changeme
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.2.0
+      initContainerImage: yuuvis/sam:2026.2.1
       dockerImage: yuuvis/clients:3.9.2
       instances: 1
       pdb:
