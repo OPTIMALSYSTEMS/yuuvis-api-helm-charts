@@ -828,7 +828,7 @@ yuuvis:
     coreextensions:
       enabled: false
       dockerImage: yuuvis/core-extensions
-      tag: 2026.2.1
+      tag: 2026.2.0
       profiles: prod,kubernetes,redis,jpapostgres,dbs,corex
       instances: 1
       config:
