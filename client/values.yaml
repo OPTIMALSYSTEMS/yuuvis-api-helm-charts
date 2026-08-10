@@ -177,7 +177,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.25.3
+      dockerImage: yuuvis/api-web:1.25.5
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
@@ -324,7 +324,7 @@ yuuvis:
       podAntiAffinity: {}
     architect:
       enabled: true
-      dockerImage: yuuvis/architect:2.8.2
+      dockerImage: yuuvis/architect:2.8.3
       instances: 1
       resources:
         requests:
