@@ -46,7 +46,7 @@ yuuvis:
     storage:
       instances: 1
       image: yuuvis/mailarchiving-storage
-      tag: 2.2.5
+      tag: 2.2.32
       resources:
         requests:
           cpu: "0.2"

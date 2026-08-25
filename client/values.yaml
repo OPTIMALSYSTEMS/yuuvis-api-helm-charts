@@ -56,7 +56,7 @@ yuuvis:
   bpm:
     engine:
       enabled: true
-      dockerImage: yuuvis/bpm-engine:0.21.0-RC03
+      dockerImage: yuuvis/bpm-engine:0.21.0-rc.4
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger,oauth2
       instances: 1
@@ -125,7 +125,7 @@ yuuvis:
           password: changeme
     modeler:
       enabled: true
-      dockerImage: yuuvis/bpm-modeler:0.3.7
+      dockerImage: yuuvis/bpm-modeler:0.4.0-rc.1
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres,swagger
       instances: 1
@@ -172,7 +172,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.27.0
+      dockerImage: yuuvis/api-web:1.28.0-rc4
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
@@ -199,7 +199,7 @@ yuuvis:
         #  cpu: 
     userservice:
       enabled: true
-      dockerImage: yuuvis/userservice:1.18.0-RC02
+      dockerImage: yuuvis/userservice:1.18.0-rc.4
       initContainerImage: yuuvis/helper/init-helper:2023-12-03
       profiles: dbspostgres
       instances: 1
@@ -245,8 +245,8 @@ yuuvis:
           password: changeme
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.3.0-RC01
-      dockerImage: yuuvis/clients:3.12.1
+      initContainerImage: yuuvis/sam:2026.3.0-RC08
+      dockerImage: yuuvis/clients:3.13.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
@@ -270,7 +270,7 @@ yuuvis:
       podAntiAffinity: {}
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.24.0-RC04
+      dockerImage: yuuvis/tenant-management:1.24.0-rc.5
       profiles: prod,oauth2
       instances: 1
       pdb:
@@ -310,7 +310,7 @@ yuuvis:
           name: keycloak-tls-selfsigned
     signing:
       enabled: false
-      dockerImage: yuuvis/signingservice:11.5.1
+      dockerImage: yuuvis/signingservice:11.6.4
       profiles: prod,dev,docker,mq,components,redis
       instances: 1
       pdb:
@@ -402,7 +402,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.3.0-RC02
+      dockerImage: yuuvis/template-service:1.3.0-rc.4
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
