@@ -246,7 +246,7 @@ yuuvis:
     clients:
       enabled: true
       initContainerImage: yuuvis/sam:2026.2.2
-      dockerImage: yuuvis/clients:3.9.2
+      dockerImage: yuuvis/clients:3.9.3
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
