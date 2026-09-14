@@ -471,7 +471,7 @@ yuuvis:
         #  cpu: 
     dashlet:
       enabled: true
-      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:2.0.3
+      dockerImage: yuuvis/office-for-the-web/yuuvis-momentum-dashlet-microservice:3.1.1
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
