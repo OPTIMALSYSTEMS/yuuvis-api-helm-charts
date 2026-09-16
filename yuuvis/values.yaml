@@ -343,12 +343,19 @@ yuuvis:
   systemHookConfiguration: |
     {"systemhooks" :
       {"amqp" : [],
-       "lifecycle" : [ 
+       "lifecycle" : [
          {
            "type" : "dms.request.objects.upsert.database-before",
            "enable" : true,
            "predicate" : "spel:T(java.util.List).of(100,101).contains(options['action']) && contentStreams != null && contentStreams.size() > 0 && contentStreams[0]['range'] != null",
            "tagname" : "system:ren:text",
+           "tagstate" : 1
+         },
+         {
+           "type" : "dms.request.objects.upsert.database-before",
+           "enable" : true,
+           "predicate" : "spel:(T(java.util.List).of('application/pdf','image/tiff','image/png','image/jpg','image/jpeg').contains((contentStreams==null || contentStreams.size() < 1 ? '' : contentStreams[0].mimeType))) && (renditions==null || renditions.size() < 1 || renditions[0].contentStream==null || renditions[0].contentStream.length==null || renditions[0].contentStream.length < 1) && T(java.util.List).of(101,301,302).contains(options['action'])",
+           "tagname" : "system:ren:text:ocr",
            "tagstate" : 1
          }
        ],
