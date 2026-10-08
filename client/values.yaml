@@ -172,7 +172,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.29.0-RC02
+      dockerImage: yuuvis/api-web:1.29.0-RC03
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
@@ -245,7 +245,7 @@ yuuvis:
           password: changeme
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.3.0
+      initContainerImage: yuuvis/sam:2026.4.0-RC01
       dockerImage: yuuvis/clients:3.15.0
       instances: 1
       pdb:
