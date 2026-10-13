@@ -270,7 +270,7 @@ yuuvis:
       podAntiAffinity: {}
     tenantmanagement:
       enabled: true
-      dockerImage: yuuvis/tenant-management:1.24.0
+      dockerImage: yuuvis/tenant-management:1.24.2
       profiles: prod,oauth2
       instances: 1
       pdb:
