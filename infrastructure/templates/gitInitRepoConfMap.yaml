@@ -10,7 +10,7 @@ data:
 
     sleep 2
     
-    if [ -z "$GITINITLOG" ] || [ "$GITINITLOG" = "DEBUG" ]; then
+    if [ "$GITINITLOG" = "DEBUG" ]; then
       echo "create user: $GITUSER with existing user: $GITADMINUSER"
     else
       echo 'create user'
