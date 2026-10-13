@@ -53,6 +53,7 @@ yuuvis:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
+      debugLog: false
 
 elasticsearch:
   image: docker.yuuvis.org/yuuvis/elasticsearch:8.19.3.25112025.0
@@ -197,6 +198,7 @@ gitea:
   fullnameOverride: gitea
   gitea:
     admin:
+      username: gitea_admin
       password: changeme
     config:
       database: 
