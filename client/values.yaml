@@ -324,7 +324,7 @@ yuuvis:
       podAntiAffinity: {}
     architect:
       enabled: true
-      dockerImage: yuuvis/architect:2.8.4
+      dockerImage: yuuvis/architect:2.8.6
       instances: 1
       resources:
         requests:
@@ -500,7 +500,7 @@ yuuvis:
         url: http://system/config  
     templateservice:
       enabled: true
-      dockerImage: yuuvis/template-service:1.2.11
+      dockerImage: yuuvis/template-service:1.2.12
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
