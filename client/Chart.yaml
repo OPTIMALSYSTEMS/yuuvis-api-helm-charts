@@ -2,7 +2,7 @@ apiVersion: v1
 appVersion: "2026autumn"
 description: yuuvis client components
 name: yuuvis-client
-version: 0.18.3
+version: 0.18.4
 keywords:
 - yuuvis
 - client
