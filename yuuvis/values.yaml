@@ -599,7 +599,7 @@ yuuvis:
     index:
       dockerImage: yuuvis/index
       profiles: prod,es,kubernetes,redis,metrics
-      tag: 2025.4.17
+      tag: 2025.4.18
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
