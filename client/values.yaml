@@ -177,12 +177,12 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.25.10
+      dockerImage: yuuvis/api-web:1.25.12
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
-        # otherwise draining nodes will deadlock!
+        # otherwise draining nodes will deadlock! 
         enabled: false
 
         # set `minAvailable: null` if you want to use maxUnavailable instead
@@ -250,7 +250,7 @@ yuuvis:
           password: changeme
     client:
       enabled: true
-      initContainerImage: yuuvis/sam:2025.4.17
+      initContainerImage: yuuvis/sam:2025.4.18
       dockerImage: yuuvis/client:6.5.0
       instances: 1
       pdb:
@@ -341,7 +341,7 @@ yuuvis:
       podAntiAffinity: {}
     sothook:
       enabled: true
-      dockerImage: yuuvis/sandbox/sothook:2025.4.7
+      dockerImage: yuuvis/sandbox/sothook:2025.4.8
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
