@@ -256,7 +256,7 @@ keycloak:
   fullnameOverride: "keycloak"
   image:
     repository: docker.yuuvis.org/yuuvis/keycloak
-    tag: "26.8.0"
+    tag: "26.8.1"
     pullPolicy: IfNotPresent
   imagePullSecrets: 
    - name: dockeryuuvisorg
