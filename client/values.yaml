@@ -245,8 +245,8 @@ yuuvis:
           password: changeme
     clients:
       enabled: true
-      initContainerImage: yuuvis/sam:2026.4.0-RC02
-      dockerImage: yuuvis/clients:3.15.0
+      initContainerImage: yuuvis/sam:2026.4.0-RC03
+      dockerImage: yuuvis/clients:3.16.0
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,

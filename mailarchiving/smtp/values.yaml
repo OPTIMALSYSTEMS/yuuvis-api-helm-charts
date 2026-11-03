@@ -49,7 +49,7 @@ yuuvis:
     smtp:
       instances: 1
       image: yuuvis/mailarchiving-smtp
-      tag: 2.2.37
+      tag: 2.2.38
       resources:
         requests:
           cpu: "0.2"
