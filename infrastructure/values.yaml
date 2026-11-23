@@ -229,6 +229,10 @@ minio:
   mode: standalone
   rootUser: minio
   rootPassword: "changeme"
+  image:
+    repository: docker.yuuvis.org/library/minio
+  mcImage:
+    repository: docker.yuuvis.org/library/mc
   persistence:
     enabled: true
     storageClass: standard
