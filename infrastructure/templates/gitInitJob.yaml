@@ -25,6 +25,31 @@ spec:
         image: {{.Values.yuuvis.git.initcontainer.image}}
         imagePullPolicy: IfNotPresent
         command: ['sh', '/yuuvis/script/gitInitRepo.sh']
+        env:
+        - name: GITADMINUSER
+          valueFrom:
+            secretKeyRef:
+              name: giteainituser
+              key: gitea-admin-user
+        - name: GITADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: giteainituser
+              key: gitea-admin-password
+        - name: GITUSER
+          valueFrom:
+            secretKeyRef:
+              name: giteainituser
+              key: yuuvis-user
+        - name: GITPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: giteainituser
+              key: yuuvis-password
+        {{- if .Values.yuuvis.git.initcontainer.debugLog }}
+        - name: GITINITLOG
+          value: "DEBUG"
+        {{- end }}
         volumeMounts:
         - mountPath: /yuuvis/script/gitInitRepo.sh
           name: initscript
