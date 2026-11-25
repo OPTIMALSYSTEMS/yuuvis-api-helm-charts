@@ -341,7 +341,7 @@ yuuvis:
       podAntiAffinity: {}
     sothook:
       enabled: true
-      dockerImage: yuuvis/sandbox/sothook:2025.4.9
+      dockerImage: yuuvis/sandbox/sothook:2025.4.10
       instances: 1
       pdb:
         # pdb requires instances > 1 and minAvailable < instances,
