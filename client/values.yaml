@@ -172,7 +172,7 @@ yuuvis:
   client:
     apiweb:
       enabled: true
-      dockerImage: yuuvis/api-web:1.28.6
+      dockerImage: yuuvis/api-web:1.28.8
       profiles: prod,kubernetes,redis
       instances: 1
       pdb:
